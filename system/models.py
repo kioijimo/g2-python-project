@@ -147,7 +147,7 @@ class CatalogItem(models.Model):
         The status of the item. To see the statuses, check `CatalogItem.CatalogItemStatus` class.
     """
 
-    class CatalogItemStatus(Enum):
+    class CatalogItemStatus(models.IntegerChoices):
         """
         The statuses of items.
 
