@@ -1,8 +1,9 @@
 from django.shortcuts import render
 
 
-# Sample MTV with tailwindcss
 def login(request):
+    # Sample MTV with tailwindcss
+
     return render(request, "login.html")
 
 
