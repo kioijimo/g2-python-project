@@ -5,20 +5,8 @@ from django.db import models
 """
 TODO:
     - Solidify system workflow
-    - Finish modelling every required entity appropriately
-        MISSING:
-            - CatalogItem (WIP) - Missing fields
-            - EquipmentUnit
-            - BorrowRequest
-            - RequestItem
-            - UnitAllocation
-            - LoanRecord
-            - ReturnRecord
-
 CHANGES:
-    - Created models.Choices for models that require them (basically moving the separate enums into the models they belong to)
-    - Moved default settings constants in the class under SystemSetting.Defaults class
-    - Followed docstring documentation for python code
+    - Finished a defacto model of the system database
 """
 
 NAME_LENGTH = 64  # Maximum length for names
@@ -82,7 +70,7 @@ class Profile(models.Model):
     `contact_number`: str
         The user's personal contact number. Must not exceed `CONTACT_NUM_LENGTH` number of characters.
     `created_at`: datetime
-        The date and time when the user's account is created. Defaults to the date and time when the user's instance is first created.
+        The date and time when the user's account is created.
     """
 
     user = models.ForeignKey(
@@ -108,7 +96,7 @@ class Category(models.Model):
     `status`: int
         The status of the category. To see the statuses, check `Category.CategoryStatus` class.
     `created_at`: datetime
-        The date and time when the category is first created. Defaults to the date and time when the category's instance is first created.
+        The date and time when the category is first created.
     """
 
     class CategoryStatus(models.IntegerChoices):
@@ -130,21 +118,20 @@ class Category(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
 
-# Represents an item
 class CatalogItem(models.Model):
     """
-    The item users can borrow.
+    An item classifier. An item brand.
 
     Attributes
     ----------
     `category`: Category
         The category the item belongs to.
     `name`: str
-        The item name. Must not exceed `NAME_LENGTH` number of characters.
+        The item brand name. Must not exceed `NAME_LENGTH` number of characters.
     `description`: str
-        The desscription of the item. Must not exceed `DESCRIPTION_LENGTH` number of characters.
+        The description of the item brand. Must not exceed `DESCRIPTION_LENGTH` number of characters.
     `status`: int
-        The status of the item. To see the statuses, check `CatalogItem.CatalogItemStatus` class.
+        The status of the item brand. To see the statuses, check `CatalogItem.CatalogItemStatus` class.
     """
 
     class CatalogItemStatus(models.IntegerChoices):
@@ -152,9 +139,9 @@ class CatalogItem(models.Model):
         The statuses of items.
 
         `ACTIVE`
-            The item is available
+            The item brand is available
         `ARCHIVED`
-            The item has been retired and is not available for users to borrow.
+            The item brand has been retired and is not available for users to borrow.
         """
 
         ACTIVE = 0
@@ -167,6 +154,23 @@ class CatalogItem(models.Model):
 
 
 class EquipmentUnit(models.Model):
+    """
+    The item under a catalog item.
+
+    Attributes
+    ----------
+    `asset_code`: str
+        A unique identifier (different from database ID). Must not exceed `NAME_LENGTH` number of characters.
+    `catalog_item`: CatalogItem
+        The catalog item the equipment unit belongs to.
+    `inventory_status`: int
+        The inventory status of the equipment unit. To see statuses, check `EquipmentUnit.EquipmentStatus` class.
+    `condition`: int
+        The condition of the equipment unit. To see conditions, check `EquipmentUnit.EquipmentCondition` class.
+    `created_at`: datetime
+        The datetime when the unit was acquired.
+    """
+
     class EquipmentStatus(models.IntegerChoices):
         AVAILABLE = 0
         RESERVED = 1
@@ -174,8 +178,35 @@ class EquipmentUnit(models.Model):
         MAINTENANCE = 3
         RETIRED = 4
 
+    class EquipmentCondition(models.IntegerChoices):
+        FINE = 0
+        DAMAGED = 1
+
+    asset_code = models.CharField(max_length=NAME_LENGTH)
+    catalog_item = models.ForeignKey(CatalogItem, on_delete=models.PROTECT)
+    inventory_status = models.IntegerField(choices=EquipmentStatus)
+    condition = models.IntegerField(choices=EquipmentCondition)
+    acquired_at = models.DateTimeField(auto_now_add=True)
+
 
 class BorrowRequest(models.Model):
+    """
+    The request form of users trying to borrow equipment units.
+
+    Attributes
+    ----------
+    `user`: User
+        The user that created the borrow request.
+    `reason`: str
+        The purpose of the user for creating a borrow request. Must not exceed `DESCRIPTION_LEGNTH` number of characters.
+    `status`: int
+        The workflow status of the request. To see the statuses, check `BorrowRequest.BorrowRequestStatus` class.
+    `created_at`: datetime
+        The date and time when the request was created.
+    `due_at`: datetime
+        The date and time the user must return the borrowed item(s). Defaults to `DefaultSetting.Defaults.MAXIMUM_BORROW_DAYS`.
+    """
+
     class BorrowRequestStatus(models.IntegerChoices):
         """The status of a borrow request.
 
@@ -203,21 +234,98 @@ class BorrowRequest(models.Model):
         REJECTED = 5
         CANCELLED = 6
 
+    user = models.ForeignKey(User, on_delete=models.PROTECT)
+    reason = models.CharField(max_length=DESCRIPTION_LENGTH)
+    status = models.IntegerField(choices=BorrowRequestStatus)
+    created_at = models.DateTimeField(auto_now_add=True)
+    due_at = models.DateTimeField()
+
 
 class RequestItem(models.Model):
-    pass
+    """
+    The reference item a borrow request lists down.
+
+    Attributes
+    ----------
+    `borrow_request`: BorrowRequest
+        The borrow request this reference item belongs to.
+    `equipment_unit`: EquipmentUnit
+        The unit to be borrowed.
+    `quantity`: int
+        The number of units to be borrowed. Defaults to `SystemSetting.Defaults.MAX_BORROW_QUANTITY` units.
+    """
+
+    borrow_request = models.ForeignKey(BorrowRequest, on_delete=models.PROTECT)
+    equipment_unit = models.ForeignKey(EquipmentUnit, on_delete=models.PROTECT)
+    quantity = models.PositiveIntegerField()
 
 
 class UnitAllocation(models.Model):
-    pass
+    """
+    The allocation process details.
+
+    Attributes
+    ----------
+    `request_item`: RequestItem
+        The reference item to lend to the user borrowing it.
+    `equipment_unit`: EquipmentUnit
+        The actual item to lend to the user borrowing it.
+    `status`: int
+        The status of the allocation process. To see statuses, check `UnitAllocation.UnitAllocationStatus` class.
+    `allocated_at`: datetime
+        The date and time when the user receives their borrowed unit.
+    """
+
+    class UnitAllocationStatus(models.IntegerChoices):
+        PENDING = 0
+        RELEASED = 1
+        CANCELLED = 2
+
+    request_item = models.ForeignKey(RequestItem, on_delete=models.PROTECT)
+    equipment_unit = models.ForeignKey(EquipmentUnit, on_delete=models.PROTECT)
+    status = models.IntegerField(choices=UnitAllocationStatus)
+    allocated_at = models.DateTimeField()
 
 
 class LoanRecord(models.Model):
-    pass
+    """
+    A record when a borrow request gets approved.
+
+    Attributes
+    ----------
+    `borrow_request`: BorrowRequest
+        The request the loan record is attached to. Strictly must be one-to-one.
+    `user`: User
+        The admin user that provisioned the request.
+    `created_at`: datetime
+        The date and time the record has been created.
+    """
+
+    borrow_request = models.ForeignKey(BorrowRequest, on_delete=models.PROTECT)
+    user = models.ForeignKey(User, on_delete=models.PROTECT)
+    created_at = models.DateTimeField(auto_now_add=True)
 
 
 class ReturnRecord(models.Model):
-    pass
+    """
+    A record when a borrow request has finished and items borrowed are returned.
+
+    Attributes
+    ----------
+    `borrow_request`: BorrowRequest
+        The request the loan record is attached to. Strictly must be one-to-one.
+    `equipment_unit`: EquipmentUnit
+        An individual unit returned.
+    `condition`: int
+        The returned unit's condition.
+    `created_at`: datetime
+        The date and time the record has been created.
+    """
+
+    borrow_request = models.ForeignKey(BorrowRequest, on_delete=models.PROTECT)
+    equipment_unit = models.ForeignKey(EquipmentUnit, on_delete=models.PROTECT)
+    condition = models.IntegerField(choices=EquipmentUnit.EquipmentCondition)
+    created_at = models.DateTimeField(auto_now_add=True)
 
 
 class MaintenanceRecord(models.Model):
@@ -237,7 +345,7 @@ class MaintenanceRecord(models.Model):
     `status`: int
         The current status of the ongoing maintenance. To see the valid values, check MaintenanceRecord.MaintenanceStatus class
     `created_at`: datetime
-        The date and time when the maintenance is first opened. Defaults to the date and time where the instance is first created.
+        The date and time when the maintenance is first opened.
     `resolved_at`: datetime
         The date and time when the maintenance has reached the FINISHED status.
     """
@@ -278,7 +386,6 @@ class AuditLog(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
 
-# System settings
 class SystemSetting(models.Model):
     """
     Entity that holds the system configurations.
@@ -291,11 +398,13 @@ class SystemSetting(models.Model):
         The maximum allowed days the users can keep their borrowed equipment(s) without their BORROW_REQUEST being marked as OVERDUE.
     """
 
-    class Defaults:
+    class Defaults(Enum):
         """Default configuration values for the system settings"""
 
         MAX_BORROW_QUANTITY = 3
         LOAN_DURATION = 7
 
-    max_borrow_quantity = models.IntegerField()
-    max_borrow_days = models.IntegerField()
+    max_borrow_quantity = models.IntegerField(
+        default=Defaults.MAX_BORROW_QUANTITY.value
+    )
+    max_borrow_days = models.IntegerField(default=Defaults.LOAN_DURATION.value)
