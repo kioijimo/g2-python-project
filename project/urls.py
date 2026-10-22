@@ -17,7 +17,7 @@ Including another URLconf
 
 from django.urls import path
 
-from system import views
+from app import views
 
 urlpatterns = [
     path(route="", view=views.login),
