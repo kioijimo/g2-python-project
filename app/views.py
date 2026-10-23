@@ -1,14 +1,8 @@
 from django.contrib import messages
 from django.shortcuts import render
 
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-=======
-=======
->>>>>>> Stashed changes
 from . import forms, models
 
->>>>>>> Stashed changes
 
 def login(request):
     # Sample MTV with tailwindcss
@@ -17,9 +11,6 @@ def login(request):
 
 
 def admin(request):
-<<<<<<< Updated upstream
-    return render(request, template_name="admin.html")
-=======
     context = {}
 
     user_form = forms.UserForm(request.POST or None, authorized=True)
@@ -59,7 +50,3 @@ def category(request):
     context["forms"] = {"catalog_item": catalogItemForm}
 
     return render(request, "category.html", context)
-<<<<<<< Updated upstream
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
