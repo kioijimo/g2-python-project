@@ -22,4 +22,5 @@ from app import views
 urlpatterns = [
     path(route="", view=views.login),
     path("admin/", views.admin),
+    path("category/", views.category),
 ]

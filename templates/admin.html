@@ -1,17 +1,40 @@
-{% load tailwind_tags %} {% tailwind_css %}
+{% load static tailwind_tags %}
 <!doctype html>
 <html lang="en">
   <head>
     <title>Admin</title>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    {% tailwind_css %}
   </head>
 
   <body class="bg-gray-50 text-black font-sans leading-normal tracking-normal">
     <div class="container mx-auto">
+<<<<<<< Updated upstream
       <section class="flex items-center justify-center h-screen">
         <h1 class="text-5xl font-bold">Hello, Admin!</h1>
       </section>
+=======
+      <div class="flex flex-col items-center justify-center h-screen">
+        <h1 class="inline text-5xl font-bold">Hello, Admin!</h1>
+
+        <form method="post">
+          {% csrf_token %} {{ forms.user }} {{ forms.profile }}
+          <input type="submit" />
+        </form>
+
+        {% if messages %}
+        <ul class="messages">
+            {% for message in messages %}
+            <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>
+                {% if message.level == DEFAULT_MESSAGE_LEVELS.ERROR %}Important: {% endif %}
+                {{ message }}
+            </li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+      </div>
+>>>>>>> Stashed changes
     </div>
   </body>
 </html>

@@ -1,6 +1,16 @@
-from enum import Enum
+from typing import override
 
+from django.conf import settings
+from django.contrib.auth.models import AbstractBaseUser
+from django.core.validators import (
+    EmailValidator,
+    MaxLengthValidator,
+    MaxValueValidator,
+    MinValueValidator,
+    RegexValidator,
+)
 from django.db import models
+from django.utils import timezone
 
 """
 TODO:
@@ -10,36 +20,32 @@ CHANGES:
 """
 
 NAME_LENGTH = 64  # Maximum length for names
-EMAIL_LENGTH = 254  # According to IETF RFC 2821
 DESCRIPTION_LENGTH = (
-    EMAIL_LENGTH  # Single maximum length for descriptions for any kind of entity
+    254  # Single maximum length for descriptions for any kind of entity
 )
 CONTACT_NUM_LENGTH = 11
 
+# Default system settings values
+MAX_BORROW_QUANTITY = 3
+MAX_BORROW_DAYS = 7
 
-class User(models.Model):
+
+class User(AbstractBaseUser):
     """
-    A user of the system.
+    A user of the system. Inherits Django Auth's AbstractUser model.
 
     Attributes
     ----------
-    `password`: str
-        The user's password used to authenticate into the system. Must strictly follow django-auth's protocol.
-    `role`: int
-        The user's role in the system. To see the valid roles, check `User.UserRoles` class.
+    `email`: str
+        The user's email. Must not exceed `EMAIL_LENGTH` number of characters. Required to be unique.
+    `role: int
+        The user's role in the system whether they are a staff (ADMIN) or not. To see roles, check `User.UserRoles` class.
     `status`: int
         The user's activity status in the system. To see the valid statuses, check `User.UserStatus` class.
     """
 
     class UserRoles(models.IntegerChoices):
-        """
-        The roles of users in the system.
-
-        `USER`
-            Allows users to perform borrow requests, change their profile information, and browse available equipment units.
-        `ADMIN`
-            Allows users to manage categories, catalog items and equipment units, process borrow requests and loans, and edit the system configurations.
-        """
+        """This indicates whether the user is ADMIN or not"""
 
         USER = 0
         ADMIN = 1
@@ -47,12 +53,42 @@ class User(models.Model):
     class UserStatus(models.IntegerChoices):
         """This indicates whether the user can apply for BORROW_REQUESTS or not."""
 
-        ACTIVE = 0
-        INACTIVE = 1
+        ACTIVE = 1
+        INACTIVE = 0
 
-    password = models.CharField(max_length=NAME_LENGTH)
-    role = models.IntegerField(choices=UserRoles)
-    status = models.IntegerField(choices=UserStatus)
+    # Overriding default AbstractBaseUser fields
+    last_login = None
+    is_superuser = None
+    username = None
+    first_name = None
+    last_name = None
+    is_active = None
+    is_staff = None
+
+    email = models.EmailField(unique=True, validators=[EmailValidator])
+    role = models.IntegerField(default=UserRoles.USER.value, choices=UserRoles)
+    status = models.IntegerField(default=UserStatus.ACTIVE.value, choices=UserStatus)
+
+    # Replaces username as the unique key for user and uses email instead
+    REQUIRED_FIELDS = []
+    USERNAME_FIELD = "email"
+
+    @override
+    def save(self, **kwargs):
+        """Overrides the default `save()` method to abstract setting the raw password into a hash before entering the DB."""
+        self.set_password(self.password)
+        super().save()
+
+
+    @override
+    def clean_password(self):
+        
+
+    def __str__(self):
+        return self.email
+
+
+AUTH_USER = getattr(settings, "AUTH_USER_MODEL", User)
 
 
 class Profile(models.Model):
@@ -65,22 +101,29 @@ class Profile(models.Model):
         The user's first name. Must not exceed `NAME_LENGTH` number of characters.
     `last_name`: str
         The user's last name. Must not exceed `NAME_LENGTH` number of characters.
-    `email`: str
-        The user's email. Must not exceed `EMAIL_LENGTH` number of characters.
     `contact_number`: str
         The user's personal contact number. Must not exceed `CONTACT_NUM_LENGTH` number of characters.
     `created_at`: datetime
         The date and time when the user's account is created.
     """
 
-    user = models.ForeignKey(
-        User, on_delete=models.PROTECT
+    user = models.OneToOneField(
+        AUTH_USER, on_delete=models.PROTECT
     )  # Protect protects the foreign key object from being deleted as long as they are being referenced by this entity. This serves as extra hardener for the 'no delete' policy.
-    first_name = models.CharField(max_length=NAME_LENGTH)
-    last_name = models.CharField(max_length=NAME_LENGTH)
-    email = models.CharField(max_length=EMAIL_LENGTH)
-    contact_number = models.CharField(max_length=CONTACT_NUM_LENGTH)
+    first_name = models.CharField(
+        max_length=NAME_LENGTH, validators=[MaxLengthValidator(NAME_LENGTH)]
+    )
+    last_name = models.CharField(
+        max_length=NAME_LENGTH, validators=[MaxLengthValidator(NAME_LENGTH)]
+    )
+    contact_number = models.CharField(
+        max_length=CONTACT_NUM_LENGTH,
+        validators=[RegexValidator("^(09)\\d{9}$", "Enter a valid phone number.")],
+    )
     created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return str(self.first_name) + str(self.last_name)
 
 
 class Category(models.Model):
@@ -109,13 +152,18 @@ class Category(models.Model):
             The category has been retired and all of the items belonging in it are all retired as well.
         """
 
-        ACTIVE = 0
-        ARCHIVED = 1
+        ACTIVE = 1
+        ARCHIVED = 0
 
     name = models.CharField(max_length=NAME_LENGTH)
     description = models.CharField(max_length=DESCRIPTION_LENGTH)
     status = models.IntegerField(choices=CategoryStatus)
     created_at = models.DateTimeField(auto_now_add=True)
+
+    objects = models.Manager()
+
+    def __str__(self):
+        return str(self.name)
 
 
 class CatalogItem(models.Model):
@@ -144,13 +192,18 @@ class CatalogItem(models.Model):
             The item brand has been retired and is not available for users to borrow.
         """
 
-        ACTIVE = 0
-        ARCHIVED = 1
+        ACTIVE = 1
+        ARCHIVED = 0
 
     category = models.ForeignKey(Category, on_delete=models.PROTECT)
     name = models.CharField(max_length=NAME_LENGTH)
     description = models.CharField(max_length=DESCRIPTION_LENGTH)
-    status = models.IntegerField(choices=CatalogItemStatus)
+    status = models.IntegerField(
+        default=CatalogItemStatus.ACTIVE.value, choices=CatalogItemStatus
+    )
+
+    def __str__(self):
+        return str(self.name)
 
 
 class EquipmentUnit(models.Model):
@@ -172,15 +225,15 @@ class EquipmentUnit(models.Model):
     """
 
     class EquipmentStatus(models.IntegerChoices):
-        AVAILABLE = 0
-        RESERVED = 1
-        ISSUED = 2
-        MAINTENANCE = 3
-        RETIRED = 4
+        AVAILABLE = 1
+        RESERVED = 2
+        ISSUED = 3
+        MAINTENANCE = 4
+        RETIRED = 0
 
     class EquipmentCondition(models.IntegerChoices):
-        FINE = 0
-        DAMAGED = 1
+        FINE = 1
+        DAMAGED = 0
 
     asset_code = models.CharField(max_length=NAME_LENGTH)
     catalog_item = models.ForeignKey(CatalogItem, on_delete=models.PROTECT)
@@ -204,7 +257,7 @@ class BorrowRequest(models.Model):
     `created_at`: datetime
         The date and time when the request was created.
     `due_at`: datetime
-        The date and time the user must return the borrowed item(s). Defaults to `DefaultSetting.Defaults.MAXIMUM_BORROW_DAYS`.
+        The date and time the user must return the borrowed item(s). Defaults to `MAXIMUM_BORROW_DAYS`.
     """
 
     class BorrowRequestStatus(models.IntegerChoices):
@@ -226,19 +279,27 @@ class BorrowRequest(models.Model):
             The request has been cancelled by the user or an admin. This is used for emergency cases such as request mistake or change of mind situations.
         """
 
-        PENDING = 0
-        APPROVED = 1
-        ISSUED = 2
-        PARTIALLY_RETURNED = 3
-        RETURNED = 4
-        REJECTED = 5
-        CANCELLED = 6
+        PENDING = 1
+        APPROVED = 2
+        ISSUED = 3
+        PARTIALLY_RETURNED = 4
+        RETURNED = 5
+        REJECTED = 6
+        CANCELLED = 0
 
-    user = models.ForeignKey(User, on_delete=models.PROTECT)
+    user = models.ForeignKey(AUTH_USER, on_delete=models.PROTECT)
     reason = models.CharField(max_length=DESCRIPTION_LENGTH)
     status = models.IntegerField(choices=BorrowRequestStatus)
     created_at = models.DateTimeField(auto_now_add=True)
-    due_at = models.DateTimeField()
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(args, kwargs)
+
+        self.due_at = models.DateTimeField(default=self.compute_return_date)
+
+    @staticmethod
+    def compute_return_date():
+        return timezone.now() + timezone.timedelta(MAX_BORROW_DAYS)
 
 
 class RequestItem(models.Model):
@@ -252,12 +313,17 @@ class RequestItem(models.Model):
     `equipment_unit`: EquipmentUnit
         The unit to be borrowed.
     `quantity`: int
-        The number of units to be borrowed. Defaults to `SystemSetting.Defaults.MAX_BORROW_QUANTITY` units.
+        The number of units to be borrowed. Defaults to `MAX_BORROW_QUANTITY` units.
     """
 
     borrow_request = models.ForeignKey(BorrowRequest, on_delete=models.PROTECT)
     equipment_unit = models.ForeignKey(EquipmentUnit, on_delete=models.PROTECT)
-    quantity = models.PositiveIntegerField()
+    quantity = models.PositiveIntegerField(
+        validators=[
+            MinValueValidator(1),
+            MaxValueValidator(MAX_BORROW_QUANTITY),
+        ]
+    )
 
 
 class UnitAllocation(models.Model):
@@ -277,9 +343,9 @@ class UnitAllocation(models.Model):
     """
 
     class UnitAllocationStatus(models.IntegerChoices):
-        PENDING = 0
-        RELEASED = 1
-        CANCELLED = 2
+        PENDING = 1
+        RELEASED = 2
+        CANCELLED = 0
 
     request_item = models.ForeignKey(RequestItem, on_delete=models.PROTECT)
     equipment_unit = models.ForeignKey(EquipmentUnit, on_delete=models.PROTECT)
@@ -353,12 +419,12 @@ class MaintenanceRecord(models.Model):
     class MaintenanceStatus(models.IntegerChoices):
         """Status indicating the current status of a maintenance process on an equipment unit"""
 
-        ACTIVE = 0
-        PAUSED = 1
-        CANCELLED = 2
+        ACTIVE = 1
+        PAUSED = 2
         FINISHED = 3
+        CANCELLED = 0
 
-    maintainer = models.ForeignKey(User, on_delete=models.PROTECT)
+    maintainer = models.ForeignKey(AUTH_USER, on_delete=models.PROTECT)
     unit = models.ForeignKey(EquipmentUnit, on_delete=models.PROTECT)
     issue = models.CharField(max_length=DESCRIPTION_LENGTH)
     action = models.CharField(max_length=DESCRIPTION_LENGTH)
@@ -381,7 +447,7 @@ class AuditLog(models.Model):
         The date and time the user performed the described activity.
     """
 
-    user = models.ForeignKey(User, on_delete=models.PROTECT)
+    user = models.ForeignKey(AUTH_USER, on_delete=models.PROTECT)
     action = models.CharField(max_length=DESCRIPTION_LENGTH)
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -398,13 +464,5 @@ class SystemSetting(models.Model):
         The maximum allowed days the users can keep their borrowed equipment(s) without their BORROW_REQUEST being marked as OVERDUE.
     """
 
-    class Defaults(Enum):
-        """Default configuration values for the system settings"""
-
-        MAX_BORROW_QUANTITY = 3
-        LOAN_DURATION = 7
-
-    max_borrow_quantity = models.IntegerField(
-        default=Defaults.MAX_BORROW_QUANTITY.value
-    )
-    max_borrow_days = models.IntegerField(default=Defaults.LOAN_DURATION.value)
+    max_borrow_quantity = models.IntegerField(default=MAX_BORROW_QUANTITY)
+    max_borrow_days = models.IntegerField(default=MAX_BORROW_DAYS)

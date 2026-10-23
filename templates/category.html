@@ -1,0 +1,32 @@
+{% load static tailwind_tags %}
+<!doctype html>
+<html lang="en">
+  <head>
+    <title>Category</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    {% tailwind_css %}
+  </head>
+
+  <body class="bg-gray-50 text-black font-sans">
+    <div class="container mx-auto">
+      <div class="flex flex-col items-center justify-center h-screen">
+        <form method="post">
+          {% csrf_token %} {{ forms.catalog_item }}
+          <input type="submit" />
+        </form>
+
+        {% if messages %}
+        <ul class="messages">
+            {% for message in messages %}
+            <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>
+                {% if message.level == DEFAULT_MESSAGE_LEVELS.ERROR %}Important: {% endif %}
+                {{ message }}
+            </li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+      </div>
+    </div>
+  </body>
+</html>
