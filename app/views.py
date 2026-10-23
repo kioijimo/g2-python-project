@@ -2,7 +2,10 @@ from django.contrib import messages
 from django.shortcuts import render
 
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 =======
+=======
+>>>>>>> Stashed changes
 from . import forms, models
 
 >>>>>>> Stashed changes
@@ -56,4 +59,7 @@ def category(request):
     context["forms"] = {"catalog_item": catalogItemForm}
 
     return render(request, "category.html", context)
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
