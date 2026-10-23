@@ -79,11 +79,6 @@ class User(AbstractBaseUser):
         self.set_password(self.password)
         super().save()
 
-
-    @override
-    def clean_password(self):
-        
-
     def __str__(self):
         return self.email
 
