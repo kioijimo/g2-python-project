@@ -25,7 +25,13 @@ python manage.py tailwind init
 python manage.py tailwind install
 ```
 
-5. Run the server with this
+5. Run migrations
+
+```sh
+python manage.py makemigrations && python manage.py migrate
+```
+
+6. Run the server with this
 
 ```sh
 python manage.py tailwind dev
