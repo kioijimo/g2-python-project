@@ -8,16 +8,11 @@
     {% tailwind_css %}
   </head>
 
-  <body class="bg-gray-50 text-black font-sans leading-normal tracking-normal">
+  <body class="bg-gray-50 text-black font-sans">
     <div class="container mx-auto">
-<<<<<<< Updated upstream
-      <section class="flex items-center justify-center h-screen">
-        <h1 class="text-5xl font-bold">Hello, Admin!</h1>
-      </section>
-=======
       <div class="flex flex-col items-center justify-center h-screen">
-        <h1 class="inline text-5xl font-bold">Hello, Admin!</h1>
-
+        <h1 class="text-5xl font-bold">Hello, Admin!</h1>
+        
         <form method="post">
           {% csrf_token %} {{ forms.user }} {{ forms.profile }}
           <input type="submit" />
@@ -34,7 +29,6 @@
         </ul>
         {% endif %}
       </div>
->>>>>>> Stashed changes
     </div>
   </body>
 </html>

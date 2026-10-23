@@ -13,8 +13,8 @@ def login(request):
 def admin(request):
     context = {}
 
-    user_form = forms.UserForm(request.POST or None, authorized=True)
-    profile_form = forms.ProfileForm(request.POST or None)
+    user_form = forms.UserForm(request.POST or None)
+    profile_form = forms.ProfileForm(data=request.POST or None)
 
     if user_form.is_valid() and profile_form.is_valid():
         user = user_form.save()
