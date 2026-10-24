@@ -89,6 +89,8 @@ DATABASES = {
 
 AUTH_USER_MODEL = "app.User"
 
+AUTHENTICATION_BACKENDS = ["app.backends.ActiveSessionBackend"]
+
 # Authentication redirects
 
 LOGIN_URL = "login"

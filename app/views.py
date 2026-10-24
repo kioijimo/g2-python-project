@@ -11,7 +11,9 @@ from .decorators import admin_required, basic_user_required, redirect_for_user
 @require_http_methods(["GET", "POST"])
 def login_view(request):
     if request.user.is_authenticated:
-        return redirect_for_user(request.user)
+        if request.user.is_active:
+            return redirect_for_user(request.user)
+        auth_logout(request)
 
     form = forms.LoginForm(request=request, data=request.POST or None)
 
@@ -33,7 +35,9 @@ def logout_view(request):
 @require_http_methods(["GET", "POST"])
 def register_view(request):
     if request.user.is_authenticated:
-        return redirect_for_user(request.user)
+        if request.user.is_active:
+            return redirect_for_user(request.user)
+        auth_logout(request)
 
     form = forms.RegisterForm(request.POST or None)
 
