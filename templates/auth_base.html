@@ -1,0 +1,26 @@
+{% load tailwind_tags %}
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{% block title %}Campus Equipment System{% endblock %}</title>
+    {% tailwind_css %}
+  </head>
+
+  <body class="bg-gray-50 text-black font-sans">
+    <main class="container mx-auto max-w-3xl p-6">
+      {% if messages %}
+      <ul class="mb-6 space-y-2">
+        {% for message in messages %}
+        <li
+          class="rounded border px-3 py-2 {% if message.tags == 'error' %}border-red-300 bg-red-50 text-red-700{% elif message.tags == 'success' %}border-green-300 bg-green-50 text-green-700{% else %}border-gray-300 bg-white text-gray-700{% endif %}"
+        >
+          {{ message }}
+        </li>
+        {% endfor %}
+      </ul>
+      {% endif %} {% block content %}{% endblock %}
+    </main>
+  </body>
+</html>

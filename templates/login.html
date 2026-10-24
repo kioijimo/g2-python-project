@@ -1,24 +1,37 @@
-{% load static tailwind_tags %}
-<!doctype html>
-<html lang="en">
-  <head>
-    <title>Login</title>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    {% tailwind_css %}
-  </head>
+{% extends "auth_base.html" %}
 
-  <body class="bg-gray-50 text-black font-sans leading-normal tracking-normal">
-    <div class="container mx-auto">
-      <section class="flex items-center justify-center h-screen">
-        <h1 class="text-5xl">
-          Hello, world! This uses
-          <p class="text-blue-800 font-bold inline">Tailwind</p>
-          inside
-          <p class="text-green-800 font-bold inline">Django Templates</p>
-          !
-        </h1>
-      </section>
-    </div>
-  </body>
-</html>
+{% block title %}Sign in{% endblock %}
+
+{% block content %}
+<h1 class="mb-6 text-3xl font-bold">Sign in</h1>
+
+<form method="post" class="space-y-4">
+  {% csrf_token %} {{ form.non_field_errors }}
+
+  <div>
+    <label for="{{ form.username.id_for_label }}" class="mb-1 block text-sm font-medium">
+      {{ form.username.label }}
+    </label>
+    {{ form.username }} {{ form.username.errors }}
+  </div>
+
+  <div>
+    <label for="{{ form.password.id_for_label }}" class="mb-1 block text-sm font-medium">
+      {{ form.password.label }}
+    </label>
+    {{ form.password }} {{ form.password.errors }}
+  </div>
+
+  <button
+    type="submit"
+    class="rounded bg-blue-700 px-4 py-2 font-medium text-white hover:bg-blue-800"
+  >
+    Sign in
+  </button>
+</form>
+
+<p class="mt-4 text-sm">
+  No account?
+  <a href="{% url 'portal:register' %}" class="text-blue-700 underline">Register</a>
+</p>
+{% endblock %}

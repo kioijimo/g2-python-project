@@ -89,6 +89,14 @@ DATABASES = {
 
 AUTH_USER_MODEL = "app.User"
 
+AUTHENTICATION_BACKENDS = ["app.backends.ActiveSessionBackend"]
+
+# Authentication redirects
+
+LOGIN_URL = "login"
+LOGIN_REDIRECT_URL = "portal:home"
+LOGOUT_REDIRECT_URL = "login"
+
 # Password validation
 # https://docs.djangoproject.com/en/6.1/ref/settings/#auth-password-validators
 

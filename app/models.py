@@ -1,5 +1,3 @@
-from typing import override
-
 from django.conf import settings
 from django.contrib.auth.models import AbstractBaseUser
 from django.core.validators import (
@@ -11,6 +9,8 @@ from django.core.validators import (
 )
 from django.db import models
 from django.utils import timezone
+
+from .managers import UserManager
 
 """
 TODO:
@@ -56,14 +56,11 @@ class User(AbstractBaseUser):
         ACTIVE = 1
         INACTIVE = 0
 
-    # Overriding default AbstractBaseUser fields
-    last_login = None
+    # Unused AbstractBaseUser fields
     is_superuser = None
     username = None
     first_name = None
     last_name = None
-    is_active = None
-    is_staff = None
 
     email = models.EmailField(unique=True, validators=[EmailValidator])
     role = models.IntegerField(default=UserRoles.USER.value, choices=UserRoles)
@@ -73,11 +70,21 @@ class User(AbstractBaseUser):
     REQUIRED_FIELDS = []
     USERNAME_FIELD = "email"
 
-    @override
-    def save(self, **kwargs):
-        """Overrides the default `save()` method to abstract setting the raw password into a hash before entering the DB."""
-        self.set_password(self.password)
-        super().save()
+    objects = UserManager()
+
+    @property
+    def is_active(self):
+        """Expose Django auth's active check backed by `status`."""
+        return self.status == self.UserStatus.ACTIVE
+
+    @is_active.setter
+    def is_active(self, value):
+        self.status = self.UserStatus.ACTIVE if value else self.UserStatus.INACTIVE
+
+    @property
+    def is_staff(self):
+        """Allow future admin tooling to check for staff status."""
+        return self.role == self.UserRoles.ADMIN
 
     def __str__(self):
         return self.email
