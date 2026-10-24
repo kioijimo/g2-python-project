@@ -7,7 +7,7 @@ from . import models
 class UserForm(forms.ModelForm):
     class Meta:
         model = models.User
-        exclude = ("status",)
+        exclude = ("status", "last_login")
 
     password = forms.CharField(
         widget=forms.PasswordInput(), validators=[validate_password]
@@ -25,6 +25,13 @@ class UserForm(forms.ModelForm):
         ]
 
         self.order_fields(self.field_order)
+
+    def save(self, commit=True):
+        user = super().save(commit=False)
+        user.set_password(self.cleaned_data["password"])
+        if commit:
+            user.save()
+        return user
 
 
 class ProfileForm(forms.ModelForm):
