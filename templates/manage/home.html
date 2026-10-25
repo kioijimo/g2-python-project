@@ -1,23 +1,12 @@
-{% extends "auth_base.html" %}
+{% extends "base.html" %}
 
-{% block title %}Manage{% endblock %}
+{% block title %}Manage | Campus Equipment System{% endblock %}
 
 {% block content %}
 <div class="flex flex-wrap items-center justify-between gap-4">
   <div>
-    <h1 class="text-3xl font-bold">Admin</h1>
+    <h1 class="text-3xl font-bold text-gray-900">Admin</h1>
     <p class="mt-1 text-sm text-gray-600">Signed in as {{ request.user.email }}</p>
   </div>
-
- <form method="post" action="{% url 'logout' %}">
-    {% csrf_token %}
-    <button
-      type="submit"
-      class="rounded border border-gray-400 px-4 py-2 text-sm font-medium hover:bg-gray-100"
-    >
-      Log out
-    </button>
-  </form>
 </div>
-
 {% endblock %}

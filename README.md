@@ -49,3 +49,10 @@ python manage.py createadmin --email user@example.com --promote
 
 Administrator accounts cannot be created or promoted through the web portal.
 
+
+
+### Design System & UI Guidelines
+
+This project uses Tailwind CSS v4 Standalone and standardized Django template components.
+For visual principles, design tokens, component standards, form widget styling, and AI agent rules, see:
+* [Design System Documentation](docs/DESIGN_SYSTEM.md)
