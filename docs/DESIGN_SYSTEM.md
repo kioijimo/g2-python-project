@@ -92,10 +92,10 @@ A simple, practical, and maintainable design system tailored for **g2-python-pro
 
 ### 3.2 Form Controls & Field Groups
 
-All form inputs in `app/forms.py` must use the unified widget class constants:
+All form inputs in `app/forms/` must use the unified widget class constants from `app/forms/styling.py`:
 
 ```python
-# In app/forms.py:
+# In app/forms/styling.py:
 FORM_INPUT_CLASS = (
     "w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 "
     "placeholder-gray-400 shadow-sm transition-colors duration-150 "
@@ -204,7 +204,7 @@ The top navigation bar is provided in `templates/components/navbar.html` and loa
 3. Use the standardized card wrapper (`rounded-xl border border-gray-200 bg-white p-6 shadow-sm`).
 
 ### 6.2 Adding a New Django Form
-1. In `app/forms.py`, define your `ModelForm` or `Form`.
+1. In the appropriate module under `app/forms/`, define your `ModelForm` or `Form`.
 2. In `__init__`, call `apply_widget_styling(self)`:
    ```python
    def __init__(self, *args, **kwargs):
@@ -237,7 +237,7 @@ When generating, modifying, or refactoring UI in this project, **all AI coding a
 
 3. **Form Styling**:
    - **DO NOT** hardcode repetitive widget CSS strings across multiple forms.
-   - Always call `apply_widget_styling(self)` in form `__init__` or reference `FORM_INPUT_CLASS` / `FORM_SELECT_CLASS` from `app/forms.py`.
+   - Always call `apply_widget_styling(self)` in form `__init__` or reference `FORM_INPUT_CLASS` / `FORM_SELECT_CLASS` from `app/forms/styling.py`.
 
 4. **Component Partials**:
    - Place reusable markup components into `templates/components/` (e.g., `button.html`, `badge.html`, `navbar.html`).
