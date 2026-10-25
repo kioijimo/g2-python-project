@@ -6,10 +6,51 @@ from django.db import transaction
 
 from . import models
 
-INPUT_CLASS = (
-    "w-full rounded border border-gray-300 px-3 py-2 "
-    "focus:border-blue-500 focus:outline-none"
+# Design System Form Widget Classes
+FORM_INPUT_CLASS = (
+    "w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 "
+    "placeholder-gray-400 shadow-sm transition-colors duration-150 "
+    "focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600/20"
 )
+
+FORM_SELECT_CLASS = (
+    "w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 "
+    "shadow-sm transition-colors duration-150 "
+    "focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600/20"
+)
+
+FORM_TEXTAREA_CLASS = (
+    "w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 "
+    "placeholder-gray-400 shadow-sm transition-colors duration-150 "
+    "focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600/20"
+)
+
+FORM_CHECKBOX_CLASS = (
+    "h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-2 focus:ring-blue-500"
+)
+
+# Backward-compatible alias
+INPUT_CLASS = FORM_INPUT_CLASS
+
+
+def apply_widget_styling(form):
+    """Apply design system classes to all fields in a form according to widget type."""
+    for field_name, field in form.fields.items():
+        widget = field.widget
+        if isinstance(widget, (forms.Select, forms.SelectMultiple)):
+            css = FORM_SELECT_CLASS
+        elif isinstance(widget, forms.Textarea):
+            css = FORM_TEXTAREA_CLASS
+        elif isinstance(widget, forms.CheckboxInput):
+            css = FORM_CHECKBOX_CLASS
+        else:
+            css = FORM_INPUT_CLASS
+
+        existing = widget.attrs.get("class", "")
+        if existing:
+            widget.attrs["class"] = f"{css} {existing}".strip()
+        else:
+            widget.attrs["class"] = css
 
 
 class UserForm(forms.ModelForm):
@@ -33,6 +74,7 @@ class UserForm(forms.ModelForm):
         ]
 
         self.order_fields(self.field_order)
+        apply_widget_styling(self)
 
     def save(self, commit=True):
         user = super().save(commit=False)
@@ -51,7 +93,7 @@ class LoginForm(AuthenticationForm):
             attrs={
                 "autofocus": True,
                 "autocomplete": "email",
-                "class": INPUT_CLASS,
+                "class": FORM_INPUT_CLASS,
             }
         ),
     )
@@ -61,7 +103,7 @@ class LoginForm(AuthenticationForm):
         widget=forms.PasswordInput(
             attrs={
                 "autocomplete": "current-password",
-                "class": INPUT_CLASS,
+                "class": FORM_INPUT_CLASS,
             }
         ),
     )
@@ -72,35 +114,35 @@ class RegisterForm(forms.Form):
 
     email = forms.EmailField(
         widget=forms.EmailInput(
-            attrs={"autocomplete": "email", "class": INPUT_CLASS}
+            attrs={"autocomplete": "email", "class": FORM_INPUT_CLASS}
         )
     )
     first_name = forms.CharField(
         max_length=models.NAME_LENGTH,
-        widget=forms.TextInput(attrs={"class": INPUT_CLASS}),
+        widget=forms.TextInput(attrs={"class": FORM_INPUT_CLASS}),
     )
     last_name = forms.CharField(
         max_length=models.NAME_LENGTH,
-        widget=forms.TextInput(attrs={"class": INPUT_CLASS}),
+        widget=forms.TextInput(attrs={"class": FORM_INPUT_CLASS}),
     )
     contact_number = forms.CharField(
         max_length=models.CONTACT_NUM_LENGTH,
         widget=forms.TextInput(
-            attrs={"placeholder": "09XXXXXXXXX", "class": INPUT_CLASS}
+            attrs={"placeholder": "09XXXXXXXXX", "class": FORM_INPUT_CLASS}
         ),
     )
     password1 = forms.CharField(
         label="Password",
         strip=False,
         widget=forms.PasswordInput(
-            attrs={"autocomplete": "new-password", "class": INPUT_CLASS}
+            attrs={"autocomplete": "new-password", "class": FORM_INPUT_CLASS}
         ),
     )
     password2 = forms.CharField(
         label="Confirm password",
         strip=False,
         widget=forms.PasswordInput(
-            attrs={"autocomplete": "new-password", "class": INPUT_CLASS}
+            attrs={"autocomplete": "new-password", "class": FORM_INPUT_CLASS}
         ),
     )
 
@@ -153,11 +195,19 @@ class ProfileForm(forms.ModelForm):
         model = models.Profile
         exclude = ("user",)
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        apply_widget_styling(self)
+
 
 class CategoryForm(forms.ModelForm):
     class Meta:
         model = models.Category
         exclude = ("status",)
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        apply_widget_styling(self)
 
 
 class CategoryItemForm(forms.ModelForm):
@@ -173,3 +223,4 @@ class CategoryItemForm(forms.ModelForm):
         )
 
         self.fields["category"].label_from_instance = lambda obj: obj.name
+        apply_widget_styling(self)

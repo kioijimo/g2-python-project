@@ -1,0 +1,22 @@
+{% comment %}
+Usage:
+  {% include "components/button.html" with text="Save" type="submit" variant="primary" %}
+Variants: primary (default), secondary, danger, ghost
+{% endcomment %}
+<button
+  type="{{ type|default:'button' }}"
+  {% if name %}name="{{ name }}"{% endif %}
+  {% if value %}value="{{ value }}"{% endif %}
+  class="inline-flex items-center justify-center rounded-md px-4 py-2 text-sm font-medium transition duration-150 shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50
+  {% if variant == 'danger' %}
+    bg-rose-600 text-white hover:bg-rose-700 focus:ring-rose-500
+  {% elif variant == 'secondary' %}
+    border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 focus:ring-blue-600
+  {% elif variant == 'ghost' %}
+    bg-transparent text-gray-700 shadow-none hover:bg-gray-100 focus:ring-gray-400
+  {% else %}
+    bg-blue-700 text-white hover:bg-blue-800 focus:ring-blue-600
+  {% endif %}
+  {{ extra_class }}">
+  {{ text }}
+</button>

@@ -1,32 +1,21 @@
-{% load static tailwind_tags %}
-<!doctype html>
-<html lang="en">
-  <head>
-    <title>Category</title>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    {% tailwind_css %}
-  </head>
+{% extends "base.html" %}
 
-  <body class="bg-gray-50 text-black font-sans">
-    <div class="container mx-auto">
-      <div class="flex flex-col items-center justify-center h-screen">
-        <form method="post">
-          {% csrf_token %} {{ forms.catalog_item }}
-          <input type="submit" />
-        </form>
+{% block title %}Category | Campus Equipment System{% endblock %}
 
-        {% if messages %}
-        <ul class="messages">
-            {% for message in messages %}
-            <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>
-                {% if message.level == DEFAULT_MESSAGE_LEVELS.ERROR %}Important: {% endif %}
-                {{ message }}
-            </li>
-            {% endfor %}
-        </ul>
-        {% endif %}
-      </div>
-    </div>
-  </body>
-</html>
+{% block content %}
+<div class="mx-auto max-w-xl">
+  <div class="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+    <h1 class="mb-4 text-2xl font-bold text-gray-900">Category</h1>
+    <form method="post" class="space-y-4">
+      {% csrf_token %}
+      {{ forms.catalog_item }}
+      <button
+        type="submit"
+        class="inline-flex items-center justify-center rounded-md bg-blue-700 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2"
+      >
+        Submit
+      </button>
+    </form>
+  </div>
+</div>
+{% endblock %}

@@ -1,69 +1,102 @@
 {% extends "auth_base.html" %}
 
-{% block title %}Register{% endblock %}
+{% block title %}Create an Account | Campus Equipment System{% endblock %}
 
 {% block content %}
-<h1 class="mb-6 text-3xl font-bold">Create an account</h1>
+<div class="mb-6">
+  <h1 class="text-2xl font-bold tracking-tight text-gray-900">Create an account</h1>
+  <p class="mt-1 text-sm text-gray-600">Register as a basic user to borrow campus equipment</p>
+</div>
 
 <form method="post" class="space-y-4">
-  {% csrf_token %} {{ form.non_field_errors }}
+  {% csrf_token %}
+
+  {% if form.non_field_errors %}
+  <div class="rounded-md border border-rose-200 bg-rose-50 p-3 text-sm text-rose-700" role="alert">
+    {{ form.non_field_errors }}
+  </div>
+  {% endif %}
 
   <div>
-    <label for="{{ form.email.id_for_label }}" class="mb-1 block text-sm font-medium">
+    <label for="{{ form.email.id_for_label }}" class="mb-1.5 block text-sm font-medium text-gray-700">
       {{ form.email.label }}
     </label>
-    {{ form.email }} {{ form.email.errors }}
+    {{ form.email }}
+    {% if form.email.errors %}
+    <p class="mt-1 text-xs text-rose-600">{{ form.email.errors.0 }}</p>
+    {% endif %}
   </div>
 
   <div class="grid gap-4 sm:grid-cols-2">
     <div>
-      <label for="{{ form.first_name.id_for_label }}" class="mb-1 block text-sm font-medium">
+      <label for="{{ form.first_name.id_for_label }}" class="mb-1.5 block text-sm font-medium text-gray-700">
         {{ form.first_name.label }}
       </label>
-      {{ form.first_name }} {{ form.first_name.errors }}
+      {{ form.first_name }}
+      {% if form.first_name.errors %}
+      <p class="mt-1 text-xs text-rose-600">{{ form.first_name.errors.0 }}</p>
+      {% endif %}
     </div>
 
     <div>
-      <label for="{{ form.last_name.id_for_label }}" class="mb-1 block text-sm font-medium">
+      <label for="{{ form.last_name.id_for_label }}" class="mb-1.5 block text-sm font-medium text-gray-700">
         {{ form.last_name.label }}
       </label>
-      {{ form.last_name }} {{ form.last_name.errors }}
+      {{ form.last_name }}
+      {% if form.last_name.errors %}
+      <p class="mt-1 text-xs text-rose-600">{{ form.last_name.errors.0 }}</p>
+      {% endif %}
     </div>
   </div>
 
   <div>
-    <label for="{{ form.contact_number.id_for_label }}" class="mb-1 block text-sm font-medium">
+    <label for="{{ form.contact_number.id_for_label }}" class="mb-1.5 block text-sm font-medium text-gray-700">
       {{ form.contact_number.label }}
     </label>
-    {{ form.contact_number }} {{ form.contact_number.errors }}
+    {{ form.contact_number }}
+    {% if form.contact_number.errors %}
+    <p class="mt-1 text-xs text-rose-600">{{ form.contact_number.errors.0 }}</p>
+    {% endif %}
   </div>
 
   <div class="grid gap-4 sm:grid-cols-2">
     <div>
-      <label for="{{ form.password1.id_for_label }}" class="mb-1 block text-sm font-medium">
+      <label for="{{ form.password1.id_for_label }}" class="mb-1.5 block text-sm font-medium text-gray-700">
         {{ form.password1.label }}
       </label>
-      {{ form.password1 }} {{ form.password1.errors }}
+      {{ form.password1 }}
+      {% if form.password1.errors %}
+      <p class="mt-1 text-xs text-rose-600">{{ form.password1.errors.0 }}</p>
+      {% endif %}
     </div>
 
     <div>
-      <label for="{{ form.password2.id_for_label }}" class="mb-1 block text-sm font-medium">
+      <label for="{{ form.password2.id_for_label }}" class="mb-1.5 block text-sm font-medium text-gray-700">
         {{ form.password2.label }}
       </label>
-      {{ form.password2 }} {{ form.password2.errors }}
+      {{ form.password2 }}
+      {% if form.password2.errors %}
+      <p class="mt-1 text-xs text-rose-600">{{ form.password2.errors.0 }}</p>
+      {% endif %}
     </div>
   </div>
 
-  <button
-    type="submit"
-    class="rounded bg-blue-700 px-4 py-2 font-medium text-white hover:bg-blue-800"
-  >
-    Register
-  </button>
+  <div class="pt-2">
+    <button
+      type="submit"
+      class="inline-flex w-full items-center justify-center rounded-md bg-blue-700 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2"
+    >
+      Register Account
+    </button>
+  </div>
 </form>
 
-<p class="mt-4 text-sm">
-  Already have an account?
-  <a href="{% url 'login' %}" class="text-blue-700 underline">Sign in</a>
-</p>
+<div class="mt-6 border-t border-gray-100 pt-4 text-center">
+  <p class="text-sm text-gray-600">
+    Already have an account?
+    <a href="{% url 'login' %}" class="font-medium text-blue-700 hover:text-blue-800 hover:underline">
+      Sign in
+    </a>
+  </p>
+</div>
 {% endblock %}
