@@ -74,6 +74,25 @@ def manage(request):
 
     context["forms"] = {"user": user_form, "profile": profile_form}
 
+    # Hardcoded statistics for the 4 dashboard cards
+    context["stats"] = {
+        "available_units": 142,
+        "pending_requests": 8,
+        "active_loans": 34,
+        "overdue_loans": 3,
+    }
+
+    # Hardcoded static data for charts
+    context["monthly_trend"] = {
+        "labels": ["May", "Jun", "Jul", "Aug", "Sep", "Oct"],
+        "data": [18, 26, 22, 35, 42, 38],
+    }
+
+    context["category_usage"] = {
+        "labels": ["Electronics & Lab", "Audio / Visual", "IT & Computing", "Measuring Tools"],
+        "data": [40, 25, 20, 15],
+    }
+
     return render(request, "manage/home.html", context)
 
 
@@ -97,4 +116,9 @@ def category(request):
 
     context["forms"] = {"catalog_item": catalog_item_form}
 
-    return render(request, "category.html", context)
+    return render(request, "manage/category.html", context)
+
+
+@admin_required
+def sample(request):
+    return render(request, "manage/sample.html")

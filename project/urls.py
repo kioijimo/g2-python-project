@@ -33,5 +33,6 @@ urlpatterns = [
         RedirectView.as_view(pattern_name="manage", permanent=False),
     ),
     path("category/", views.category, name="category"),
+    path("sample/", views.sample, name="sample"),
     path("portal/", include("app.urls")),
 ]
