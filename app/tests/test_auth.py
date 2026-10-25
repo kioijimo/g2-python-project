@@ -7,7 +7,7 @@ from django.core.management.base import CommandError
 from django.test import Client, TestCase
 from django.urls import reverse
 
-from .models import Profile, User
+from app.models import Profile, User
 
 PASSWORD = "Str0ng-Passw0rd!2026"
 CONTACT_NUMBER = "09123456789"
