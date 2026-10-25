@@ -1,10 +1,17 @@
-from django.urls import path
+from django.urls import include, path
+from django.views.generic import RedirectView
 
-from . import views
-
-app_name = "portal"
+from .views.auth import login_view, logout_view
+from .views.manage import category, manage
 
 urlpatterns = [
-    path("", views.portal_home, name="home"),
-    path("register/", views.register_view, name="register"),
+    path("login/", login_view, name="login"),
+    path("logout/", logout_view, name="logout"),
+    path("manage/", manage, name="manage"),
+    path(
+        "admin/",
+        RedirectView.as_view(pattern_name="manage", permanent=False),
+    ),
+    path("category/", category, name="category"),
+    path("portal/", include("app.portal_urls")),
 ]
