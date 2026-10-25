@@ -1,5 +1,12 @@
 from .auth import LoginForm, RegisterForm
 from .manage import CategoryForm, CategoryItemForm, UserForm
+from .portal import (
+    BorrowRequestForm,
+    BorrowRequestItemForm,
+    BorrowRequestItemFormSet,
+    CatalogSearchForm,
+    ProfileUpdateForm,
+)
 from .profile import ProfileForm
 from .styling import (
     FORM_CHECKBOX_CLASS,
@@ -11,6 +18,10 @@ from .styling import (
 )
 
 __all__ = [
+    "BorrowRequestForm",
+    "BorrowRequestItemForm",
+    "BorrowRequestItemFormSet",
+    "CatalogSearchForm",
     "CategoryForm",
     "CategoryItemForm",
     "FORM_CHECKBOX_CLASS",
@@ -20,6 +31,7 @@ __all__ = [
     "INPUT_CLASS",
     "LoginForm",
     "ProfileForm",
+    "ProfileUpdateForm",
     "RegisterForm",
     "UserForm",
     "apply_widget_styling",

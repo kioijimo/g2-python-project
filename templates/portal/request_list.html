@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+
+{% block title %}My Requests | Campus Equipment System{% endblock %}
+
+{% block content %}
+<div class="flex flex-wrap items-end justify-between gap-4">
+  <div>
+    <h1 class="text-2xl font-bold tracking-tight text-gray-900 sm:text-3xl">My Requests</h1>
+    <p class="mt-1 text-sm text-gray-600">Review the status and due dates of your borrowing requests.</p>
+  </div>
+
+  <a
+    href="{% url 'portal:request_create' %}"
+    class="inline-flex items-center justify-center rounded-md bg-blue-700 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2"
+  >
+    New request
+  </a>
+</div>
+
+{% if borrow_requests %}
+<div class="mt-6 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
+  <div class="overflow-x-auto">
+    <table class="min-w-full divide-y divide-gray-200">
+      <thead class="bg-gray-50">
+        <tr>
+          <th scope="col" class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
+            Request
+          </th>
+          <th scope="col" class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
+            Purpose
+          </th>
+          <th scope="col" class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
+            Status
+          </th>
+          <th scope="col" class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
+            Return by
+          </th>
+          <th scope="col" class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
+            Submitted
+          </th>
+          <th scope="col" class="px-6 py-3 text-right text-xs font-semibold uppercase tracking-wide text-gray-500">
+            Actions
+          </th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-gray-100">
+        {% for borrow_request in borrow_requests %}
+        <tr class="hover:bg-gray-50">
+          <td class="whitespace-nowrap px-6 py-4">
+            <a
+              href="{% url 'portal:request_detail' borrow_request.pk %}"
+              class="font-medium text-blue-700 hover:text-blue-800 hover:underline focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2"
+            >
+              #{{ borrow_request.pk }}
+            </a>
+            <p class="mt-1 text-xs text-gray-500">
+              {{ borrow_request.items.all|length }} item{{ borrow_request.items.all|length|pluralize }}
+            </p>
+          </td>
+          <td class="max-w-xs px-6 py-4 text-sm text-gray-700">
+            {{ borrow_request.purpose|truncatechars:48 }}
+          </td>
+          <td class="whitespace-nowrap px-6 py-4">
+            {% include "components/request_status_badge.html" with borrow_request=borrow_request %}
+          </td>
+          <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-700">
+            {{ borrow_request.due_at|date:"M j, Y" }}
+            {% with overdue=borrow_request.overdue_days %}
+            {% if overdue > 0 %}
+            <p class="mt-1 text-xs font-medium text-rose-600">
+              Overdue by {{ overdue }} day{{ overdue|pluralize }}
+            </p>
+            {% endif %}
+            {% endwith %}
+          </td>
+          <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-700">
+            {{ borrow_request.created_at|date:"M j, Y" }}
+          </td>
+          <td class="whitespace-nowrap px-6 py-4 text-right">
+            <a
+              href="{% url 'portal:request_detail' borrow_request.pk %}"
+              class="text-sm font-medium text-blue-700 hover:text-blue-800 hover:underline focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2"
+            >
+              View
+            </a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% else %}
+<div class="mt-6 rounded-xl border border-gray-200 bg-white p-6 text-center shadow-sm sm:p-8">
+  <h2 class="text-lg font-semibold text-gray-900">No requests yet</h2>
+  <p class="mt-1 text-sm text-gray-600">Start by browsing the catalog or submitting a new request.</p>
+  <a
+    href="{% url 'portal:request_create' %}"
+    class="mt-4 inline-flex items-center justify-center rounded-md bg-blue-700 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2"
+  >
+    New request
+  </a>
+</div>
+{% endif %}
+{% endblock %}
