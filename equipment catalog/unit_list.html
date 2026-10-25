@@ -1,0 +1,141 @@
+{% load static tailwind_tags %}
+<!doctype html>
+
+<html lang="en">
+<head>
+
+    <title>Equipment Units</title>
+
+    {% tailwind_css %}
+
+</head>
+
+<body class="bg-gray-100">
+
+<div class="container mx-auto p-8">
+
+<div class="bg-white rounded shadow p-6">
+
+<h1 class="text-3xl font-bold mb-4">
+Equipment Units
+</h1>
+
+<form method="GET" class="grid grid-cols-3 gap-3 mb-5">
+
+<select name="category" class="border p-2 rounded">
+
+<option value="">
+All Categories
+</option>
+
+{% for category in categories %}
+<option value="{{ category.id }}">
+{{ category.name }}
+</option>
+{% endfor %}
+
+</select>
+
+<select name="item" class="border p-2 rounded">
+
+<option value="">
+All Items
+</option>
+
+{% for item in items %}
+<option value="{{ item.id }}">
+{{ item.name }}
+</option>
+{% endfor %}
+
+</select>
+
+<select name="status" class="border p-2 rounded">
+
+<option value="">
+All Status
+</option>
+
+<option value="AVAILABLE">
+Available
+</option>
+
+<option value="RESERVED">
+Reserved
+</option>
+
+<option value="ISSUED">
+Issued
+</option>
+
+<option value="MAINTENANCE">
+Maintenance
+</option>
+
+<option value="RETIRED">
+Retired
+</option>
+
+</select>
+
+<button
+class="bg-green-600 text-white p-2 rounded">
+Filter
+</button>
+
+</form>
+
+<table class="w-full">
+
+<thead class="bg-green-700 text-white">
+
+<tr>
+<th class="p-3">Asset Code</th>
+<th class="p-3">Equipment</th>
+<th class="p-3">Condition</th>
+<th class="p-3">Date Acquired</th>
+<th class="p-3">Status</th>
+</tr>
+
+</thead>
+
+<tbody>
+
+{% for unit in units %}
+
+<tr class="border-b">
+
+<td class="p-3">
+{{ unit.asset_code }}
+</td>
+
+<td class="p-3">
+{{ unit.catalog_item.name }}
+</td>
+
+<td class="p-3">
+{{ unit.condition }}
+</td>
+
+<td class="p-3">
+{{ unit.acquisition_date }}
+</td>
+
+<td class="p-3">
+{{ unit.status }}
+</td>
+
+</tr>
+
+{% endfor %}
+
+</tbody>
+
+</table>
+
+</div>
+
+</div>
+
+</body>
+</html>
