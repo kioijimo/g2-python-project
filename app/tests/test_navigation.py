@@ -3,7 +3,7 @@ import re
 from django.test import TestCase
 from django.urls import reverse
 
-from app.tests.helpers import create_admin, create_user
+from app.tests.helpers import create_admin, create_borrow_request, create_user
 
 
 class UserNavigationTests(TestCase):
@@ -39,7 +39,10 @@ class UserNavigationTests(TestCase):
         self._assert_active_tab("portal:request_list")
 
     def test_request_detail_highlights_my_requests_tab(self):
-        response = self.client.get(reverse("portal:request_detail", args=[1]))
+        borrow_request = create_borrow_request(self.user)
+        response = self.client.get(
+            reverse("portal:request_detail", args=[borrow_request.pk])
+        )
         content = response.content.decode()
 
         self.assertRegex(

@@ -1,22 +1,16 @@
 from django.contrib import messages
 from django.core.exceptions import ValidationError
-from django.shortcuts import redirect, render
+from django.shortcuts import get_object_or_404, redirect, render
+from django.views.decorators.http import require_POST
 
 from .. import forms, models
 from ..decorators import basic_user_required
-from ..services.borrowing import create_borrow_request, due_at_for_date
+from ..services.borrowing import (
+    cancel_borrow_request,
+    create_borrow_request,
+    due_at_for_date,
+)
 from ..services.catalog import active_catalog_items
-
-
-def _placeholder(request, title, description):
-    return render(
-        request,
-        "portal/placeholder.html",
-        {
-            "page_title": title,
-            "page_description": description,
-        },
-    )
 
 
 @basic_user_required
@@ -127,17 +121,56 @@ def request_create(request):
 
 @basic_user_required
 def request_list(request):
-    return _placeholder(
+    borrow_requests = (
+        models.BorrowRequest.objects.filter(user=request.user)
+        .prefetch_related("items__catalog_item")
+        .order_by("-created_at")
+    )
+
+    return render(
         request,
-        "My Requests",
-        "Review the borrowing requests you have submitted.",
+        "portal/request_list.html",
+        {
+            "borrow_requests": borrow_requests,
+        },
     )
 
 
 @basic_user_required
 def request_detail(request, pk):
-    return _placeholder(
-        request,
-        "Request Details",
-        f"View the details of request #{pk}.",
+    borrow_request = get_object_or_404(
+        models.BorrowRequest.objects.select_related("user").prefetch_related(
+            "items__catalog_item__category",
+            "items__allocations__equipment_unit",
+        ),
+        pk=pk,
+        user=request.user,
     )
+
+    return render(
+        request,
+        "portal/request_detail.html",
+        {
+            "borrow_request": borrow_request,
+            "overdue_days": borrow_request.overdue_days(),
+        },
+    )
+
+
+@basic_user_required
+@require_POST
+def request_cancel(request, pk):
+    borrow_request = get_object_or_404(
+        models.BorrowRequest,
+        pk=pk,
+        user=request.user,
+    )
+
+    try:
+        cancel_borrow_request(borrow_request)
+    except ValidationError as error:
+        messages.error(request, " ".join(error.messages))
+    else:
+        messages.success(request, "Borrow request cancelled successfully.")
+
+    return redirect("portal:request_detail", pk=pk)
