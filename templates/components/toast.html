@@ -1,0 +1,136 @@
+{% if messages %}
+<div
+  id="toast-container"
+  class="fixed bottom-5 right-5 z-50 flex max-w-sm w-full flex-col gap-3 px-4 sm:px-0 pointer-events-none"
+  aria-live="polite"
+>
+  {% for message in messages %}
+  <div
+    class="toast-item pointer-events-auto flex items-start gap-3 rounded-xl border bg-white p-4 shadow-lg ring-1 ring-black/5 transition-all duration-300 ease-out transform translate-x-0 opacity-100
+    {% if message.tags == 'error' %}
+      border-rose-200
+    {% elif message.tags == 'success' %}
+      border-emerald-200
+    {% elif message.tags == 'warning' %}
+      border-amber-200
+    {% else %}
+      border-blue-200
+    {% endif %}"
+    role="{% if message.tags == 'error' %}alert{% else %}status{% endif %}"
+  >
+    <!-- Icon -->
+    <div
+      class="shrink-0 rounded-lg p-1.5
+      {% if message.tags == 'error' %}
+        bg-rose-50 text-rose-600
+      {% elif message.tags == 'success' %}
+        bg-emerald-50 text-emerald-600
+      {% elif message.tags == 'warning' %}
+        bg-amber-50 text-amber-600
+      {% else %}
+        bg-blue-50 text-blue-600
+      {% endif %}"
+    >
+      {% if message.tags == 'error' %}
+      <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z"/>
+      </svg>
+      {% elif message.tags == 'success' %}
+      <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+      </svg>
+      {% elif message.tags == 'warning' %}
+      <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+      </svg>
+      {% else %}
+      <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z"/>
+      </svg>
+      {% endif %}
+    </div>
+
+    <!-- Content -->
+    <div class="flex-1 pt-0.5">
+      <p class="text-xs font-semibold uppercase tracking-wider
+        {% if message.tags == 'error' %}
+          text-rose-700
+        {% elif message.tags == 'success' %}
+          text-emerald-700
+        {% elif message.tags == 'warning' %}
+          text-amber-700
+        {% else %}
+          text-blue-700
+        {% endif %}"
+      >
+        {% if message.tags == 'error' %}Error{% elif message.tags == 'success' %}Success{% elif message.tags == 'warning' %}Notice{% else %}Info{% endif %}
+      </p>
+      <p class="mt-0.5 text-sm text-gray-800">{{ message }}</p>
+    </div>
+
+    <!-- Dismiss Button -->
+    <button
+      type="button"
+      class="toast-close shrink-0 rounded-lg p-1 text-gray-400 transition hover:bg-gray-100 hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-600"
+      aria-label="Dismiss notification"
+    >
+      <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+      </svg>
+    </button>
+  </div>
+  {% endfor %}
+</div>
+
+<script>
+  (function () {
+    function initToasts() {
+      var toasts = document.querySelectorAll(".toast-item");
+      toasts.forEach(function (toast) {
+        if (toast.dataset.initialized) return;
+        toast.dataset.initialized = "true";
+
+        var timeoutId;
+        var duration = 5000;
+
+        function dismiss() {
+          toast.classList.remove("translate-x-0", "opacity-100");
+          toast.classList.add("translate-x-full", "opacity-0");
+          setTimeout(function () {
+            toast.remove();
+          }, 300);
+        }
+
+        function startTimer() {
+          timeoutId = setTimeout(dismiss, duration);
+        }
+
+        function clearTimer() {
+          if (timeoutId) {
+            clearTimeout(timeoutId);
+          }
+        }
+
+        startTimer();
+
+        toast.addEventListener("mouseenter", clearTimer);
+        toast.addEventListener("mouseleave", startTimer);
+
+        var closeBtn = toast.querySelector(".toast-close");
+        if (closeBtn) {
+          closeBtn.addEventListener("click", function () {
+            clearTimer();
+            dismiss();
+          });
+        }
+      });
+    }
+
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", initToasts);
+    } else {
+      initToasts();
+    }
+  })();
+</script>
+{% endif %}

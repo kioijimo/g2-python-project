@@ -147,13 +147,17 @@ Standard container for dashboards, forms, and item lists:
 
 ---
 
-### 3.5 Feedback Alerts (Django Messages)
+### 3.5 Feedback Alerts & Toast Notifications (Django Messages)
 
-Integrated directly into `templates/base.html` and `templates/auth_base.html`:
-* **Success**: `border-emerald-200 bg-emerald-50 text-emerald-800`
-* **Error**: `border-rose-200 bg-rose-50 text-rose-800`
-* **Warning**: `border-amber-200 bg-amber-50 text-amber-800`
-* **Info**: `border-blue-200 bg-blue-50 text-blue-800`
+Floating Toast notifications are rendered at the bottom-right via `templates/components/toast.html` and integrated directly into `templates/base.html` and `templates/auth_base.html`:
+* **Position**: Fixed bottom-right (`fixed bottom-5 right-5 z-50`), non-blocking container with interactive cards.
+* **Auto-Dismiss**: Automatically fades and slides out after 5 seconds; timer pauses on hover.
+* **Manual Close**: Accessible button with `aria-label="Dismiss notification"`.
+* **Variants**:
+  * **Success**: `border-emerald-200 bg-emerald-50 text-emerald-600`
+  * **Error**: `border-rose-200 bg-rose-50 text-rose-600`
+  * **Warning**: `border-amber-200 bg-amber-50 text-amber-600`
+  * **Info**: `border-blue-200 bg-blue-50 text-blue-600`
 
 ---
 

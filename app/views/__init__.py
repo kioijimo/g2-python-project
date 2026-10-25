@@ -1,5 +1,5 @@
 from .auth import login_view, logout_view, register_view
-from .manage import category, manage
+from .manage import category, manage, sample
 from .portal import (
     catalog,
     portal_home,
@@ -21,4 +21,5 @@ __all__ = [
     "request_create",
     "request_detail",
     "request_list",
+    "sample",
 ]
