@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+
+{% block title %}Profile | Campus Equipment System{% endblock %}
+
+{% block content %}
+<div class="mx-auto max-w-2xl">
+  <div class="rounded-xl border border-gray-200 bg-white p-6 shadow-sm sm:p-8">
+    <div class="mb-6 border-b border-gray-100 pb-4">
+      <h1 class="text-2xl font-bold tracking-tight text-gray-900">Profile</h1>
+      <p class="mt-1 text-sm text-gray-600">Keep your personal and contact details up to date.</p>
+    </div>
+
+    <form method="post" class="space-y-5">
+      {% csrf_token %}
+
+      {% if form.non_field_errors %}
+      <div class="rounded-md border border-rose-200 bg-rose-50 p-3 text-sm text-rose-700" role="alert">
+        {{ form.non_field_errors }}
+      </div>
+      {% endif %}
+
+      <div>
+        <p class="mb-1.5 block text-sm font-medium text-gray-700">Email address</p>
+        <div class="rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-700">
+          {{ request.user.email }}
+        </div>
+        <p class="mt-1 text-xs text-gray-500">Email changes are handled by an administrator.</p>
+      </div>
+
+      <div class="grid gap-4 sm:grid-cols-2">
+        <div>
+          <label for="{{ form.first_name.id_for_label }}" class="mb-1.5 block text-sm font-medium text-gray-700">
+            {{ form.first_name.label }}
+          </label>
+          {{ form.first_name }}
+          {% if form.first_name.errors %}
+          <p class="mt-1 text-xs text-rose-600">{{ form.first_name.errors.0 }}</p>
+          {% endif %}
+        </div>
+
+        <div>
+          <label for="{{ form.last_name.id_for_label }}" class="mb-1.5 block text-sm font-medium text-gray-700">
+            {{ form.last_name.label }}
+          </label>
+          {{ form.last_name }}
+          {% if form.last_name.errors %}
+          <p class="mt-1 text-xs text-rose-600">{{ form.last_name.errors.0 }}</p>
+          {% endif %}
+        </div>
+      </div>
+
+      <div>
+        <label for="{{ form.contact_number.id_for_label }}" class="mb-1.5 block text-sm font-medium text-gray-700">
+          {{ form.contact_number.label }}
+        </label>
+        {{ form.contact_number }}
+        {% if form.contact_number.errors %}
+        <p class="mt-1 text-xs text-rose-600">{{ form.contact_number.errors.0 }}</p>
+        {% else %}
+        <p class="mt-1 text-xs text-gray-500">Use the format 09XXXXXXXXX.</p>
+        {% endif %}
+      </div>
+
+      <div class="flex flex-wrap items-center gap-3 border-t border-gray-100 pt-5">
+        {% include "components/button.html" with text="Save changes" type="submit" variant="primary" %}
+        <a
+          href="{% url 'portal:home' %}"
+          class="inline-flex items-center justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm transition hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2"
+        >
+          Cancel
+        </a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

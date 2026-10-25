@@ -1,5 +1,7 @@
-from django.shortcuts import render
+from django.contrib import messages
+from django.shortcuts import redirect, render
 
+from .. import forms, models
 from ..decorators import basic_user_required
 
 
@@ -30,10 +32,25 @@ def catalog(request):
 
 @basic_user_required
 def profile(request):
-    return _placeholder(
+    profile_record = models.Profile.objects.filter(user=request.user).first()
+    form = forms.ProfileUpdateForm(
+        request.POST if request.method == "POST" else None,
+        instance=profile_record,
+    )
+
+    if request.method == "POST" and form.is_valid():
+        profile_record = form.save(commit=False)
+        profile_record.user = request.user
+        profile_record.save()
+        messages.success(request, "Profile updated successfully.")
+        return redirect("portal:profile")
+
+    return render(
         request,
-        "Profile",
-        "Update your personal details and contact information.",
+        "portal/profile.html",
+        {
+            "form": form,
+        },
     )
 
 
