@@ -3,6 +3,7 @@ from django.shortcuts import redirect, render
 
 from .. import forms, models
 from ..decorators import basic_user_required
+from ..services.catalog import active_catalog_items
 
 
 def _placeholder(request, title, description):
@@ -23,10 +24,20 @@ def portal_home(request):
 
 @basic_user_required
 def catalog(request):
-    return _placeholder(
+    search_form = forms.CatalogSearchForm(request.GET or None)
+    query = ""
+
+    if search_form.is_valid():
+        query = search_form.cleaned_data["q"].strip()
+
+    return render(
         request,
-        "Catalog",
-        "Browse the equipment catalog and check current availability.",
+        "portal/catalog.html",
+        {
+            "search_form": search_form,
+            "query": query,
+            "items": active_catalog_items(query),
+        },
     )
 
 
