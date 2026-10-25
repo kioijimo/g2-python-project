@@ -85,6 +85,14 @@ class BorrowRequestItemForm(forms.ModelForm):
             lambda item: f"{item.name} ({item.category.name}) - "
             f"{item.available_count} available"
         )
+
+        settings = models.SystemSetting.load()
+        self.fields["quantity"].widget.attrs.update(
+            {
+                "min": 1,
+                "max": settings.max_borrow_quantity,
+            }
+        )
         apply_widget_styling(self)
 
 

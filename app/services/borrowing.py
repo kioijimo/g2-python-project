@@ -37,6 +37,15 @@ def create_borrow_request(user, purpose, due_at, items):
         raise ValidationError("A request can contain at most three catalog items.")
 
     settings = SystemSetting.load()
+    min_date, max_date = due_date_bounds(settings)
+    due_date = timezone.localtime(due_at).date()
+
+    if not min_date <= due_date <= max_date:
+        raise ValidationError(
+            f"Choose a return date between {min_date.isoformat()} and "
+            f"{max_date.isoformat()}."
+        )
+
     selected_ids = set()
 
     for catalog_item, quantity in items:
