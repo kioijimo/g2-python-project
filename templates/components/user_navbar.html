@@ -1,55 +1,28 @@
 <header class="border-b border-gray-200 bg-white">
-  <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-    <div class="flex min-h-16 flex-wrap items-center justify-between gap-4 py-3">
+  <div class="mx-auto flex min-h-16 max-w-7xl flex-nowrap items-center gap-4 px-4 py-3 sm:px-6 lg:px-8">
+    <div class="flex shrink-0 items-center">
       <a
         href="{% url 'portal:home' %}"
         class="inline-flex items-center rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2"
       >
         <span class="text-base font-bold text-gray-900">Campus Equipment System</span>
       </a>
-
-      {% if request.user.is_authenticated %}
-      <div class="flex items-center gap-3">
-        <div class="hidden text-right sm:block">
-          <p class="text-xs text-gray-500">Signed in as</p>
-          <p class="text-sm font-medium text-gray-900">{{ request.user.email }}</p>
-        </div>
-
-        {% include "components/badge.html" with label="User" variant="user" %}
-
-        <form method="post" action="{% url 'logout' %}" class="inline">
-          {% csrf_token %}
-          <button
-            type="submit"
-            class="inline-flex items-center rounded-md border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 shadow-sm transition hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2"
-          >
-            Log out
-          </button>
-        </form>
-      </div>
-      {% else %}
-      <div class="flex items-center gap-3">
-        <a
-          href="{% url 'login' %}"
-          class="inline-flex items-center rounded-md bg-blue-700 px-3.5 py-1.5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2"
-        >
-          Sign in
-        </a>
-      </div>
-      {% endif %}
     </div>
 
     {% if request.user.is_authenticated %}
     {% with current=request.resolver_match.url_name %}
-    <nav aria-label="User portal" class="flex gap-1 overflow-x-auto border-t border-gray-100">
+    <nav
+      aria-label="User portal"
+      class="flex min-w-0 flex-1 items-center gap-2 overflow-x-auto sm:justify-center"
+    >
       <a
         href="{% url 'portal:catalog' %}"
         {% if current == 'catalog' %}aria-current="page"{% endif %}
-        class="whitespace-nowrap border-b-2 px-3 py-3 text-sm font-medium transition focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-600
+        class="whitespace-nowrap rounded-md px-3 py-1.5 text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2
         {% if current == 'catalog' %}
-          border-blue-700 text-blue-700
+          bg-blue-50 font-semibold text-blue-700
         {% else %}
-          border-transparent text-gray-600 hover:border-gray-300 hover:text-gray-900
+          text-gray-700 hover:bg-gray-100 hover:text-gray-900
         {% endif %}"
       >
         Catalog
@@ -58,11 +31,11 @@
       <a
         href="{% url 'portal:request_create' %}"
         {% if current == 'request_create' %}aria-current="page"{% endif %}
-        class="whitespace-nowrap border-b-2 px-3 py-3 text-sm font-medium transition focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-600
+        class="whitespace-nowrap rounded-md px-3 py-1.5 text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2
         {% if current == 'request_create' %}
-          border-blue-700 text-blue-700
+          bg-blue-50 font-semibold text-blue-700
         {% else %}
-          border-transparent text-gray-600 hover:border-gray-300 hover:text-gray-900
+          text-gray-700 hover:bg-gray-100 hover:text-gray-900
         {% endif %}"
       >
         New Request
@@ -71,11 +44,11 @@
       <a
         href="{% url 'portal:request_list' %}"
         {% if current == 'request_list' or current == 'request_detail' %}aria-current="page"{% endif %}
-        class="whitespace-nowrap border-b-2 px-3 py-3 text-sm font-medium transition focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-600
+        class="whitespace-nowrap rounded-md px-3 py-1.5 text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2
         {% if current == 'request_list' or current == 'request_detail' %}
-          border-blue-700 text-blue-700
+          bg-blue-50 font-semibold text-blue-700
         {% else %}
-          border-transparent text-gray-600 hover:border-gray-300 hover:text-gray-900
+          text-gray-700 hover:bg-gray-100 hover:text-gray-900
         {% endif %}"
       >
         My Requests
@@ -84,17 +57,38 @@
       <a
         href="{% url 'portal:profile' %}"
         {% if current == 'profile' %}aria-current="page"{% endif %}
-        class="whitespace-nowrap border-b-2 px-3 py-3 text-sm font-medium transition focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-600
+        class="whitespace-nowrap rounded-md px-3 py-1.5 text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2
         {% if current == 'profile' %}
-          border-blue-700 text-blue-700
+          bg-blue-50 font-semibold text-blue-700
         {% else %}
-          border-transparent text-gray-600 hover:border-gray-300 hover:text-gray-900
+          text-gray-700 hover:bg-gray-100 hover:text-gray-900
         {% endif %}"
       >
         Profile
       </a>
     </nav>
     {% endwith %}
+
+    <div class="flex shrink-0 items-center gap-3">
+      <form method="post" action="{% url 'logout' %}" class="inline">
+        {% csrf_token %}
+        <button
+          type="submit"
+          class="inline-flex items-center rounded-md border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 shadow-sm transition hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2"
+        >
+          Log out
+        </button>
+      </form>
+    </div>
+    {% else %}
+    <div class="ml-auto flex shrink-0 items-center gap-3">
+      <a
+        href="{% url 'login' %}"
+        class="inline-flex items-center rounded-md bg-blue-700 px-3.5 py-1.5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2"
+      >
+        Sign in
+      </a>
+    </div>
     {% endif %}
   </div>
 </header>

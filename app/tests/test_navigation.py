@@ -22,11 +22,9 @@ class UserNavigationTests(TestCase):
         ):
             self.assertContains(response, f'href="{reverse(url_name)}"')
 
-    def test_user_navbar_shows_user_role_and_logout(self):
+    def test_user_navbar_shows_logout_without_account_summary(self):
         response = self.client.get(reverse("portal:home"))
 
-        self.assertContains(response, "Signed in as")
-        self.assertContains(response, self.user.email)
         self.assertContains(response, "Log out")
 
     def test_catalog_tab_is_active(self):
