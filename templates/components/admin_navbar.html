@@ -56,12 +56,20 @@
         Maintenance
       </a>
 
-      <!-- 4. Sample Page -->
+      <!-- 5. Maintenance -->
       <a
-        href="{% url 'sample' %}"
-        class="rounded-md px-3 py-1.5 text-sm font-medium transition-colors {% if request.resolver_match.url_name == 'sample' %} bg-blue-50 text-blue-700 font-semibold {% else %} text-gray-700 hover:bg-gray-100 hover:text-gray-900 {% endif %}"
+        href="{% url 'audit' %}"
+        class="rounded-md px-3 py-1.5 text-sm font-medium transition-colors {% if request.resolver_match.url_name == 'audit' %} bg-blue-50 text-blue-700 font-semibold {% else %} text-gray-700 hover:bg-gray-100 hover:text-gray-900 {% endif %}"
       >
-        Sample
+        Audit Log
+      </a>
+
+      <!-- 6. Settings -->
+      <a
+        href="{% url 'settings' %}"
+        class="rounded-md px-3 py-1.5 text-sm font-medium transition-colors {% if request.resolver_match.url_name == 'settings' %} bg-blue-50 text-blue-700 font-semibold {% else %} text-gray-700 hover:bg-gray-100 hover:text-gray-900 {% endif %}"
+      >
+        Settings
       </a>
     </nav>
 

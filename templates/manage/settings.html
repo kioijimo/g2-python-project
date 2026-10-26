@@ -1,0 +1,37 @@
+{% extends "base.html" %} {% block title %} Settings | Campus Equipment
+System {% endblock %} {% block content %}
+
+<div class="flex flex-wrap items-end justify-between gap-4">
+  <div>
+    <h1 class="text-2xl font-bold tracking-tight text-gray-900 sm:text-3xl">
+      System Settings
+    </h1>
+    <p class="mt-1 text-sm text-gray-600">
+      Configure and set defaults for system settings that will be applied throughout the system.
+    </p>
+  </div>
+</div>
+
+<div class="mt-6 rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+  <form method="POST">
+    {% csrf_token %}
+
+    {% include "components/form_field.html" with field=form %}
+
+    <div class="flex flex-wrap items-center gap-3 border-t border-gray-100 pt-5">
+      <button
+        type="submit"
+        class="inline-flex items-center justify-center rounded-md bg-blue-700 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2"
+      >
+        Save settings
+      </button>
+      <a
+        href="{% url 'settings' %}"
+        class="inline-flex items-center justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm transition hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2"
+      >
+        Cancel
+      </a>
+    </div>
+  </form>
+</div>
+{% endblock %}

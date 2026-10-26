@@ -95,3 +95,27 @@ class BorrowRequestFilterForm(forms.Form):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         apply_widget_styling(self)
+
+
+class AuditLogSearchForm(forms.Form):
+    q = forms.CharField(
+        required=False,
+        label="Search",
+        widget=forms.TextInput(
+            attrs={"placeholder": "Search for admin email or audit action"}
+        ),
+    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        apply_widget_styling(self)
+
+
+class SystemSettingForm(forms.ModelForm):
+    class Meta:
+        model = models.SystemSetting
+        exclude = ()
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        apply_widget_styling(self)
