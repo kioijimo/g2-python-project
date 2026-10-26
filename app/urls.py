@@ -2,7 +2,13 @@ from django.urls import include, path
 from django.views.generic import RedirectView
 
 from .views.auth import login_view, logout_view
-from .views.manage import category, manage, sample
+from .views.manage import (
+    category,
+    manage,
+    sample,
+    loans_list,
+    process_returns,
+)
 
 urlpatterns = [
     path("login/", login_view, name="login"),
@@ -15,4 +21,6 @@ urlpatterns = [
     path("category/", category, name="category"),
     path("sample/", sample, name="sample"),
     path("portal/", include("app.portal_urls")),
+    path("manage/loans/", loans_list, name="loans_list"),
+    path("manage/loans/<int:request_id>/return/", process_returns, name="process_returns"),
 ]
