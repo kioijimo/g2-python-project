@@ -3,7 +3,7 @@
     <div class="flex shrink-0 items-center">
       <a
         href="{% url 'portal:home' %}"
-        class="inline-flex items-center rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2"
+        class="inline-flex items-center rounded-md focus:outline-none  focus:ring-blue-600 focus:ring-offset-2"
       >
         <span class="text-base font-bold text-gray-900">Campus Equipment System</span>
       </a>
@@ -18,7 +18,7 @@
       <a
         href="{% url 'portal:catalog' %}"
         {% if current == 'catalog' %}aria-current="page"{% endif %}
-        class="whitespace-nowrap rounded-md px-3 py-1.5 text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2
+        class="whitespace-nowrap rounded-md px-3 py-1.5 text-sm font-medium transition-colors focus:outline-none  focus:ring-blue-600 focus:ring-offset-2
         {% if current == 'catalog' %}
           bg-blue-50 font-semibold text-blue-700
         {% else %}
@@ -31,7 +31,7 @@
       <a
         href="{% url 'portal:request_create' %}"
         {% if current == 'request_create' %}aria-current="page"{% endif %}
-        class="whitespace-nowrap rounded-md px-3 py-1.5 text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2
+        class="whitespace-nowrap rounded-md px-3 py-1.5 text-sm font-medium transition-colors focus:outline-none  focus:ring-blue-600 focus:ring-offset-2
         {% if current == 'request_create' %}
           bg-blue-50 font-semibold text-blue-700
         {% else %}
@@ -44,7 +44,7 @@
       <a
         href="{% url 'portal:request_list' %}"
         {% if current == 'request_list' or current == 'request_detail' %}aria-current="page"{% endif %}
-        class="whitespace-nowrap rounded-md px-3 py-1.5 text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2
+        class="whitespace-nowrap rounded-md px-3 py-1.5 text-sm font-medium transition-colors focus:outline-none  focus:ring-blue-600 focus:ring-offset-2
         {% if current == 'request_list' or current == 'request_detail' %}
           bg-blue-50 font-semibold text-blue-700
         {% else %}
@@ -57,7 +57,7 @@
       <a
         href="{% url 'portal:profile' %}"
         {% if current == 'profile' %}aria-current="page"{% endif %}
-        class="whitespace-nowrap rounded-md px-3 py-1.5 text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2
+        class="whitespace-nowrap rounded-md px-3 py-1.5 text-sm font-medium transition-colors focus:outline-none  focus:ring-blue-600 focus:ring-offset-2
         {% if current == 'profile' %}
           bg-blue-50 font-semibold text-blue-700
         {% else %}
@@ -74,7 +74,7 @@
         {% csrf_token %}
         <button
           type="submit"
-          class="inline-flex items-center rounded-md border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 shadow-sm transition hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2"
+          class="inline-flex items-center rounded-md border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 shadow-sm transition hover:bg-gray-50 focus:outline-none  focus:ring-blue-600 focus:ring-offset-2"
         >
           Log out
         </button>
@@ -84,7 +84,7 @@
     <div class="ml-auto flex shrink-0 items-center gap-3">
       <a
         href="{% url 'login' %}"
-        class="inline-flex items-center rounded-md bg-blue-700 px-3.5 py-1.5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2"
+        class="inline-flex items-center rounded-md bg-blue-700 px-3.5 py-1.5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-800 focus:outline-none  focus:ring-blue-600 focus:ring-offset-2"
       >
         Sign in
       </a>

@@ -3,48 +3,74 @@
 {% block title %}Portal | Campus Equipment System{% endblock %}
 
 {% block content %}
-<div class="flex flex-wrap items-end justify-between gap-4">
-  <div>
-    <h1 class="text-2xl font-bold tracking-tight text-gray-900 sm:text-3xl">Basic User Portal</h1>
-    <p class="mt-1 text-sm text-gray-600">Browse equipment, submit requests, and track your loans.</p>
+<div class="py-10 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+
+  <!-- Hero / Header Section -->
+  <div class="text-center max-w-3xl mx-auto space-y-4">
+
+    <!-- Title / Heading -->
+    <h1 class="text-3xl font-bold tracking-tight sm:text-5xl text-gray-900 uppercase">
+      Campus Equipment <span class="text-blue-700">System</span>
+    </h1>
+
+    <!-- Subtitle -->
+    <p class="text-base sm:text-lg text-gray-600 font-medium">
+      Get Started &rarr;
+    </p>
+
+
+
+  <!-- Cards Grid Layout -->
+  <div class="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-2">
+
+    <!-- Card 1: Browse Catalog -->
+    <a
+      href="{% url 'portal:catalog' %}"
+      class="flex flex-col justify-between rounded-xl border border-gray-200 bg-white p-6 shadow-sm transition hover:border-blue-300 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2"
+    >
+      <div>
+        <h2 class="text-lg font-semibold text-gray-900">Browse Catalog</h2>
+        <p class="mt-2 text-sm text-gray-600">Check serviceable and currently available equipment.</p>
+      </div>
+      <span class="mt-6 inline-block text-sm font-medium text-blue-700">View catalog &rarr;</span>
+    </a>
+
+    <!-- Card 2: New Request -->
+    <a
+      href="{% url 'portal:request_create' %}"
+      class="flex flex-col justify-between rounded-xl border border-gray-200 bg-white p-6 shadow-sm transition hover:border-blue-300 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2"
+    >
+      <div>
+        <h2 class="text-lg font-semibold text-gray-900">New Request</h2>
+        <p class="mt-2 text-sm text-gray-600">Request up to three different catalog items in one submission.</p>
+      </div>
+      <span class="mt-6 inline-block text-sm font-medium text-blue-700">Start a request &rarr;</span>
+    </a>
+
+    <!-- Card 3: My Requests -->
+    <a
+      href="{% url 'portal:request_list' %}"
+      class="flex flex-col justify-between rounded-xl border border-gray-200 bg-white p-6 shadow-sm transition hover:border-blue-300 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2"
+    >
+      <div>
+        <h2 class="text-lg font-semibold text-gray-900">My Requests</h2>
+        <p class="mt-2 text-sm text-gray-600">Review request status, due dates, and cancellation options.</p>
+      </div>
+      <span class="mt-6 inline-block text-sm font-medium text-blue-700">View requests &rarr;</span>
+    </a>
+
+    <!-- Card 4: Profile -->
+    <a
+      href="{% url 'portal:profile' %}"
+      class="flex flex-col justify-between rounded-xl border border-gray-200 bg-white p-6 shadow-sm transition hover:border-blue-300 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2"
+    >
+      <div>
+        <h2 class="text-lg font-semibold text-gray-900">Profile</h2>
+        <p class="mt-2 text-sm text-gray-600">Keep your name and contact number up to date.</p>
+      </div>
+      <span class="mt-6 inline-block text-sm font-medium text-blue-700">Edit profile &rarr;</span>
+    </a>
+
   </div>
-</div>
-
-<div class="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-  <a
-    href="{% url 'portal:catalog' %}"
-    class="rounded-xl border border-gray-200 bg-white p-6 shadow-sm transition hover:border-blue-300 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2"
-  >
-    <h2 class="text-lg font-semibold text-gray-900">Browse Catalog</h2>
-    <p class="mt-2 text-sm text-gray-600">Check serviceable and currently available equipment.</p>
-    <span class="mt-4 inline-block text-sm font-medium text-blue-700">View catalog</span>
-  </a>
-
-  <a
-    href="{% url 'portal:request_create' %}"
-    class="rounded-xl border border-gray-200 bg-white p-6 shadow-sm transition hover:border-blue-300 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2"
-  >
-    <h2 class="text-lg font-semibold text-gray-900">New Request</h2>
-    <p class="mt-2 text-sm text-gray-600">Request up to three different catalog items in one submission.</p>
-    <span class="mt-4 inline-block text-sm font-medium text-blue-700">Start a request</span>
-  </a>
-
-  <a
-    href="{% url 'portal:request_list' %}"
-    class="rounded-xl border border-gray-200 bg-white p-6 shadow-sm transition hover:border-blue-300 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2"
-  >
-    <h2 class="text-lg font-semibold text-gray-900">My Requests</h2>
-    <p class="mt-2 text-sm text-gray-600">Review request status, due dates, and cancellation options.</p>
-    <span class="mt-4 inline-block text-sm font-medium text-blue-700">View requests</span>
-  </a>
-
-  <a
-    href="{% url 'portal:profile' %}"
-    class="rounded-xl border border-gray-200 bg-white p-6 shadow-sm transition hover:border-blue-300 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2"
-  >
-    <h2 class="text-lg font-semibold text-gray-900">Profile</h2>
-    <p class="mt-2 text-sm text-gray-600">Keep your name and contact number up to date.</p>
-    <span class="mt-4 inline-block text-sm font-medium text-blue-700">Edit profile</span>
-  </a>
 </div>
 {% endblock %}
