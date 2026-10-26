@@ -13,7 +13,7 @@
     </div>
 
     <!-- Center: Centered Navlinks -->
-    <nav class="flex flex-1 items-center justify-center gap-2">
+    <nav class="flex flex-1 flex-wrap items-center justify-center gap-2">
       <!-- 1. Dashboard -->
       <a
         href="{% url 'manage' %}"
@@ -30,12 +30,30 @@
         Borrow Requests
       </a>
 
-      <!-- 3. Loans and Returns -->
+      <!-- 3. Returns Management -->
       <a
-        href="{% url 'loans_list' %}"
-        class="rounded-md px-3 py-1.5 text-sm font-medium transition-colors {% if request.resolver_match.url_name == 'loans_list' or request.resolver_match.url_name == 'process-return' %} bg-blue-50 text-blue-700 font-semibold {% else %} text-gray-700 hover:bg-gray-100 hover:text-gray-900 {% endif %}"
+        href="{% url 'manage_returns' %}"
+        class="rounded-md px-3 py-1.5 text-sm font-medium transition-colors
+        {% if request.resolver_match.url_name == 'manage_returns' or 'returns' in request.path %}
+          bg-blue-50 text-blue-700 font-semibold
+        {% else %}
+          text-gray-700 hover:bg-gray-100 hover:text-gray-900
+        {% endif %}"
       >
-        Returns and Loans
+        Returns
+      </a>
+
+      <!-- 4. Maintenance -->
+      <a
+        href="{% url 'manage_maintenance' %}"
+        class="rounded-md px-3 py-1.5 text-sm font-medium transition-colors
+        {% if request.resolver_match.url_name == 'manage_maintenance' or 'maintenance' in request.path %}
+          bg-blue-50 text-blue-700 font-semibold
+        {% else %}
+          text-gray-700 hover:bg-gray-100 hover:text-gray-900
+        {% endif %}"
+      >
+        Maintenance
       </a>
 
       <!-- 4. Sample Page -->

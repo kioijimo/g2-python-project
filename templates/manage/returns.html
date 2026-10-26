@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-6 max-w-7xl">
+    <div class="mb-6 border-b pb-4">
+        <h1 class="text-2xl font-bold text-gray-800">Returns Management</h1>
+        <p class="text-sm text-gray-500">Log unit-level returns, inspect returned conditions, and handle partial returns.</p>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Return Form -->
+        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+            <h2 class="text-lg font-bold text-gray-900 mb-4">Process Unit Return</h2>
+            <form action="{% url 'process_unit_return' %}" method="POST" class="space-y-4">
+                {% csrf_token %}
+                <div>
+                    <label class="block text-xs font-semibold text-gray-700 uppercase mb-1">Active Borrow Request</label>
+                    <select name="borrow_request_id" required class="w-full border border-gray-300 rounded-lg p-2.5 text-sm">
+                        <option value="">-- Select Issued Request --</option>
+                        {% for req in active_requests %}
+                            <option value="{{ req.id }}">#REQ-{{ req.id }} | {{ req.user.email }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-gray-700 uppercase mb-1">Asset Code</label>
+                    <input type="text" name="asset_code" placeholder="e.g. AST-0012" required class="w-full border border-gray-300 rounded-lg p-2.5 text-sm">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-gray-700 uppercase mb-1">Returned Condition</label>
+                    <select name="condition" required class="w-full border border-gray-300 rounded-lg p-2.5 text-sm">
+                        <option value="{{ EquipmentCondition.FINE }}">Fine / Serviceable (Restock to Available)</option>
+                        <option value="{{ EquipmentCondition.DAMAGED }}">Damaged (Route to Maintenance)</option>
+                    </select>
+                </div>
+
+                <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-2.5 rounded-lg shadow-sm text-sm">
+                    Log Unit Return
+                </button>
+            </form>
+        </div>
+
+        <!-- Recent Returns Audit Table -->
+        <div class="lg:col-span-2 bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-200 font-semibold text-gray-800">
+                Recent Unit Return Logs
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-sm">
+                    <thead class="bg-gray-50 border-b text-xs font-semibold text-gray-600 uppercase">
+                        <tr>
+                            <th class="px-6 py-3">Timestamp</th>
+                            <th class="px-6 py-3">Request ID</th>
+                            <th class="px-6 py-3">Asset Code</th>
+                            <th class="px-6 py-3">Condition</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-200">
+                        {% for record in recent_returns %}
+                        <tr class="hover:bg-gray-50/50">
+                            <td class="px-6 py-4 text-gray-600">{{ record.created_at|date:"M d, Y H:i" }}</td>
+                            <td class="px-6 py-4 font-mono font-medium">#REQ-{{ record.borrow_request.id }}</td>
+                            <td class="px-6 py-4 font-mono font-bold text-gray-900">{{ record.equipment_unit.asset_code }}</td>
+                            <td class="px-6 py-4">
+                                {% if record.condition == EquipmentCondition.FINE %}
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">Fine</span>
+                                {% else %}
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800">Damaged</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="4" class="px-6 py-8 text-center text-gray-500">No unit returns logged yet.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

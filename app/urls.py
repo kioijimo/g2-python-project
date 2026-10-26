@@ -14,6 +14,11 @@ from .views.manage import (
     manage,
     process_returns,
     sample,
+    returns_manage_view,
+    process_unit_return,
+    maintenance_manage_view,
+    open_maintenance_ticket,
+    resolve_maintenance_ticket,
 )
 
 urlpatterns = [
@@ -57,4 +62,9 @@ urlpatterns = [
     path(
         "manage/loans/<int:request_id>/return/", process_returns, name="process_returns"
     ),
+    path('manage/returns/', returns_manage_view, name='manage_returns'),
+    path('manage/returns/process/', process_unit_return, name='process_unit_return'),
+    path('manage/maintenance/', maintenance_manage_view, name='manage_maintenance'),
+    path('manage/maintenance/open/', open_maintenance_ticket, name='open_maintenance_ticket'),
+    path('manage/maintenance/<int:ticket_id>/resolve/', resolve_maintenance_ticket,name='resolve_maintenance_ticket'),
 ]
