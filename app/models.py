@@ -3,7 +3,6 @@ from django.contrib.auth.models import AbstractBaseUser
 from django.core.validators import (
     EmailValidator,
     MaxLengthValidator,
-    MaxValueValidator,
     MinValueValidator,
     RegexValidator,
 )
@@ -238,7 +237,9 @@ class EquipmentUnit(models.Model):
         DAMAGED = 0
 
     asset_code = models.CharField(max_length=NAME_LENGTH)
-    catalog_item = models.ForeignKey(CatalogItem, on_delete=models.PROTECT)
+    catalog_item = models.ForeignKey(
+        CatalogItem, on_delete=models.PROTECT, related_name="units"
+    )
     inventory_status = models.IntegerField(choices=EquipmentStatus)
     condition = models.IntegerField(choices=EquipmentCondition)
     acquired_at = models.DateTimeField(auto_now_add=True)
@@ -252,14 +253,14 @@ class BorrowRequest(models.Model):
     ----------
     `user`: User
         The user that created the borrow request.
-    `reason`: str
-        The purpose of the user for creating a borrow request. Must not exceed `DESCRIPTION_LEGNTH` number of characters.
+    `purpose`: str
+        The purpose of the user for creating a borrow request. Must not exceed `DESCRIPTION_LENGTH` number of characters.
     `status`: int
         The workflow status of the request. To see the statuses, check `BorrowRequest.BorrowRequestStatus` class.
     `created_at`: datetime
         The date and time when the request was created.
     `due_at`: datetime
-        The date and time the user must return the borrowed item(s). Defaults to `MAXIMUM_BORROW_DAYS`.
+        The date and time the user must return the borrowed item(s).
     """
 
     class BorrowRequestStatus(models.IntegerChoices):
@@ -289,19 +290,34 @@ class BorrowRequest(models.Model):
         REJECTED = 6
         CANCELLED = 0
 
-    user = models.ForeignKey(AUTH_USER, on_delete=models.PROTECT)
-    reason = models.CharField(max_length=DESCRIPTION_LENGTH)
-    status = models.IntegerField(choices=BorrowRequestStatus)
+    user = models.ForeignKey(
+        AUTH_USER, on_delete=models.PROTECT, related_name="borrow_requests"
+    )
+    purpose = models.CharField(max_length=DESCRIPTION_LENGTH)
+    status = models.IntegerField(
+        choices=BorrowRequestStatus,
+        default=BorrowRequestStatus.PENDING.value,
+    )
     created_at = models.DateTimeField(auto_now_add=True)
+    due_at = models.DateTimeField()
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(args, kwargs)
+    @property
+    def is_cancellable(self):
+        return self.status in (
+            self.BorrowRequestStatus.PENDING,
+            self.BorrowRequestStatus.APPROVED,
+        )
 
-        self.due_at = models.DateTimeField(default=self.compute_return_date)
+    def overdue_days(self, as_of=None):
+        if self.status not in (
+            self.BorrowRequestStatus.ISSUED,
+            self.BorrowRequestStatus.PARTIALLY_RETURNED,
+        ):
+            return 0
 
-    @staticmethod
-    def compute_return_date():
-        return timezone.now() + timezone.timedelta(MAX_BORROW_DAYS)
+        as_of = as_of or timezone.localdate()
+        due_date = timezone.localtime(self.due_at).date()
+        return max(0, (as_of - due_date).days)
 
 
 class RequestItem(models.Model):
@@ -312,20 +328,31 @@ class RequestItem(models.Model):
     ----------
     `borrow_request`: BorrowRequest
         The borrow request this reference item belongs to.
-    `equipment_unit`: EquipmentUnit
-        The unit to be borrowed.
+    `catalog_item`: CatalogItem
+        The catalog item to be borrowed.
     `quantity`: int
-        The number of units to be borrowed. Defaults to `MAX_BORROW_QUANTITY` units.
+        The number of units to be borrowed.
     """
 
-    borrow_request = models.ForeignKey(BorrowRequest, on_delete=models.PROTECT)
-    equipment_unit = models.ForeignKey(EquipmentUnit, on_delete=models.PROTECT)
-    quantity = models.PositiveIntegerField(
-        validators=[
-            MinValueValidator(1),
-            MaxValueValidator(MAX_BORROW_QUANTITY),
-        ]
+    borrow_request = models.ForeignKey(
+        BorrowRequest, on_delete=models.PROTECT, related_name="items"
     )
+    catalog_item = models.ForeignKey(
+        CatalogItem, on_delete=models.PROTECT, related_name="request_items"
+    )
+    quantity = models.PositiveIntegerField(validators=[MinValueValidator(1)])
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=("borrow_request", "catalog_item"),
+                name="unique_catalog_item_per_request",
+            ),
+            models.CheckConstraint(
+                condition=models.Q(quantity__gte=1),
+                name="request_item_quantity_gte_1",
+            ),
+        ]
 
 
 class UnitAllocation(models.Model):
@@ -349,7 +376,9 @@ class UnitAllocation(models.Model):
         RELEASED = 2
         CANCELLED = 0
 
-    request_item = models.ForeignKey(RequestItem, on_delete=models.PROTECT)
+    request_item = models.ForeignKey(
+        RequestItem, on_delete=models.PROTECT, related_name="allocations"
+    )
     equipment_unit = models.ForeignKey(EquipmentUnit, on_delete=models.PROTECT)
     status = models.IntegerField(choices=UnitAllocationStatus)
     allocated_at = models.DateTimeField()
@@ -468,3 +497,7 @@ class SystemSetting(models.Model):
 
     max_borrow_quantity = models.IntegerField(default=MAX_BORROW_QUANTITY)
     max_borrow_days = models.IntegerField(default=MAX_BORROW_DAYS)
+
+    @classmethod
+    def load(cls):
+        return cls.objects.order_by("pk").first() or cls()
