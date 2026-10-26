@@ -1,9 +1,12 @@
+from datetime import datetime, timedelta
+
+from dateutil import relativedelta
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError
 from django.core.paginator import Paginator
 from django.db import transaction
-from django.db.models import Count, Q
+from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.views.decorators.http import require_POST
@@ -13,7 +16,10 @@ from ..decorators import admin_required
 from ..models import (
     AuditLog,
     BorrowRequest,
+    CatalogItem,
+    Category,
     EquipmentUnit,
+    LoanRecord,
     MaintenanceRecord,
     RequestItem,
     ReturnRecord,
@@ -343,27 +349,77 @@ def manage(request):
 
     # Hardcoded statistics for the 4 dashboard cards
     context["stats"] = {
-        "available_units": 142,
-        "pending_requests": 8,
-        "active_loans": 34,
-        "overdue_loans": 3,
+        "available_units": EquipmentUnit.objects.filter(
+            Q(inventory_status=EquipmentUnit.EquipmentStatus.AVAILABLE)
+            | Q(condition=EquipmentUnit.EquipmentCondition.FINE)
+        ).count(),
+        "pending_requests": BorrowRequest.objects.filter(
+            status=BorrowRequest.BorrowRequestStatus.PENDING
+        ).count(),
+        "active_loans": BorrowRequest.objects.filter(
+            Q(status=BorrowRequest.BorrowRequestStatus.ISSUED)
+            | Q(status=BorrowRequest.BorrowRequestStatus.PARTIALLY_RETURNED)
+        ).count(),
+        "overdue_loans": BorrowRequest.objects.filter(
+            status__in=(
+                BorrowRequest.BorrowRequestStatus.ISSUED,
+                BorrowRequest.BorrowRequestStatus.PARTIALLY_RETURNED,
+            ),
+            due_at__lt=timezone.now(),
+        ).count(),
     }
 
-    # Hardcoded static data for charts
     context["monthly_trend"] = {
-        "labels": ["May", "Jun", "Jul", "Aug", "Sep", "Oct"],
-        "data": [18, 26, 22, 35, 42, 38],
+        "labels": [],
+        "data": [],
     }
+
+    prev = None
+    for i, date in enumerate(
+        [
+            timezone.now() - relativedelta.relativedelta(months=x)
+            for x in range(5, -1, -1)
+        ]
+    ):
+        if i == 0:
+            prev: datetime = date
+            date = date.replace(day=1)
+
+        context["monthly_trend"]["labels"].append(date.strftime("%b"))
+
+        sum = 0
+
+        print(f"Date is {date} while timezone is {timezone.now()}")
+
+        for _ in BorrowRequest.objects.filter(
+            created_at__range=(
+                date,
+                timezone.now() if i == 0 else prev,
+            )
+        ):
+            sum = sum + 1
+
+        context["monthly_trend"]["data"].insert(0, sum)
+
+    categories = Category.objects.all()
+
+    category_stats = []
+
+    for c in categories:
+        total = 0
+
+        for i in CatalogItem.objects.filter(category=c.id):
+            for o in RequestItem.objects.filter(catalog_item=i.id):
+                total += o.quantity
+
+        category_stats.append({"category": c.name, "usage": total})
 
     context["category_usage"] = {
-        "labels": [
-            "Electronics & Lab",
-            "Audio / Visual",
-            "IT & Computing",
-            "Measuring Tools",
-        ],
-        "data": [40, 25, 20, 15],
+        "labels": [s["category"] for s in category_stats],
+        "data": [s["usage"] for s in category_stats],
     }
+
+    context["settings"] = SystemSetting.objects.first()
 
     return render(request, "manage/home.html", context)
 
