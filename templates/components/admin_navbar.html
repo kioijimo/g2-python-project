@@ -1,5 +1,7 @@
 <header class="border-b border-gray-200 bg-white">
-  <div class="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-4 px-4 py-3 sm:px-6 lg:px-8">
+  <div
+    class="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-4 px-4 py-3 sm:px-6 lg:px-8"
+  >
     <!-- Left: Brand -->
     <div class="flex shrink-0 items-center">
       <a
@@ -15,17 +17,20 @@
       <!-- 1. Dashboard -->
       <a
         href="{% url 'manage' %}"
-        class="rounded-md px-3 py-1.5 text-sm font-medium transition-colors
-        {% if request.resolver_match.url_name == 'manage' or request.resolver_match.url_name == 'home' %}
-          bg-blue-50 text-blue-700 font-semibold
-        {% else %}
-          text-gray-700 hover:bg-gray-100 hover:text-gray-900
-        {% endif %}"
+        class="rounded-md px-3 py-1.5 text-sm font-medium transition-colors {% if request.resolver_match.url_name == 'manage' or request.resolver_match.url_name == 'home' %} bg-blue-50 text-blue-700 font-semibold {% else %} text-gray-700 hover:bg-gray-100 hover:text-gray-900 {% endif %}"
       >
         Dashboard
       </a>
 
-      <!-- 2. Returns Management -->
+      <!-- 2. Loans and Returns -->
+      <a
+        href="{% url 'borrow_requests' %}"
+        class="rounded-md px-3 py-1.5 text-sm font-medium transition-colors {% if request.resolver_match.url_name == 'borrow_requests' or request.resolver_match.url_name == 'process-return' %} bg-blue-50 text-blue-700 font-semibold {% else %} text-gray-700 hover:bg-gray-100 hover:text-gray-900 {% endif %}"
+      >
+        Borrow Requests
+      </a>
+
+      <!-- 3. Returns Management -->
       <a
         href="{% url 'manage_returns' %}"
         class="rounded-md px-3 py-1.5 text-sm font-medium transition-colors
@@ -38,7 +43,7 @@
         Returns
       </a>
 
-      <!-- 3. Maintenance -->
+      <!-- 4. Maintenance -->
       <a
         href="{% url 'manage_maintenance' %}"
         class="rounded-md px-3 py-1.5 text-sm font-medium transition-colors
@@ -54,12 +59,7 @@
       <!-- 4. Sample Page -->
       <a
         href="{% url 'sample' %}"
-        class="rounded-md px-3 py-1.5 text-sm font-medium transition-colors
-        {% if request.resolver_match.url_name == 'sample' %}
-          bg-blue-50 text-blue-700 font-semibold
-        {% else %}
-          text-gray-700 hover:bg-gray-100 hover:text-gray-900
-        {% endif %}"
+        class="rounded-md px-3 py-1.5 text-sm font-medium transition-colors {% if request.resolver_match.url_name == 'sample' %} bg-blue-50 text-blue-700 font-semibold {% else %} text-gray-700 hover:bg-gray-100 hover:text-gray-900 {% endif %}"
       >
         Sample
       </a>
@@ -68,9 +68,7 @@
     <!-- Right: User Profile & Actions -->
     <div class="flex shrink-0 items-center gap-3">
       <div class="hidden text-right sm:block">
-        <p class="text-xs text-gray-500">
-          Signed in as admin
-        </p>
+        <p class="text-xs text-gray-500">Signed in as admin</p>
         <p class="text-sm font-medium text-gray-900">
           {{ request.user.email }}
         </p>

@@ -1,0 +1,131 @@
+{% extends "base.html" %}
+{% block title %}
+Borrowing Slip #{{ borrow_request.pk }} | Campus Equipment System
+{% endblock %}
+{% block content %}
+<div
+  class="mb-6 flex flex-wrap items-center justify-between gap-3 print:hidden"
+>
+  <a
+    href="{% url 'borrow_request_review' borrow_request.pk %}"
+    class="text-sm font-medium text-blue-700 hover:text-blue-800 hover:underline"
+  >
+    &larr; Back to request
+  </a>
+  <button
+    type="button"
+    onclick="window.print()"
+    class="inline-flex items-center justify-center rounded-md bg-blue-700 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2"
+  >
+    Print slip
+  </button>
+</div>
+
+<div
+  class="mx-auto max-w-3xl rounded-xl border border-gray-200 bg-white p-6 shadow-sm sm:p-8 print:border-0 print:shadow-none"
+>
+  <div
+    class="flex flex-wrap items-start justify-between gap-4 border-b border-gray-200 pb-5"
+  >
+    <div>
+      <h1 class="text-2xl font-bold tracking-tight text-gray-900">
+        Borrowing Slip
+      </h1>
+      <p class="mt-1 text-sm text-gray-600">Campus Equipment System</p>
+    </div>
+    <div class="text-right">
+      <p class="text-sm font-semibold text-gray-900">
+        Request #{{ borrow_request.pk }}
+      </p>
+      <p class="mt-1 text-sm text-gray-600">
+        Released {{ loan.released_at|date:"Y-m-d H:i" }}
+      </p>
+    </div>
+  </div>
+
+  <div class="mt-6 grid gap-6 sm:grid-cols-2">
+    <div>
+      <h2 class="text-xs font-semibold uppercase tracking-wide text-gray-500">
+        Borrower
+      </h2>
+      {% if borrower_profile %}
+      <p class="mt-2 text-sm font-medium text-gray-900">
+        {{ borrower_profile.first_name }}
+        {{ borrower_profile.last_name }}
+      </p>
+      {% endif %}
+      <p class="mt-1 text-sm text-gray-700">{{ borrow_request.user.email }}</p>
+      {% if borrower_profile.contact_number %}
+      <p class="mt-1 text-sm text-gray-700">
+        {{ borrower_profile.contact_number }}
+      </p>
+      {% endif %}
+    </div>
+    <div>
+      <h2 class="text-xs font-semibold uppercase tracking-wide text-gray-500">
+        Loan details
+      </h2>
+      <p class="mt-2 text-sm text-gray-700">
+        Due date:
+        <span class="font-semibold text-gray-900"
+          >{{ borrow_request.due_at|date:"Y-m-d" }}</span
+        >
+      </p>
+      <p class="mt-1 text-sm text-gray-700">
+        Approved by: {{ loan.user.email }}
+      </p>
+      <p class="mt-1 text-sm text-gray-700">
+        Purpose: {{ borrow_request.purpose }}
+      </p>
+    </div>
+  </div>
+
+  <div class="mt-6 overflow-hidden rounded-lg border border-gray-200">
+    <table class="w-full text-left text-sm">
+      <thead
+        class="border-b border-gray-200 bg-gray-50 text-xs font-semibold uppercase tracking-wide text-gray-500"
+      >
+        <tr>
+          <th class="px-4 py-3">Catalog item</th>
+          <th class="px-4 py-3">Category</th>
+          <th class="px-4 py-3">Asset code</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-gray-100">
+        {% for allocation in allocations %}
+        <tr>
+          <td class="px-4 py-3 text-gray-900">
+            {{ allocation.request_item.catalog_item.name }}
+          </td>
+          <td class="px-4 py-3 text-gray-600">
+            {{ allocation.request_item.catalog_item.category.name }}
+          </td>
+          <td class="px-4 py-3 font-mono text-xs font-semibold text-gray-900">
+            {{ allocation.equipment_unit.asset_code }}
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="3" class="px-4 py-6 text-center text-sm text-gray-500">
+            No equipment units released.
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="mt-10 grid gap-8 sm:grid-cols-2">
+    <div>
+      <div class="border-t border-gray-400 pt-2 text-sm text-gray-600">
+        Borrower signature
+      </div>
+    </div>
+    <div>
+      <div class="border-t border-gray-400 pt-2 text-sm text-gray-600">
+        Releasing administrator signature
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

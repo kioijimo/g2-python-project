@@ -1,5 +1,10 @@
 from .auth import LoginForm, RegisterForm
-from .manage import CategoryForm, CategoryItemForm, UserForm
+from .manage import (
+    BorrowRequestFilterForm,
+    CategoryForm,
+    CategoryItemForm,
+    UserForm,
+)
 from .portal import (
     BorrowRequestForm,
     BorrowRequestItemForm,
@@ -21,6 +26,7 @@ __all__ = [
     "BorrowRequestForm",
     "BorrowRequestItemForm",
     "BorrowRequestItemFormSet",
+    "BorrowRequestFilterForm",
     "CatalogSearchForm",
     "CategoryForm",
     "CategoryItemForm",

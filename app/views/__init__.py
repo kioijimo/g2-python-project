@@ -1,5 +1,15 @@
 from .auth import login_view, logout_view, register_view
-from .manage import category, manage, sample
+from .manage import (
+    borrow_request_approve,
+    borrow_request_reject,
+    borrow_request_release,
+    borrow_request_review,
+    borrow_request_slip,
+    borrow_requests,
+    category,
+    manage,
+    sample,
+)
 from .portal import (
     catalog,
     portal_home,
@@ -21,5 +31,11 @@ __all__ = [
     "request_create",
     "request_detail",
     "request_list",
+    "borrow_requests",
+    "borrow_request_review",
+    "borrow_request_reject",
+    "borrow_request_approve",
+    "borrow_request_release",
+    "borrow_request_slip",
     "sample",
 ]

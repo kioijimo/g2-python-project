@@ -5,6 +5,10 @@ from .. import models
 from .styling import apply_widget_styling
 
 
+def _status_choices(status_choices, empty_label="All statuses"):
+    return [("", empty_label)] + [(value, label) for value, label in status_choices]
+
+
 class UserForm(forms.ModelForm):
     class Meta:
         model = models.User
@@ -59,4 +63,35 @@ class CategoryItemForm(forms.ModelForm):
         )
 
         self.fields["category"].label_from_instance = lambda obj: obj.name
+        apply_widget_styling(self)
+
+
+class BorrowRequestFilterForm(forms.Form):
+    q = forms.CharField(
+        required=False,
+        label="Search",
+        widget=forms.TextInput(
+            attrs={"placeholder": "Search borrower, purpose, or request ID"}
+        ),
+    )
+    status = forms.TypedChoiceField(
+        required=False,
+        label="Status",
+        choices=_status_choices(models.BorrowRequest.BorrowRequestStatus.choices),
+        coerce=int,
+        empty_value=None,
+    )
+    date_from = forms.DateField(
+        required=False,
+        label="Created from",
+        widget=forms.DateInput(attrs={"type": "date"}, format="%Y-%m-%d"),
+    )
+    date_to = forms.DateField(
+        required=False,
+        label="Created to",
+        widget=forms.DateInput(attrs={"type": "date"}, format="%Y-%m-%d"),
+    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         apply_widget_styling(self)

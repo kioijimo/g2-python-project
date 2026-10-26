@@ -1,0 +1,17 @@
+{% with status=req.get_status_display %}
+{% if status == "Pending" %}
+{% include "components/badge.html" with label=status variant="warning" %}
+{% elif status == "Approved" %}
+{% include "components/badge.html" with label=status variant="info" %}
+{% elif status == "Issued" %}
+{% include "components/badge.html" with label=status variant="user" %}
+{% elif status == "Partially Returned" %}
+{% include "components/badge.html" with label=status variant="warning" %}
+{% elif status == "Returned" %}
+{% include "components/badge.html" with label=status variant="success" %}
+{% elif status == "Rejected" %}
+{% include "components/badge.html" with label=status variant="danger" %}
+{% elif status == "Cancelled" %} 
+{% include "components/badge.html" with label=status variant="neutral" %} 
+{% endif %}
+{%endwith %}
