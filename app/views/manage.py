@@ -1,4 +1,5 @@
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError
 from django.core.paginator import Paginator
 from django.db import transaction
@@ -7,19 +8,16 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.views.decorators.http import require_POST
 
-from .. import forms, models
+from .. import forms
 from ..decorators import admin_required
-from django.contrib.auth.decorators import login_required
-  
 from ..models import (
     AuditLog,
     BorrowRequest,
     EquipmentUnit,
-    RequestItem,
-    UnitAllocation,
-    ReturnRecord,
     MaintenanceRecord,
+    RequestItem,
     ReturnRecord,
+    SystemSetting,
     UnitAllocation,
 )
 from ..services.approvals import (
@@ -40,7 +38,7 @@ def _table_paginate(request, queryset):
 
 def _get_borrow_request(pk):
     return get_object_or_404(
-        models.BorrowRequest.objects.select_related("user").prefetch_related(
+        BorrowRequest.objects.select_related("user").prefetch_related(
             "review_records__user",
             "items__catalog_item__category",
             "items__allocations__equipment_unit",
@@ -67,16 +65,21 @@ def _structure_allocations_from_post(request, items):
 
     return allocations_by_item
 
+
 @login_required
 @admin_required
 def returns_manage_view(request):
     # Active loans eligible for returns (ISSUED or PARTIALLY_RETURNED)
-    active_requests = BorrowRequest.objects.filter(
-        status__in=[
-            BorrowRequest.BorrowRequestStatus.ISSUED,
-            BorrowRequest.BorrowRequestStatus.PARTIALLY_RETURNED,
-        ]
-    ).select_related("user").order_by("-created_at")
+    active_requests = (
+        BorrowRequest.objects.filter(
+            status__in=[
+                BorrowRequest.BorrowRequestStatus.ISSUED,
+                BorrowRequest.BorrowRequestStatus.PARTIALLY_RETURNED,
+            ]
+        )
+        .select_related("user")
+        .order_by("-created_at")
+    )
 
     # Recent return audit records
     recent_returns = ReturnRecord.objects.select_related(
@@ -98,7 +101,9 @@ def process_unit_return(request):
     if request.method == "POST":
         borrow_request_id = request.POST.get("borrow_request_id")
         asset_code = request.POST.get("asset_code", "").strip()
-        condition_val = int(request.POST.get("condition", EquipmentUnit.EquipmentCondition.FINE))
+        condition_val = int(
+            request.POST.get("condition", EquipmentUnit.EquipmentCondition.FINE)
+        )
 
         borrow_request = get_object_or_404(BorrowRequest, id=borrow_request_id)
         unit = get_object_or_404(EquipmentUnit, asset_code=asset_code)
@@ -111,12 +116,20 @@ def process_unit_return(request):
         ).exists()
 
         if not allocation_exists:
-            messages.error(request, f"Asset unit '{asset_code}' was not issued under Request #{borrow_request.id}.")
+            messages.error(
+                request,
+                f"Asset unit '{asset_code}' was not issued under Request #{borrow_request.id}.",
+            )
             return redirect("manage_returns")
 
         # Check for duplicate return
-        if ReturnRecord.objects.filter(borrow_request=borrow_request, equipment_unit=unit).exists():
-            messages.warning(request, f"Unit '{asset_code}' has already been returned for Request #{borrow_request.id}.")
+        if ReturnRecord.objects.filter(
+            borrow_request=borrow_request, equipment_unit=unit
+        ).exists():
+            messages.warning(
+                request,
+                f"Unit '{asset_code}' has already been returned for Request #{borrow_request.id}.",
+            )
             return redirect("manage_returns")
 
         # Create Return Record
@@ -131,7 +144,10 @@ def process_unit_return(request):
         if condition_val == EquipmentUnit.EquipmentCondition.FINE:
             unit.inventory_status = EquipmentUnit.EquipmentStatus.AVAILABLE
             unit.save()
-            messages.success(request, f"Unit {unit.asset_code} returned in FINE condition and restored to AVAILABLE stock.")
+            messages.success(
+                request,
+                f"Unit {unit.asset_code} returned in FINE condition and restored to AVAILABLE stock.",
+            )
         else:
             # DAMAGED -> Route directly to MAINTENANCE
             unit.inventory_status = EquipmentUnit.EquipmentStatus.MAINTENANCE
@@ -146,7 +162,10 @@ def process_unit_return(request):
                 status=MaintenanceRecord.MaintenanceStatus.ACTIVE,
                 resolved_at=timezone.now(),  # Placeholder until finished
             )
-            messages.warning(request, f"Unit {unit.asset_code} returned DAMAGED and placed into MAINTENANCE.")
+            messages.warning(
+                request,
+                f"Unit {unit.asset_code} returned DAMAGED and placed into MAINTENANCE.",
+            )
 
         # Evaluate overall BorrowRequest status (Partial vs Fully Returned)
         total_allocated = UnitAllocation.objects.filter(
@@ -154,7 +173,9 @@ def process_unit_return(request):
             status=UnitAllocation.UnitAllocationStatus.RELEASED,
         ).count()
 
-        total_returned = ReturnRecord.objects.filter(borrow_request=borrow_request).count()
+        total_returned = ReturnRecord.objects.filter(
+            borrow_request=borrow_request
+        ).count()
 
         if total_returned >= total_allocated:
             borrow_request.status = BorrowRequest.BorrowRequestStatus.RETURNED
@@ -170,18 +191,31 @@ def process_unit_return(request):
 
     return redirect("manage_returns")
 
+
 @login_required
 @admin_required
 def maintenance_manage_view(request):
-    tickets = MaintenanceRecord.objects.select_related("unit", "maintainer").order_by("-created_at")
+    tickets = MaintenanceRecord.objects.select_related("unit", "maintainer").order_by(
+        "-created_at"
+    )
 
     # Inventory Reconciliation Totals
     total_units = EquipmentUnit.objects.count()
-    available_cnt = EquipmentUnit.objects.filter(inventory_status=EquipmentUnit.EquipmentStatus.AVAILABLE).count()
-    reserved_cnt = EquipmentUnit.objects.filter(inventory_status=EquipmentUnit.EquipmentStatus.RESERVED).count()
-    issued_cnt = EquipmentUnit.objects.filter(inventory_status=EquipmentUnit.EquipmentStatus.ISSUED).count()
-    maintenance_cnt = EquipmentUnit.objects.filter(inventory_status=EquipmentUnit.EquipmentStatus.MAINTENANCE).count()
-    retired_cnt = EquipmentUnit.objects.filter(inventory_status=EquipmentUnit.EquipmentStatus.RETIRED).count()
+    available_cnt = EquipmentUnit.objects.filter(
+        inventory_status=EquipmentUnit.EquipmentStatus.AVAILABLE
+    ).count()
+    reserved_cnt = EquipmentUnit.objects.filter(
+        inventory_status=EquipmentUnit.EquipmentStatus.RESERVED
+    ).count()
+    issued_cnt = EquipmentUnit.objects.filter(
+        inventory_status=EquipmentUnit.EquipmentStatus.ISSUED
+    ).count()
+    maintenance_cnt = EquipmentUnit.objects.filter(
+        inventory_status=EquipmentUnit.EquipmentStatus.MAINTENANCE
+    ).count()
+    retired_cnt = EquipmentUnit.objects.filter(
+        inventory_status=EquipmentUnit.EquipmentStatus.RETIRED
+    ).count()
 
     # Units eligible to enter maintenance (cannot be ISSUED or RESERVED)
     eligible_units = EquipmentUnit.objects.filter(
@@ -246,7 +280,9 @@ def open_maintenance_ticket(request):
             user=request.user,
             action=f"Opened maintenance record for unit '{unit.asset_code}'.",
         )
-        messages.success(request, f"Maintenance work order opened for unit '{unit.asset_code}'.")
+        messages.success(
+            request, f"Maintenance work order opened for unit '{unit.asset_code}'."
+        )
 
     return redirect("manage_maintenance")
 
@@ -270,7 +306,10 @@ def resolve_maintenance_ticket(request, ticket_id):
             unit.inventory_status = EquipmentUnit.EquipmentStatus.AVAILABLE
             unit.condition = EquipmentUnit.EquipmentCondition.FINE
             unit.save()
-            messages.success(request, f"Unit '{unit.asset_code}' successfully repaired and restored to AVAILABLE stock.")
+            messages.success(
+                request,
+                f"Unit '{unit.asset_code}' successfully repaired and restored to AVAILABLE stock.",
+            )
             action_log = f"Resolved maintenance for '{unit.asset_code}' (Repaired)."
         else:
             unit.inventory_status = EquipmentUnit.EquipmentStatus.RETIRED
@@ -281,6 +320,7 @@ def resolve_maintenance_ticket(request, ticket_id):
         AuditLog.objects.create(user=request.user, action=action_log)
 
     return redirect("manage_maintenance")
+
 
 @admin_required
 def manage(request):
@@ -334,14 +374,14 @@ def category(request):
 
     catalog_item_form = forms.CategoryItemForm(
         data=request.POST or None,
-        status=models.CatalogItem.CatalogItemStatus.ACTIVE,
+        status=CatalogItem.CatalogItemStatus.ACTIVE,
     )
 
     if request.method == "POST" and catalog_item_form.is_valid():
         catalog_item_form.save()
 
         catalog_item_form = forms.CategoryItemForm(
-            status=models.CatalogItem.CatalogItemStatus.ACTIVE
+            status=CatalogItem.CatalogItemStatus.ACTIVE
         )
 
         messages.success(request, "Added category item successfully.")
@@ -490,9 +530,11 @@ def process_returns(request, request_id):
 @admin_required
 def borrow_requests(request):
     filter_form = forms.BorrowRequestFilterForm(request.GET)
-    queryset = models.BorrowRequest.objects.select_related(
-        "user"
-    ).prefetch_related("review_records__user").order_by("-created_at")
+    queryset = (
+        BorrowRequest.objects.select_related("user")
+        .prefetch_related("review_records__user")
+        .order_by("-created_at")
+    )
 
     if filter_form.is_valid():
         query = filter_form.cleaned_data["q"].strip()
@@ -533,15 +575,15 @@ def borrow_request_review(request, pk):
         allocations = [
             allocation
             for allocation in request_item.allocations.all()
-            if allocation.status != models.UnitAllocation.UnitAllocationStatus.CANCELLED
+            if allocation.status != UnitAllocation.UnitAllocationStatus.CANCELLED
         ]
-        available_units = models.EquipmentUnit.objects.none()
+        available_units = EquipmentUnit.objects.none()
 
-        if borrow_request.status == models.BorrowRequest.BorrowRequestStatus.PENDING:
-            available_units = models.EquipmentUnit.objects.filter(
+        if borrow_request.status == BorrowRequest.BorrowRequestStatus.PENDING:
+            available_units = EquipmentUnit.objects.filter(
                 catalog_item=request_item.catalog_item,
-                inventory_status=models.EquipmentUnit.EquipmentStatus.AVAILABLE,
-                condition=models.EquipmentUnit.EquipmentCondition.FINE,
+                inventory_status=EquipmentUnit.EquipmentStatus.AVAILABLE,
+                condition=EquipmentUnit.EquipmentCondition.FINE,
             ).order_by("asset_code")
 
         item_rows.append(
@@ -553,8 +595,8 @@ def borrow_request_review(request, pk):
             }
         )
 
-    loan = models.LoanRecord.objects.filter(borrow_request=borrow_request).first()
-    borrower_profile = models.Profile.objects.filter(user=borrow_request.user).first()
+    loan = LoanRecord.objects.filter(borrow_request=borrow_request).first()
+    borrower_profile = Profile.objects.filter(user=borrow_request.user).first()
 
     return render(
         request,
@@ -627,19 +669,19 @@ def borrow_request_release(request, pk):
 def borrow_request_slip(request, pk):
     borrow_request = _get_borrow_request(pk)
     loan = get_object_or_404(
-        models.LoanRecord.objects.select_related("user"),
+        LoanRecord.objects.select_related("user"),
         borrow_request=borrow_request,
         released_at__isnull=False,
     )
     allocations = (
-        models.UnitAllocation.objects.filter(
+        UnitAllocation.objects.filter(
             request_item__borrow_request=borrow_request,
-            status=models.UnitAllocation.UnitAllocationStatus.RELEASED,
+            status=UnitAllocation.UnitAllocationStatus.RELEASED,
         )
         .select_related("equipment_unit", "request_item__catalog_item")
         .order_by("request_item__catalog_item__name", "equipment_unit__asset_code")
     )
-    borrower_profile = models.Profile.objects.filter(user=borrow_request.user).first()
+    borrower_profile = Profile.objects.filter(user=borrow_request.user).first()
 
     return render(
         request,
@@ -651,6 +693,63 @@ def borrow_request_slip(request, pk):
             "borrower_profile": borrower_profile,
         },
     )
+
+
+@admin_required
+def audit(request):
+    search_form = forms.AuditLogSearchForm(request.GET)
+    logs = AuditLog.objects.all().order_by("-created_at")
+
+    if search_form.is_valid():
+        query = search_form.cleaned_data["q"].strip()
+        print(query)
+
+        logs = logs.filter(Q(action__icontains=query) | Q(user__email__icontains=query))
+
+    return render(
+        request,
+        "manage/audit.html",
+        {"logs": logs, "search_form": search_form},
+    )
+
+
+@admin_required
+def settings(request):
+    setting, created = SystemSetting.objects.get_or_create(id=1)
+
+    if request.method == "POST":
+        old_borrow_quantity, old_borrow_days = (
+            setting.max_borrow_quantity,
+            setting.max_borrow_days,
+        )
+
+        form = forms.SystemSettingForm(request.POST, instance=setting)
+        if form.is_valid():
+            form.save()
+
+            message = f"{'No existing settings found. Using default ' if created else 'Updated system settings. '} Max Quantity: {setting.max_borrow_quantity}, Max Borrow Days:{setting.max_borrow_days}"
+
+            AuditLog.objects.create(
+                user=request.user,
+                action=message,
+            )
+
+            if old_borrow_quantity != setting.max_borrow_quantity:
+                messages.success(
+                    request,
+                    f"Updated MAX_BORROW_QUANTITY from {old_borrow_quantity} to {setting.max_borrow_quantity}.",
+                )
+            if old_borrow_days != setting.max_borrow_days:
+                messages.success(
+                    request,
+                    f"Updated MAX_BORROW_DAYS from {old_borrow_days} to {setting.max_borrow_days}.",
+                )
+
+            return redirect("settings")
+    else:
+        form = forms.SystemSettingForm(instance=setting)
+
+    return render(request, "manage/settings.html", {"form": form})
 
 
 @admin_required

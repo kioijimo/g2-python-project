@@ -3,6 +3,7 @@ from django.views.generic import RedirectView
 
 from .views.auth import login_view, logout_view
 from .views.manage import (
+    audit,
     borrow_request_approve,
     borrow_request_reject,
     borrow_request_release,
@@ -11,14 +12,15 @@ from .views.manage import (
     borrow_requests,
     category,
     loans_list,
-    manage,
-    process_returns,
-    sample,
-    returns_manage_view,
-    process_unit_return,
     maintenance_manage_view,
+    manage,
     open_maintenance_ticket,
+    process_returns,
+    process_unit_return,
     resolve_maintenance_ticket,
+    returns_manage_view,
+    sample,
+    settings,
 )
 
 urlpatterns = [
@@ -62,9 +64,19 @@ urlpatterns = [
     path(
         "manage/loans/<int:request_id>/return/", process_returns, name="process_returns"
     ),
-    path('manage/returns/', returns_manage_view, name='manage_returns'),
-    path('manage/returns/process/', process_unit_return, name='process_unit_return'),
-    path('manage/maintenance/', maintenance_manage_view, name='manage_maintenance'),
-    path('manage/maintenance/open/', open_maintenance_ticket, name='open_maintenance_ticket'),
-    path('manage/maintenance/<int:ticket_id>/resolve/', resolve_maintenance_ticket,name='resolve_maintenance_ticket'),
+    path("manage/returns/", returns_manage_view, name="manage_returns"),
+    path("manage/returns/process/", process_unit_return, name="process_unit_return"),
+    path("manage/maintenance/", maintenance_manage_view, name="manage_maintenance"),
+    path(
+        "manage/maintenance/open/",
+        open_maintenance_ticket,
+        name="open_maintenance_ticket",
+    ),
+    path(
+        "manage/maintenance/<int:ticket_id>/resolve/",
+        resolve_maintenance_ticket,
+        name="resolve_maintenance_ticket",
+    ),
+    path(route="manage/audit", view=audit, name="audit"),
+    path(route="manage/settings", view=settings, name="settings"),
 ]
