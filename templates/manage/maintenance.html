@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-6 max-w-7xl">
+    <div class="mb-6 border-b pb-4 flex justify-between items-center">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-800">Maintenance & Reconciliation</h1>
+            <p class="text-sm text-gray-500">Track asset maintenance work orders and view live inventory status reconciliation counts.</p>
+        </div>
+        <button onclick="document.getElementById('ticketModal').classList.remove('hidden')" class="bg-amber-600 hover:bg-amber-700 text-white font-medium px-4 py-2 rounded-lg text-sm shadow-sm">
+            Open Maintenance Ticket
+        </button>
+    </div>
+
+    <!-- Inventory Reconciliation Stat Cards (A6 Equation) -->
+    <div class="grid grid-cols-2 md:grid-cols-6 gap-3 mb-6">
+        <div class="bg-white p-4 border rounded-xl shadow-sm text-center">
+            <div class="text-xs font-bold text-gray-500 uppercase">Total Units</div>
+            <div class="text-2xl font-bold text-gray-900 mt-1">{{ audit.total }}</div>
+        </div>
+        <div class="bg-white p-4 border rounded-xl shadow-sm text-center border-l-4 border-l-emerald-500">
+            <div class="text-xs font-bold text-emerald-600 uppercase">Available</div>
+            <div class="text-2xl font-bold text-gray-900 mt-1">{{ audit.available }}</div>
+        </div>
+        <div class="bg-white p-4 border rounded-xl shadow-sm text-center border-l-4 border-l-yellow-500">
+            <div class="text-xs font-bold text-yellow-600 uppercase">Reserved</div>
+            <div class="text-2xl font-bold text-gray-900 mt-1">{{ audit.reserved }}</div>
+        </div>
+        <div class="bg-white p-4 border rounded-xl shadow-sm text-center border-l-4 border-l-blue-500">
+            <div class="text-xs font-bold text-blue-600 uppercase">Issued</div>
+            <div class="text-2xl font-bold text-gray-900 mt-1">{{ audit.issued }}</div>
+        </div>
+        <div class="bg-white p-4 border rounded-xl shadow-sm text-center border-l-4 border-l-amber-500">
+            <div class="text-xs font-bold text-amber-600 uppercase">Maintenance</div>
+            <div class="text-2xl font-bold text-gray-900 mt-1">{{ audit.maintenance }}</div>
+        </div>
+        <div class="bg-white p-4 border rounded-xl shadow-sm text-center border-l-4 border-l-gray-500">
+            <div class="text-xs font-bold text-gray-600 uppercase">Retired</div>
+            <div class="text-2xl font-bold text-gray-900 mt-1">{{ audit.retired }}</div>
+        </div>
+    </div>
+
+    <!-- Maintenance Tickets Table -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+        <div class="px-6 py-4 border-b border-gray-200 font-semibold text-gray-800">Maintenance Work Orders</div>
+        <div class="overflow-x-auto">
+            <table class="w-full text-left text-sm">
+                <thead class="bg-gray-50 border-b text-xs font-semibold text-gray-600 uppercase">
+                    <tr>
+                        <th class="px-6 py-3">Ticket ID</th>
+                        <th class="px-6 py-3">Asset Code</th>
+                        <th class="px-6 py-3">Reported Issue</th>
+                        <th class="px-6 py-3">Action Taken</th>
+                        <th class="px-6 py-3">Status</th>
+                        <th class="px-6 py-3 text-right">Resolve Action</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-200">
+                    {% for ticket in tickets %}
+                    <tr class="hover:bg-gray-50/50">
+                        <td class="px-6 py-4 font-mono font-medium text-gray-900">#MNT-{{ ticket.id }}</td>
+                        <td class="px-6 py-4 font-mono font-bold text-gray-900">{{ ticket.unit.asset_code }}</td>
+                        <td class="px-6 py-4 text-gray-700">{{ ticket.issue }}</td>
+                        <td class="px-6 py-4 text-gray-500">{{ ticket.action|default:"---" }}</td>
+                        <td class="px-6 py-4">
+                            {% if ticket.status == MaintenanceStatus.ACTIVE %}
+                                <span class="px-2 py-0.5 bg-amber-100 text-amber-800 text-xs rounded-full font-medium">In Maintenance</span>
+                            {% elif ticket.status == MaintenanceStatus.FINISHED %}
+                                <span class="px-2 py-0.5 bg-emerald-100 text-emerald-800 text-xs rounded-full font-medium">Finished</span>
+                            {% else %}
+                                <span class="px-2 py-0.5 bg-gray-100 text-gray-800 text-xs rounded-full font-medium">Cancelled</span>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4 text-right">
+                            {% if ticket.status == MaintenanceStatus.ACTIVE %}
+                                <form action="{% url 'resolve_maintenance_ticket' ticket.id %}" method="POST" class="inline-flex gap-2">
+                                    {% csrf_token %}
+                                    <input type="text" name="action" placeholder="Describe repair action..." required class="border rounded px-2 py-1 text-xs">
+                                    <button type="submit" name="outcome" value="REPAIR" class="bg-emerald-600 text-white px-2.5 py-1 rounded text-xs hover:bg-emerald-700">Repair & Restock</button>
+                                    <button type="submit" name="outcome" value="RETIRE" class="bg-gray-600 text-white px-2.5 py-1 rounded text-xs hover:bg-gray-700">Retire Unit</button>
+                                </form>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="px-6 py-8 text-center text-gray-500">No maintenance tickets logged.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Open Maintenance Ticket -->
+<div id="ticketModal" class="fixed inset-0 bg-gray-900 bg-opacity-50 hidden flex items-center justify-center z-50 p-4">
+    <div class="bg-white rounded-xl shadow-xl max-w-lg w-full p-6 relative">
+        <h3 class="text-lg font-bold text-gray-900 mb-4">Open Maintenance Ticket</h3>
+        <form action="{% url 'open_maintenance_ticket' %}" method="POST" class="space-y-4">
+            {% csrf_token %}
+            <div>
+                <label class="block text-xs font-semibold text-gray-700 uppercase mb-1">Select Available Unit</label>
+                <select name="unit_id" required class="w-full border rounded-lg p-2.5 text-sm">
+                    {% for unit in eligible_units %}
+                        <option value="{{ unit.id }}">{{ unit.asset_code }} ({{ unit.catalog_item.name }})</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-gray-700 uppercase mb-1">Problem Description</label>
+                <textarea name="issue" rows="3" required class="w-full border rounded-lg p-2.5 text-sm" placeholder="Describe defect or required servicing..."></textarea>
+            </div>
+            <div class="flex justify-end space-x-3 mt-6">
+                <button type="button" onclick="document.getElementById('ticketModal').classList.add('hidden')" class="px-4 py-2 border text-gray-700 rounded-lg text-sm">Cancel</button>
+                <button type="submit" class="px-4 py-2 bg-amber-600 text-white rounded-lg text-sm hover:bg-amber-700">Create Ticket</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
