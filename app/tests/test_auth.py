@@ -260,7 +260,7 @@ class AccessControlTests(TestCase):
     def test_basic_user_cannot_access_category_management(self):
         self.client.force_login(self.user)
 
-        response = self.client.get(reverse("category"))
+        response = self.client.get(reverse("catalogs"))
 
         self.assertRedirects(response, reverse("portal:home"))
 
