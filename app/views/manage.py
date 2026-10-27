@@ -38,10 +38,10 @@ PAGE_ITEMS = 20
 
 
 def _table_paginate(request, queryset):
-    queryset = Paginator(queryset, PAGE_ITEMS).get_page(request.GET.get("page"))
+    page_obj = Paginator(queryset, PAGE_ITEMS).get_page(request.GET.get("page"))
     params = request.GET.copy()
     params.pop("page", None)
-    return queryset, params.urlencode()
+    return page_obj, params.urlencode()
 
 
 def _get_borrow_request(pk):
@@ -584,13 +584,13 @@ def borrow_requests(request):
         if date_to:
             queryset = queryset.filter(created_at__date__lte=date_to)
 
-    queryset, querystring = _table_paginate(request, queryset)
+    page_obj, querystring = _table_paginate(request, queryset)
     return render(
         request,
         "manage/borrow_requests.html",
         {
             "filter_form": filter_form,
-            "queryset": queryset,
+            "page_obj": page_obj,
             "querystring": querystring,
         },
     )
@@ -748,19 +748,27 @@ def settings(request):
     setting, created = SystemSetting.objects.get_or_create(id=1)
 
     if request.method == "POST":
-        old_borrow_days = setting.max_borrow_days
+        old_borrow_quantity, old_borrow_days = (
+            setting.max_borrow_quantity,
+            setting.max_borrow_days,
+        )
 
         form = forms.SystemSettingForm(request.POST, instance=setting)
         if form.is_valid():
             form.save()
 
-            message = f"{'No existing settings found. Using default ' if created else 'Updated system settings. '} Max Borrow Days: {setting.max_borrow_days}"
+            message = f"{'No existing settings found. Using default ' if created else 'Updated system settings. '} Max Quantity: {setting.max_borrow_quantity}, Max Borrow Days: {setting.max_borrow_days}"
 
             AuditLog.objects.create(
                 user=request.user,
                 action=message,
             )
 
+            if old_borrow_quantity != setting.max_borrow_quantity:
+                messages.success(
+                    request,
+                    f"Updated MAX_BORROW_QUANTITY from {old_borrow_quantity} to {setting.max_borrow_quantity}.",
+                )
             if old_borrow_days != setting.max_borrow_days:
                 messages.success(
                     request,
@@ -882,12 +890,11 @@ def catalogs(request, view="category"):
         messages.success(request, f"Successfully created a new {created}!")
         redirect("catalogs")
 
-    queryset, querystring = _table_paginate(request, queryset)
+    query
 
     context = {
         "view": view,
         "query": queryset,
-        "querystring": querystring,
         "form": form,
         "filter_form": filter_form,
     }
