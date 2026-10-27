@@ -1,143 +1,164 @@
 {% extends "base.html" %}
 
+{% block title %}Loans Management | Campus Equipment System{% endblock %}
+
 {% block content %}
-<div class="container mx-auto px-4 py-6 max-w-7xl">
-    <!-- Header -->
-    <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4">
-        <div>
-            <h1 class="text-2xl font-bold text-gray-800">Loans Management</h1>
-            <p class="text-sm text-gray-500">Track active borrowings, approve requests, and monitor return schedules.</p>
-        </div>
-        <button onclick="document.getElementById('issueLoanModal').classList.remove('hidden')"
-                class="inline-flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2 rounded-lg shadow-sm transition-colors text-sm">
-            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-            Issue New Loan
-        </button>
-    </div>
+<!-- Page Header -->
+<div class="mb-8 flex flex-wrap items-center justify-between gap-4">
+  <div>
+    <h1 class="text-2xl font-bold tracking-tight text-gray-900 sm:text-3xl">Loans Management</h1>
+    <p class="mt-1 text-sm text-gray-600">Track active borrowings, review requests, and monitor return schedules.</p>
+  </div>
+  <button
+    type="button"
+    onclick="document.getElementById('issueLoanModal').classList.remove('hidden')"
+    class="cursor-pointer inline-flex items-center justify-center gap-2 rounded-md bg-blue-700 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2"
+  >
+    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
+    <span>Issue New Loan</span>
+  </button>
+</div>
 
-    <!-- Filter Tabs -->
-    <div class="flex border-b border-gray-200 mb-6 space-x-4 overflow-x-auto">
-        <a href="?status=all" class="pb-3 px-1 border-b-2 text-sm font-medium {% if current_status == 'all' or not current_status %}border-blue-600 text-blue-600{% else %}border-transparent text-gray-500 hover:text-gray-700{% endif %}">
-            All Loans
-        </a>
-        <a href="?status=active" class="pb-3 px-1 border-b-2 text-sm font-medium {% if current_status == 'active' %}border-blue-600 text-blue-600{% else %}border-transparent text-gray-500 hover:text-gray-700{% endif %}">
-            Active Loans
-        </a>
-        <a href="?status=pending" class="pb-3 px-1 border-b-2 text-sm font-medium {% if current_status == 'pending' %}border-blue-600 text-blue-600{% else %}border-transparent text-gray-500 hover:text-gray-700{% endif %}">
-            Pending Approval
-        </a>
-        <a href="?status=overdue" class="pb-3 px-1 border-b-2 text-sm font-medium {% if current_status == 'overdue' %}border-blue-600 text-blue-600{% else %}border-transparent text-gray-500 hover:text-gray-700{% endif %}">
-            Overdue
-        </a>
-    </div>
+<!-- Filter Tabs -->
+<div class="mb-6 flex border-b border-gray-200 space-x-6 overflow-x-auto">
+  <a
+    href="?filter=active"
+    class="pb-3 border-b-2 text-sm font-medium transition-colors {% if filter_type == 'active' or not filter_type %}border-blue-700 text-blue-700 font-semibold{% else %}border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300{% endif %}"
+  >
+    Active Loans
+  </a>
+  <a
+    href="?filter=overdue"
+    class="pb-3 border-b-2 text-sm font-medium transition-colors {% if filter_type == 'overdue' %}border-blue-700 text-blue-700 font-semibold{% else %}border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300{% endif %}"
+  >
+    Overdue Loans
+  </a>
+  <a
+    href="?filter=returned"
+    class="pb-3 border-b-2 text-sm font-medium transition-colors {% if filter_type == 'returned' %}border-blue-700 text-blue-700 font-semibold{% else %}border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300{% endif %}"
+  >
+    Returned Loans
+  </a>
+</div>
 
-    <!-- Loans Table -->
-    <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-        <div class="overflow-x-auto">
-            <table class="w-full text-left border-collapse">
-                <thead>
-                    <tr class="bg-gray-50 border-b border-gray-200 text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                        <th class="px-6 py-4">Loan ID</th>
-                        <th class="px-6 py-4">Borrower</th>
-                        <th class="px-6 py-4">Item Details</th>
-                        <th class="px-6 py-4">Issue Date</th>
-                        <th class="px-6 py-4">Due Date</th>
-                        <th class="px-6 py-4">Status</th>
-                        <th class="px-6 py-4 text-right">Actions</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-gray-200 text-sm">
-                    {% for loan in loans %}
-                    <tr class="hover:bg-gray-50/50 transition-colors">
-                        <td class="px-6 py-4 font-mono font-medium text-gray-900">#LN-{{ loan.id }}</td>
-                        <td class="px-6 py-4">
-                            <div class="font-medium text-gray-900">{{ loan.borrower_name }}</div>
-                            <div class="text-xs text-gray-500">{{ loan.borrower_email }}</div>
-                        </td>
-                        <td class="px-6 py-4">
-                            <div class="font-medium text-gray-900">{{ loan.item.name }}</div>
-                            <div class="text-xs text-gray-500">Qty: {{ loan.quantity }} | Tag: {{ loan.item.asset_tag }}</div>
-                        </td>
-                        <td class="px-6 py-4 text-gray-600">{{ loan.issue_date|date:"M d, Y" }}</td>
-                        <td class="px-6 py-4 text-gray-600">{{ loan.due_date|date:"M d, Y" }}</td>
-                        <td class="px-6 py-4">
-                            {% if loan.status == 'ACTIVE' %}
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">Active</span>
-                            {% elif loan.status == 'PENDING' %}
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">Pending</span>
-                            {% elif loan.status == 'OVERDUE' %}
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">Overdue</span>
-                            {% elif loan.status == 'RETURNED' %}
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">Returned</span>
-                            {% endif %}
-                        </td>
-                        <td class="px-6 py-4 text-right space-x-2">
-                            {% if loan.status == 'PENDING' %}
-                                <form action="{% url 'approve_loan' loan.id %}" method="POST" class="inline">
-                                    {% csrf_token %}
-                                    <button type="submit" class="text-blue-600 hover:text-blue-900 font-medium text-xs">Approve</button>
-                                </form>
-                            {% endif %}
-                            {% if loan.status == 'ACTIVE' or loan.status == 'OVERDUE' %}
-                                <a href="{% url 'returns_page' %}?loan_id={{ loan.id }}" class="text-emerald-600 hover:text-emerald-900 font-medium text-xs">Process Return</a>
-                            {% endif %}
-                        </td>
-                    </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="7" class="px-6 py-8 text-center text-gray-500">
-                            No loan records found matching the criteria.
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-    </div>
+<!-- Loans Table -->
+<div class="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
+  <div class="overflow-x-auto">
+    <table class="w-full text-left text-sm">
+      <thead class="border-b border-gray-200 bg-gray-50 text-xs font-semibold uppercase tracking-wider text-gray-500">
+        <tr>
+          <th class="px-6 py-3.5">Loan ID</th>
+          <th class="px-6 py-3.5">Borrower</th>
+          <th class="px-6 py-3.5">Equipment Items</th>
+          <th class="px-6 py-3.5">Requested</th>
+          <th class="px-6 py-3.5">Due Date</th>
+          <th class="px-6 py-3.5">Status</th>
+          <th class="px-6 py-3.5 text-right">Action</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-gray-100">
+        {% for loan in loans %}
+        <tr class="transition-colors hover:bg-gray-50/50">
+          <td class="px-6 py-4 font-mono text-xs font-semibold text-gray-900">#LN-{{ loan.pk|default:loan.id }}</td>
+          <td class="px-6 py-4">
+            <div class="font-medium text-gray-900">
+              {% if loan.user %}{{ loan.user.display_name }}{% else %}{{ loan.borrower_name }}{% endif %}
+            </div>
+            <div class="text-xs text-gray-500">
+              {% if loan.user %}{{ loan.user.email }}{% else %}{{ loan.borrower_email }}{% endif %}
+            </div>
+          </td>
+          <td class="px-6 py-4 text-gray-700">
+            {% if loan.items %}
+              {% for it in loan.items.all %}
+                <span class="inline-block">{{ it.catalog_item.name }} <span class="text-xs text-gray-500">(x{{ it.quantity }})</span>{% if not forloop.last %}, {% endif %}</span>
+              {% empty %}
+                <span class="text-xs text-gray-400">---</span>
+              {% endfor %}
+            {% elif loan.item %}
+              {{ loan.item.name }} <span class="text-xs text-gray-500">(x{{ loan.quantity }})</span>
+            {% else %}
+              <span class="text-xs text-gray-400">---</span>
+            {% endif %}
+          </td>
+          <td class="px-6 py-4 text-gray-600">
+            {% if loan.created_at %}{{ loan.created_at|date:"M d, Y" }}{% else %}{{ loan.issue_date|date:"M d, Y" }}{% endif %}
+          </td>
+          <td class="px-6 py-4 text-gray-600">
+            {% if loan.due_at %}{{ loan.due_at|date:"M d, Y" }}{% else %}{{ loan.due_date|date:"M d, Y" }}{% endif %}
+          </td>
+          <td class="px-6 py-4">
+            {% if loan.get_status_display %}
+              {% include "components/borrow_request_status.html" with req=loan %}
+            {% else %}
+              <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium bg-blue-50 text-blue-700">{{ loan.status }}</span>
+            {% endif %}
+          </td>
+          <td class="px-6 py-4 text-right">
+            {% if loan.pk %}
+              <a
+                href="{% url 'borrow_request_review' loan.pk %}"
+                class="cursor-pointer inline-flex items-center justify-center rounded-md border border-gray-300 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 shadow-sm transition hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2"
+              >
+                Review
+              </a>
+            {% endif %}
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="7" class="px-6 py-12 text-center text-sm text-gray-500">
+            No loan records found matching the criteria.
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
 </div>
 
 <!-- Modal: Issue New Loan -->
-<div id="issueLoanModal" class="fixed inset-0 bg-gray-900 bg-opacity-50 hidden flex items-center justify-center z-50 p-4">
-    <div class="bg-white rounded-xl shadow-xl max-w-lg w-full p-6 relative">
-        <div class="flex justify-between items-center mb-4">
-            <h3 class="text-lg font-bold text-gray-900">Issue New Equipment Loan</h3>
-            <button onclick="document.getElementById('issueLoanModal').classList.add('hidden')" class="text-gray-400 hover:text-gray-600">&times;</button>
-        </div>
-        <form action="{% url 'create_loan' %}" method="POST" class="space-y-4">
-            {% csrf_token %}
-            <div>
-                <label class="block text-xs font-semibold text-gray-700 uppercase mb-1">Select Item</label>
-                <select name="item_id" required class="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:ring-blue-500 focus:border-blue-500">
-                    {% for item in available_items %}
-                        <option value="{{ item.id }}">{{ item.name }} (Available: {{ item.available_qty }})</option>
-                    {% endfor %}
-                </select>
-            </div>
-            <div class="grid grid-cols-2 gap-4">
-                <div>
-                    <label class="block text-xs font-semibold text-gray-700 uppercase mb-1">Borrower Name</label>
-                    <input type="text" name="borrower_name" required class="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:ring-blue-500 focus:border-blue-500" placeholder="John Doe">
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold text-gray-700 uppercase mb-1">Borrower Email</label>
-                    <input type="email" name="borrower_email" required class="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:ring-blue-500 focus:border-blue-500" placeholder="john@example.com">
-                </div>
-            </div>
-            <div class="grid grid-cols-2 gap-4">
-                <div>
-                    <label class="block text-xs font-semibold text-gray-700 uppercase mb-1">Quantity</label>
-                    <input type="number" name="quantity" min="1" value="1" required class="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:ring-blue-500 focus:border-blue-500">
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold text-gray-700 uppercase mb-1">Expected Return Date</label>
-                    <input type="date" name="due_date" required class="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:ring-blue-500 focus:border-blue-500">
-                </div>
-            </div>
-            <div class="flex justify-end space-x-3 mt-6">
-                <button type="button" onclick="document.getElementById('issueLoanModal').classList.add('hidden')" class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg text-sm hover:bg-gray-50">Cancel</button>
-                <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700">Submit Loan Request</button>
-            </div>
-        </form>
+<div id="issueLoanModal" onclick="if(event.target === this) this.classList.add('hidden')" class="fixed inset-0 bg-gray-900/50 backdrop-blur-sm hidden flex items-center justify-center z-50 p-4">
+  <div class="bg-white rounded-xl shadow-xl max-w-lg w-full p-6 relative border border-gray-200">
+    <div class="flex justify-between items-center mb-4">
+      <h3 class="text-lg font-bold text-gray-900">Issue New Equipment Loan</h3>
+      <button type="button" onclick="document.getElementById('issueLoanModal').classList.add('hidden')" class="cursor-pointer text-gray-400 hover:text-gray-600 text-xl font-bold">&times;</button>
     </div>
+    <form action="#" method="POST" class="space-y-4">
+      {% csrf_token %}
+      <div>
+        <label class="block text-xs font-semibold uppercase tracking-wide text-gray-700 mb-1.5">Select Item</label>
+        <select name="item_id" required class="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm transition focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2">
+          {% for item in available_items %}
+            <option value="{{ item.id }}">{{ item.name }} (Available: {{ item.available_qty }})</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label class="block text-xs font-semibold uppercase tracking-wide text-gray-700 mb-1.5">Borrower Name</label>
+          <input type="text" name="borrower_name" required class="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm transition focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2" placeholder="John Doe">
+        </div>
+        <div>
+          <label class="block text-xs font-semibold uppercase tracking-wide text-gray-700 mb-1.5">Borrower Email</label>
+          <input type="email" name="borrower_email" required class="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm transition focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2" placeholder="john@example.com">
+        </div>
+      </div>
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label class="block text-xs font-semibold uppercase tracking-wide text-gray-700 mb-1.5">Quantity</label>
+          <input type="number" name="quantity" min="1" value="1" required class="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm transition focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2">
+        </div>
+        <div>
+          <label class="block text-xs font-semibold uppercase tracking-wide text-gray-700 mb-1.5">Expected Return Date</label>
+          <input type="date" name="due_date" required class="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm transition focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2">
+        </div>
+      </div>
+      <div class="flex justify-end gap-3 mt-6 border-t border-gray-100 pt-4">
+        <button type="button" onclick="document.getElementById('issueLoanModal').classList.add('hidden')" class="cursor-pointer inline-flex items-center justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm transition hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2">Cancel</button>
+        <button type="submit" class="cursor-pointer inline-flex items-center justify-center rounded-md bg-blue-700 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2">Submit Loan Request</button>
+      </div>
+    </form>
+  </div>
 </div>
 {% endblock %}

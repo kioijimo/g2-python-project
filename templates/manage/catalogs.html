@@ -3,46 +3,54 @@
 {% block title %}Catalogs | Campus Equipment System{% endblock %}
 
 {% block content %}
-<div class="flex flex-wrap items-start justify-between gap-4">
+<div class="mb-8 flex flex-wrap items-center justify-between gap-4">
   <div>
     <h1 class="text-2xl font-bold tracking-tight text-gray-900 sm:text-3xl">
-      {% if view == 'category' %} Categories {% elif view == 'item' %} Catalog Items {% else %} Equipment Units {% endif %}
+      {% if view == 'category' %}Equipment Categories{% elif view == 'item' %}Catalog Items{% else %}Equipment Units{% endif %}
     </h1>
     <p class="mt-1 text-sm text-gray-600">
-      {% if view == 'category' %} 
-      Create, manage, and browse registered categories.
-      {% elif view == 'item' %} 
-      Create, manage, and browse registered catalog items under categories.
-      {% else %} 
-      Create, manage, and browse registered equipment units of catalog items.
-      {% endif %} 
+      {% if view == 'category' %}
+        Create, manage, and browse registered equipment categories.
+      {% elif view == 'item' %}
+        Create, manage, and browse catalog items registered under each category.
+      {% else %}
+        Create, track, and manage individual physical equipment units and asset codes.
+      {% endif %}
     </p>
   </div>
-  <div class="flex flex-col gap-4 self-end items-end">
-    <div
-      class="flex self-end justify-around gap-2">
-        <a
-          href="{% url 'catalogs_view' 'category' %}"
-          class="cursor-pointer inline-flex items-center justify-center rounded-md px-4 py-2 text-sm font-semibold transition shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 border {% if view != 'category' %} border-gray-300 bg-white hover:bg-gray-100 hover:text-gray-900 {% else %} bg-blue-50 text-blue-700 {% endif %}"
-        >
-          Categories
-        </a>
-        <a
-          href="{% url 'catalogs_view' 'item' %}"
-          class="cursor-pointer inline-flex items-center justify-center rounded-md px-4 py-2 text-sm font-semibold transition shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 border {% if view != 'item' %} border-gray-300 bg-white hover:bg-gray-100 hover:text-gray-900 {% else %}  bg-blue-50 text-blue-700 {% endif %}"
-        >
-          Catalog Items
-        </a>
-        <a
-          href="{% url 'catalogs_view' 'unit' %}"
-          class="cursor-pointer inline-flex items-center justify-center rounded-md px-4 py-2 text-sm font-semibold transition shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 border {% if view != 'unit' %} border-gray-300 bg-white hover:bg-gray-100 hover:text-gray-900 {% else %}  bg-blue-50 text-blue-700 {% endif %}"
-        >
-          Equipment Units
-        </a>
+
+  <div class="flex flex-wrap items-center gap-3">
+    <!-- Segmented Tab Selector -->
+    <div class="inline-flex rounded-lg bg-gray-100 p-1">
+      <a
+        href="{% url 'catalogs_view' 'category' %}"
+        class="cursor-pointer inline-flex items-center rounded-md px-3.5 py-1.5 text-sm font-semibold transition {% if view == 'category' %}bg-white text-gray-900 shadow-sm{% else %}text-gray-600 hover:text-gray-900{% endif %}"
+      >
+        Categories
+      </a>
+      <a
+        href="{% url 'catalogs_view' 'item' %}"
+        class="cursor-pointer inline-flex items-center rounded-md px-3.5 py-1.5 text-sm font-semibold transition {% if view == 'item' %}bg-white text-gray-900 shadow-sm{% else %}text-gray-600 hover:text-gray-900{% endif %}"
+      >
+        Catalog Items
+      </a>
+      <a
+        href="{% url 'catalogs_view' 'unit' %}"
+        class="cursor-pointer inline-flex items-center rounded-md px-3.5 py-1.5 text-sm font-semibold transition {% if view == 'unit' %}bg-white text-gray-900 shadow-sm{% else %}text-gray-600 hover:text-gray-900{% endif %}"
+      >
+        Equipment Units
+      </a>
     </div>
 
-    <button onclick="document.getElementById('form-modal').showModal()" class="items-center rounded-md bg-blue-700 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2">
-      New {% if view == 'category' %} Category {% elif view == 'item' %} Catalog Item {% else %} Equipment Unit {% endif %}</button>
+    <!-- New Action Button -->
+    <button
+      type="button"
+      onclick="document.getElementById('form-modal').showModal()"
+      class="cursor-pointer inline-flex items-center justify-center gap-2 rounded-md bg-blue-700 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2"
+    >
+      <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
+      <span>New {% if view == 'category' %}Category{% elif view == 'item' %}Catalog Item{% else %}Equipment Unit{% endif %}</span>
+    </button>
   </div>
 </div>
 

@@ -77,3 +77,13 @@ class AdminNavigationTests(TestCase):
             "portal:profile",
         ):
             self.assertNotContains(response, reverse(url_name))
+
+    def test_admin_maintenance_page_renders_with_hidden_ticket_modal(self):
+        response = self.client.get(reverse("manage_maintenance"))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Maintenance & Reconciliation")
+        content = response.content.decode()
+        self.assertRegex(
+            content,
+            r'id="ticketModal"[^>]*class="[^"]*\bhidden\b[^"]*"',
+        )

@@ -5,15 +5,26 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="81d952a8-95d4-4479-88b5-4cff86c96015" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/templates/manage/inventory_reconciliation.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/templates/manage/loans.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/templates/manage/maintenance.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/templates/manage/returns.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/templates/components/protected_header.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/urls.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/models.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/tests/test_navigation.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/tests/test_navigation.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/views/manage.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/views/manage.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/auth/login.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/auth/login.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/auth/register.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/auth/register.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/auth_base.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/auth_base.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/base.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/base.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/templates/components/admin_navbar.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/components/admin_navbar.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/manage/returns_list.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/components/user_navbar.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/components/user_navbar.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/manage/audit.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/manage/audit.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/manage/borrow_requests.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/manage/borrow_requests.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/manage/catalogs.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/manage/catalogs.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/manage/dashboard.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/manage/dashboard.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/manage/loans.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/manage/loans.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/manage/maintenance.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/manage/maintenance.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/manage/returns.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/manage/returns.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/manage/settings.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/manage/settings.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -36,93 +47,93 @@
   </component>
   <component name="NextEditCompletionFeaturesState">
     <decayedCancelled>
-      <entry key="MS100" value="1.0" />
-      <entry key="MS500" value="1.0" />
-      <entry key="S2" value="1.0" />
-      <entry key="S5" value="1.0000000000277718" />
-      <entry key="S10" value="1.0000074549161166" />
-      <entry key="S30" value="1.0328231073182537" />
-      <entry key="S60" value="1.316940241061081" />
-      <entry key="M2" value="2.1490053634472366" />
-      <entry key="M5" value="3.900362371344566" />
-      <entry key="M10" value="5.788096689230059" />
-      <entry key="M15" value="7.208500605227101" />
-      <entry key="M30" value="16.34075129512924" />
-      <entry key="H1" value="76.07939684002326" />
-      <entry key="H2" value="215.6369302482959" />
-      <entry key="H4" value="375.56947561751844" />
-      <entry key="D1" value="603.3039910370927" />
-      <entry key="W1" value="654.9556429924006" />
+      <entry key="MS100" value="1.5590951989143877" />
+      <entry key="MS500" value="5.584307610669342" />
+      <entry key="S2" value="11.066222354007895" />
+      <entry key="S5" value="13.634531980381349" />
+      <entry key="S10" value="14.819560649274813" />
+      <entry key="S30" value="21.177922311764643" />
+      <entry key="S60" value="32.82834305911784" />
+      <entry key="M2" value="45.85961205954811" />
+      <entry key="M5" value="58.11852760112269" />
+      <entry key="M10" value="63.24411393709318" />
+      <entry key="M15" value="65.09227670725727" />
+      <entry key="M30" value="67.35850027462239" />
+      <entry key="H1" value="79.15813644659922" />
+      <entry key="H2" value="151.09989924551743" />
+      <entry key="H4" value="301.1985520219207" />
+      <entry key="D1" value="625.899745520658" />
+      <entry key="W1" value="716.5107001453465" />
     </decayedCancelled>
     <decayedSelected>
       <entry key="MS100" value="0.0" />
       <entry key="MS500" value="0.0" />
       <entry key="S2" value="0.0" />
       <entry key="S5" value="0.0" />
-      <entry key="S10" value="7.239924367954699E-288" />
-      <entry key="S30" value="3.0205475348563615E-96" />
-      <entry key="S60" value="2.4537510414111465E-48" />
-      <entry key="M2" value="2.310025866080919E-24" />
-      <entry key="M5" value="1.2874271354293025E-9" />
-      <entry key="M10" value="2.629581474913259E-4" />
-      <entry key="M15" value="0.01804988707648493" />
-      <entry key="M30" value="1.331032469371765" />
-      <entry key="H1" value="11.725852812542739" />
-      <entry key="H2" value="35.01832348900008" />
-      <entry key="H4" value="60.60748735813279" />
-      <entry key="D1" value="95.8036993057029" />
-      <entry key="W1" value="103.63390259886597" />
+      <entry key="S10" value="0.0" />
+      <entry key="S30" value="2.942385440386567E-196" />
+      <entry key="S60" value="2.421795350308973E-98" />
+      <entry key="M2" value="2.2949346062516233E-49" />
+      <entry key="M5" value="1.284056245209801E-19" />
+      <entry key="M10" value="2.6261366817881675E-9" />
+      <entry key="M15" value="8.370696943684999E-6" />
+      <entry key="M30" value="0.028663697681538237" />
+      <entry key="H1" value="1.7207438294259279" />
+      <entry key="H2" value="13.414708547733689" />
+      <entry key="H4" value="37.511914095363906" />
+      <entry key="D1" value="88.4415007107661" />
+      <entry key="W1" value="102.45684319790271" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="0.12762651571339917" />
-      <entry key="MS500" value="0.6625035085226036" />
-      <entry key="S2" value="0.9021879987399714" />
-      <entry key="S5" value="0.9596631490549892" />
-      <entry key="S10" value="0.9796314351809426" />
-      <entry key="S30" value="1.0259214451532206" />
-      <entry key="S60" value="1.3120912143988626" />
-      <entry key="M2" value="2.142142314607277" />
-      <entry key="M5" value="3.8928177285423318" />
-      <entry key="M10" value="5.7828703365060035" />
-      <entry key="M15" value="7.222327182655181" />
-      <entry key="M30" value="17.667239633914033" />
-      <entry key="H1" value="87.79457062150887" />
-      <entry key="H2" value="250.64063703065383" />
-      <entry key="H4" value="436.16458055153316" />
-      <entry key="D1" value="699.1044654905211" />
-      <entry key="W1" value="758.5890480182702" />
+      <entry key="MS100" value="1.4920599389297486" />
+      <entry key="MS500" value="5.532231252394149" />
+      <entry key="S2" value="11.040082774568813" />
+      <entry key="S5" value="13.621646509237129" />
+      <entry key="S10" value="14.812551943402818" />
+      <entry key="S30" value="21.17412190564071" />
+      <entry key="S60" value="32.824827993484185" />
+      <entry key="M2" value="45.85687006614614" />
+      <entry key="M5" value="58.11704118741834" />
+      <entry key="M10" value="63.243287113751826" />
+      <entry key="M15" value="65.09171170843133" />
+      <entry key="M30" value="67.38676984769687" />
+      <entry key="H1" value="80.87716229028624" />
+      <entry key="H2" value="164.5089323481952" />
+      <entry key="H4" value="338.7027640022992" />
+      <entry key="D1" value="714.3382628013243" />
+      <entry key="W1" value="818.9670505071476" />
     </decayedShown>
   </component>
-  <component name="ProjectColorInfo"><![CDATA[{
-  "customColor": "",
-  "associatedIndex": 3
-}]]></component>
+  <component name="ProjectColorInfo">{
+  &quot;customColor&quot;: &quot;&quot;,
+  &quot;associatedIndex&quot;: 3
+}</component>
   <component name="ProjectId" id="3LDQtc0At09MEUeHJvTUVy6uWTW" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "DefaultHtmlFileTemplate": "HTML File",
-    "ModuleVcsDetector.initialDetectionPerformed": "true",
-    "RunOnceActivity.MCP Project settings loaded": "true",
-    "RunOnceActivity.OpenDjangoStructureViewOnStart": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "RunOnceActivity.typescript.service.memoryLimit.init": "true",
-    "codeWithMe.voiceChat.enabledByDefault": "false",
-    "django.template.preview.state": "SHOW_EDITOR",
-    "git-widget-placeholder": "origin/feat/returns-management",
-    "ignore.virus.scanning.warn.message": "true",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.jshint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.jshint": "",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;DefaultHtmlFileTemplate&quot;: &quot;HTML File&quot;,
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.MCP Project settings loaded&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.OpenDjangoStructureViewOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
+    &quot;codeWithMe.voiceChat.enabledByDefault&quot;: &quot;false&quot;,
+    &quot;django.template.preview.state&quot;: &quot;SHOW_EDITOR&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;feat/design-system&quot;,
+    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.jshint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.jshint&quot;: &quot;&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;
   }
-}]]></component>
+}</component>
   <component name="RunManager">
     <configuration name="g2-python-project" type="Python.DjangoServer" factoryName="Django server">
       <module name="g2-python-project" />
