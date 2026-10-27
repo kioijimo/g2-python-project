@@ -774,27 +774,19 @@ def settings(request):
     setting, created = SystemSetting.objects.get_or_create(id=1)
 
     if request.method == "POST":
-        old_borrow_quantity, old_borrow_days = (
-            setting.max_borrow_quantity,
-            setting.max_borrow_days,
-        )
+        old_borrow_days = setting.max_borrow_days
 
         form = forms.SystemSettingForm(request.POST, instance=setting)
         if form.is_valid():
             form.save()
 
-            message = f"{'No existing settings found. Using default ' if created else 'Updated system settings. '} Max Quantity: {setting.max_borrow_quantity}, Max Borrow Days:{setting.max_borrow_days}"
+            message = f"{'No existing settings found. Using default ' if created else 'Updated system settings. '} Max Borrow Days: {setting.max_borrow_days}"
 
             AuditLog.objects.create(
                 user=request.user,
                 action=message,
             )
 
-            if old_borrow_quantity != setting.max_borrow_quantity:
-                messages.success(
-                    request,
-                    f"Updated MAX_BORROW_QUANTITY from {old_borrow_quantity} to {setting.max_borrow_quantity}.",
-                )
             if old_borrow_days != setting.max_borrow_days:
                 messages.success(
                     request,

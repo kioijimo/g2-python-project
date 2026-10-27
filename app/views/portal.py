@@ -113,7 +113,6 @@ def request_create(request):
         {
             "form": form,
             "formset": formset,
-            "max_borrow_quantity": settings.max_borrow_quantity,
             "max_borrow_days": settings.max_borrow_days,
         },
     )

@@ -4,8 +4,10 @@ from django.urls import reverse
 from app.models import CatalogItem, Category, EquipmentUnit
 from app.tests.helpers import (
     create_admin,
+    create_borrow_request,
     create_catalog_item,
     create_category,
+    create_request_item,
     create_units,
     create_user,
 )
@@ -63,6 +65,30 @@ class CatalogTests(TestCase):
 
         self.assertContains(response, "2 available")
         self.assertContains(response, "3 serviceable")
+
+    def test_catalog_shows_requestable_count_for_pending_demand(self):
+        item = create_catalog_item("Laptop", category=self.computing)
+        create_units(item, count=3)
+        pending = create_borrow_request(user=self.user)
+        create_request_item(pending, item, quantity=2)
+
+        response = self.client.get(reverse("portal:catalog"))
+
+        self.assertContains(response, "3 available")
+        self.assertContains(response, "1 requestable")
+        self.assertContains(response, "Request this item")
+
+    def test_catalog_disables_requesting_when_pending_demand_uses_all_units(self):
+        item = create_catalog_item("Laptop", category=self.computing)
+        create_units(item, count=3)
+        pending = create_borrow_request(user=self.user)
+        create_request_item(pending, item, quantity=3)
+
+        response = self.client.get(reverse("portal:catalog"))
+
+        self.assertContains(response, "0 requestable")
+        self.assertContains(response, "All available units are pending review")
+        self.assertNotContains(response, "Request this item")
 
     def test_catalog_searches_by_item_name(self):
         laptop = create_catalog_item("Laptop", category=self.computing)
