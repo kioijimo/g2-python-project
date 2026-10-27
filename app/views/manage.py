@@ -29,6 +29,7 @@ from ..models import (
     ReturnRecord,
     SystemSetting,
     UnitAllocation,
+    User,
 )
 from ..services.approvals import (
     approve_borrow_request,
@@ -1085,3 +1086,102 @@ def catalogs(request, view="category"):
 @admin_required
 def sample(request):
     return render(request, "manage/sample.html")
+
+
+@admin_required
+def account_list(request):
+    search_form = forms.AccountSearchForm(request.GET or None)
+    search_query = (request.GET.get("q") or request.GET.get("search") or "").strip()
+
+    users = User.objects.all().select_related("profile").order_by("email")
+    if search_query:
+        users = users.filter(
+            Q(email__icontains=search_query)
+            | Q(profile__first_name__icontains=search_query)
+            | Q(profile__last_name__icontains=search_query)
+            | Q(profile__contact_number__icontains=search_query)
+        )
+
+    context = {
+        "users": users,
+        "search_form": search_form,
+        "search_query": search_query,
+        "total_count": users.count(),
+    }
+    return render(request, "manage/account_list.html", context)
+
+
+@admin_required
+def activate_user(request, pk):
+    target_user = get_object_or_404(User, pk=pk)
+    target_user.is_active = True
+    target_user.save()
+
+    record_audit(
+        request.user,
+        f"Activated user account '{target_user.email}' (ID #{target_user.id}).",
+    )
+    messages.success(request, f"Account '{target_user.email}' has been activated.")
+    return redirect("account_list")
+
+
+@admin_required
+def deactivate_user(request, pk):
+    target_user = get_object_or_404(User, pk=pk)
+
+    if target_user.id == request.user.id:
+        messages.error(request, "You cannot deactivate your own administrator account.")
+        return redirect("account_list")
+
+    target_user.is_active = False
+    target_user.save()
+
+    record_audit(
+        request.user,
+        f"Deactivated user account '{target_user.email}' (ID #{target_user.id}).",
+    )
+    messages.success(request, f"Account '{target_user.email}' has been deactivated.")
+    return redirect("account_list")
+
+
+@admin_required
+def user_borrowing_history(request, pk):
+    target_user = get_object_or_404(User.objects.select_related("profile"), pk=pk)
+    borrow_requests = (
+        BorrowRequest.objects.filter(user=target_user)
+        .prefetch_related(
+            "items__catalog_item",
+            "items__allocations__equipment_unit",
+            "review_records__user",
+        )
+        .order_by("-created_at")
+    )
+
+    active_count = borrow_requests.filter(
+        status__in=[
+            BorrowRequest.BorrowRequestStatus.ISSUED,
+            BorrowRequest.BorrowRequestStatus.PARTIALLY_RETURNED,
+        ]
+    ).count()
+    returned_count = borrow_requests.filter(
+        status=BorrowRequest.BorrowRequestStatus.RETURNED
+    ).count()
+    overdue_count = borrow_requests.filter(
+        status__in=[
+            BorrowRequest.BorrowRequestStatus.ISSUED,
+            BorrowRequest.BorrowRequestStatus.PARTIALLY_RETURNED,
+        ],
+        due_at__lt=timezone.now(),
+    ).count()
+
+    context = {
+        "target_user": target_user,
+        "borrow_requests": borrow_requests,
+        "stats": {
+            "total": borrow_requests.count(),
+            "active": active_count,
+            "returned": returned_count,
+            "overdue": overdue_count,
+        },
+    }
+    return render(request, "manage/user_borrowing_history.html", context)

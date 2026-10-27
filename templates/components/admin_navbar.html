@@ -83,7 +83,20 @@
           <span>Maintenance</span>
         </a>
 
-        <!-- 6. Audit Log -->
+        <!-- 6. Accounts -->
+        <a
+          href="{% url 'account_list' %}"
+          {% if current == 'account_list' or current == 'user_borrowing_history' or 'account' in path %}aria-current="page"{% endif %}
+          class="relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 {% if current == 'account_list' or current == 'user_borrowing_history' or 'account' in path %}bg-blue-50 text-blue-700 font-semibold{% else %}text-gray-700 hover:bg-gray-100 hover:text-gray-900{% endif %}"
+        >
+          {% if current == 'account_list' or current == 'user_borrowing_history' or 'account' in path %}<span class="absolute -left-4 h-6 w-1 rounded-r-full bg-blue-700" aria-hidden="true"></span>{% endif %}
+          <svg class="h-[18px] w-[18px] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+          </svg>
+          <span>Accounts</span>
+        </a>
+
+        <!-- 7. Audit Log -->
         <a
           href="{% url 'audit' %}"
           {% if current == 'audit' %}aria-current="page"{% endif %}
@@ -96,7 +109,7 @@
           <span>Audit Log</span>
         </a>
 
-        <!-- 7. Settings -->
+        <!-- 8. Settings -->
         <a
           href="{% url 'settings' %}"
           {% if current == 'settings' %}aria-current="page"{% endif %}
@@ -152,6 +165,7 @@
       {% elif current == 'borrow_requests' or current == 'borrow_request_review' %}Requests
       {% elif current == 'manage_returns' or 'returns' in path %}Returns
       {% elif current == 'manage_maintenance' or 'maintenance' in path %}Maintenance
+      {% elif current == 'account_list' or current == 'user_borrowing_history' or 'account' in path %}Accounts
       {% elif current == 'audit' %}Audit Log
       {% elif current == 'settings' %}Settings
       {% else %}Admin{% endif %}
@@ -246,6 +260,16 @@
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
         </svg>
         <span>Maintenance</span>
+      </a>
+
+      <a
+        href="{% url 'account_list' %}"
+        class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 {% if current == 'account_list' or current == 'user_borrowing_history' or 'account' in path %}bg-blue-50 text-blue-700 font-semibold{% else %}text-gray-700 hover:bg-gray-100 hover:text-gray-900{% endif %}"
+      >
+        <svg class="h-[18px] w-[18px] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+        </svg>
+        <span>Accounts</span>
       </a>
 
       <a

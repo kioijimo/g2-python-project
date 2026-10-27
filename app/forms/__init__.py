@@ -1,5 +1,6 @@
 from .auth import LoginForm, RegisterForm
 from .manage import (
+    AccountSearchForm,
     AuditLogSearchForm,
     BorrowRequestFilterForm,
     CatalogItemFilterForm,
@@ -29,6 +30,7 @@ from .styling import (
 )
 
 __all__ = [
+    "AccountSearchForm",
     "AuditLogSearchForm",
     "BorrowRequestForm",
     "BorrowRequestItemForm",

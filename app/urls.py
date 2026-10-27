@@ -3,6 +3,10 @@ from django.views.generic import RedirectView
 
 from .views.auth import login_view, logout_view
 from .views.manage import (
+    account_list,
+    activate_user,
+    deactivate_user,
+    user_borrowing_history,
     audit,
     borrow_request_approve,
     borrow_request_reject,
@@ -77,6 +81,22 @@ urlpatterns = [
         "manage/maintenance/<int:ticket_id>/resolve/",
         resolve_maintenance_ticket,
         name="resolve_maintenance_ticket",
+    ),
+    path(route="manage/accounts/", view=account_list, name="account_list"),
+    path(
+        "manage/accounts/<int:pk>/activate/",
+        activate_user,
+        name="activate_user",
+    ),
+    path(
+        "manage/accounts/<int:pk>/deactivate/",
+        deactivate_user,
+        name="deactivate_user",
+    ),
+    path(
+        "manage/accounts/<int:pk>/history/",
+        user_borrowing_history,
+        name="user_borrowing_history",
     ),
     path(route="manage/audit", view=audit, name="audit"),
     path(route="manage/settings", view=settings, name="settings"),

@@ -71,6 +71,20 @@ class BorrowRequestFilterForm(forms.Form):
         apply_widget_styling(self)
 
 
+class AccountSearchForm(forms.Form):
+    q = forms.CharField(
+        required=False,
+        label="Search Users",
+        widget=forms.TextInput(
+            attrs={"placeholder": "Search by email, name, or contact number..."}
+        ),
+    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        apply_widget_styling(self)
+
+
 class AuditLogSearchForm(forms.Form):
     q = forms.CharField(
         required=False,
