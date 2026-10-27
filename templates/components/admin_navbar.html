@@ -223,7 +223,7 @@
 
       <a
         href="{% url 'catalogs' %}"
-        class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 {% if current == 'catalogs' or current == 'catalogs_view' or current == 'catalogs_create' %}bg-blue-50 text-blue-700 font-semibold{% else %}text-gray-700 hover:bg-gray-100 hover:text-gray-900{% endif %}"
+        class="rounded-md px-3 py-1.5 text-sm font-medium transition-colors {% if request.resolver_match.url_name == 'catalogs' or request.resolver_match.url_name == 'catalogs_view' or request.resolver_match.url_name == 'catalogs_edit' or request.resolver_match.url_name == 'catalogs_archive' %} bg-blue-50 text-blue-700 font-semibold {% else %} text-gray-700 hover:bg-gray-100 hover:text-gray-900 {% endif %}"
       >
         <svg class="h-[18px] w-[18px] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />

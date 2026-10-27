@@ -37,8 +37,18 @@ urlpatterns = [
     path("sample/", sample, name="sample"),
     path("portal/", include("app.portal_urls")),
     path("manage/", manage, name="manage"),
-    path(route="manage/catalogs", view=catalogs, name="catalogs"),
+    path(route="manage/catalogs/", view=catalogs, name="catalogs"),
     path(route="manage/catalogs/<str:view>", view=catalogs, name="catalogs_view"),
+    path(
+        route="manage/catalogs/<str:view>/<int:pk>/edit",
+        view=catalogs,
+        name="catalogs_edit",
+    ),
+    path(
+        route="manage/catalogs/<str:view>/<int:pk>/archive",
+        view=catalogs,
+        name="catalogs_archive",
+    ),
     path(route="manage/requests/", view=borrow_requests, name="borrow_requests"),
     path(
         "manage/requests/<int:pk>/",
