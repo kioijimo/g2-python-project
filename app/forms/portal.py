@@ -47,7 +47,7 @@ class ProfileUpdateForm(forms.ModelForm):
         apply_widget_styling(self)
 
 
-class CatalogSearchForm(forms.Form):
+class CatalogFilterForm(forms.Form):
     q = forms.CharField(
         required=False,
         max_length=models.NAME_LENGTH,
@@ -56,9 +56,18 @@ class CatalogSearchForm(forms.Form):
             attrs={"placeholder": "Search by item or category"}
         ),
     )
+    category = forms.ModelChoiceField(
+        required=False,
+        label="Category",
+        queryset=models.Category.objects.none(),
+        empty_label="All categories",
+    )
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.fields["category"].queryset = models.Category.objects.filter(
+            status=models.Category.CategoryStatus.ACTIVE
+        ).order_by("name")
         apply_widget_styling(self)
 
 

@@ -1,3 +1,5 @@
+import csv
+from django.http import HttpResponse
 from datetime import datetime
 
 from dateutil import relativedelta
@@ -28,6 +30,7 @@ from ..models import (
     ReturnRecord,
     SystemSetting,
     UnitAllocation,
+    User,
 )
 from ..services.approvals import (
     approve_borrow_request,
@@ -410,6 +413,99 @@ def resolve_maintenance_ticket(request, ticket_id):
     return redirect("manage_maintenance")
 
 
+
+def _export_loans_csv(queryset):
+    response = HttpResponse(content_type="text/csv")
+    timestamp = timezone.now().strftime("%Y%m%d_%H%M%S")
+    response["Content-Disposition"] = f'attachment; filename="loan_report_{timestamp}.csv"'
+
+    writer = csv.writer(response)
+    writer.writerow([
+        "Loan ID",
+        "Borrower Name",
+        "Borrower Email",
+        "Items Requested",
+        "Allocated Asset Codes",
+        "Status",
+        "Requested At",
+        "Released At",
+        "Due Date",
+    ])
+    for loan in queryset:
+        borrower_name = getattr(loan.user, "display_name", None) or loan.user.get_full_name() or loan.user.username
+        items_desc = "; ".join(f"{item.catalog_item.name} (x{item.quantity})" for item in loan.items.all())
+        asset_codes = []
+        for item in loan.items.all():
+            for alloc in item.allocations.all():
+                asset_codes.append(alloc.equipment_unit.asset_code)
+        asset_codes_str = ", ".join(asset_codes) if asset_codes else "None"
+        released_record = loan.review_records.filter(released_at__isnull=False).first()
+        released_str = (
+            timezone.localtime(released_record.released_at).strftime("%Y-%m-%d %H:%M")
+            if released_record and released_record.released_at
+            else "N/A"
+        )
+        created_str = timezone.localtime(loan.created_at).strftime("%Y-%m-%d %H:%M")
+        due_str = timezone.localtime(loan.due_at).strftime("%Y-%m-%d")
+
+        writer.writerow([
+            f"#{loan.pk}",
+            borrower_name,
+            loan.user.email,
+            items_desc,
+            asset_codes_str,
+            loan.get_status_display(),
+            created_str,
+            released_str,
+            due_str,
+        ])
+    return response
+
+
+def _export_overdue_csv(queryset):
+    response = HttpResponse(content_type="text/csv")
+    timestamp = timezone.now().strftime("%Y%m%d_%H%M%S")
+    response["Content-Disposition"] = f'attachment; filename="overdue_report_{timestamp}.csv"'
+
+    writer = csv.writer(response)
+    writer.writerow([
+        "Loan ID",
+        "Borrower Name",
+        "Borrower Email",
+        "Contact Number",
+        "Items Requested",
+        "Allocated Asset Codes",
+        "Due Date",
+        "Days Overdue",
+        "Status",
+    ])
+    today = timezone.localdate()
+    for loan in queryset:
+        profile = getattr(loan.user, "profile", None)
+        borrower_name = getattr(loan.user, "display_name", None) or loan.user.get_full_name() or loan.user.username
+        contact = getattr(profile, "contact_number", "") or "N/A"
+        items_desc = "; ".join(f"{item.catalog_item.name} (x{item.quantity})" for item in loan.items.all())
+        asset_codes = []
+        for item in loan.items.all():
+            for alloc in item.allocations.all():
+                asset_codes.append(alloc.equipment_unit.asset_code)
+        asset_codes_str = ", ".join(asset_codes) if asset_codes else "None"
+        due_str = timezone.localtime(loan.due_at).strftime("%Y-%m-%d")
+        days = loan.overdue_days(today)
+
+        writer.writerow([
+            f"#{loan.pk}",
+            borrower_name,
+            loan.user.email,
+            contact,
+            items_desc,
+            asset_codes_str,
+            due_str,
+            days,
+            loan.get_status_display(),
+        ])
+    return response
+
 @admin_required
 def manage(request):
     context = {}
@@ -503,6 +599,91 @@ def manage(request):
 
     context["settings"] = SystemSetting.objects.first()
 
+    # Date-Filtered Loan and Overdue Reports logic
+    loan_from = request.GET.get("loan_from", "").strip()
+    loan_to = request.GET.get("loan_to", "").strip()
+    loan_status = request.GET.get("loan_status", "all").strip()
+    report_tab = request.GET.get("report_tab", "loans").strip()
+
+    overdue_from = request.GET.get("overdue_from", "").strip()
+    overdue_to = request.GET.get("overdue_to", "").strip()
+
+    loans_report_qs = (
+        BorrowRequest.objects.filter(
+            status__in=[
+                BorrowRequest.BorrowRequestStatus.ISSUED,
+                BorrowRequest.BorrowRequestStatus.PARTIALLY_RETURNED,
+                BorrowRequest.BorrowRequestStatus.RETURNED,
+            ]
+        )
+        .select_related("user")
+        .prefetch_related(
+            "items__catalog_item",
+            "items__allocations__equipment_unit",
+            "review_records__user",
+        )
+        .order_by("-created_at")
+    )
+    if loan_from:
+        loans_report_qs = loans_report_qs.filter(created_at__date__gte=loan_from)
+    if loan_to:
+        loans_report_qs = loans_report_qs.filter(created_at__date__lte=loan_to)
+    if loan_status and loan_status != "all":
+        try:
+            loans_report_qs = loans_report_qs.filter(status=int(loan_status))
+        except ValueError:
+            pass
+
+    now = timezone.now()
+    overdue_report_qs = (
+        BorrowRequest.objects.filter(
+            status__in=[
+                BorrowRequest.BorrowRequestStatus.ISSUED,
+                BorrowRequest.BorrowRequestStatus.PARTIALLY_RETURNED,
+            ],
+            due_at__lt=now,
+        )
+        .select_related("user")
+        .prefetch_related(
+            "items__catalog_item",
+            "items__allocations__equipment_unit",
+        )
+        .order_by("due_at")
+    )
+    if overdue_from:
+        overdue_report_qs = overdue_report_qs.filter(due_at__date__gte=overdue_from)
+    if overdue_to:
+        overdue_report_qs = overdue_report_qs.filter(due_at__date__lte=overdue_to)
+
+    export_action = request.GET.get("export")
+    if export_action == "loans_csv":
+        return _export_loans_csv(loans_report_qs)
+    elif export_action == "overdue_csv":
+        return _export_overdue_csv(overdue_report_qs)
+
+    today = timezone.localdate()
+    overdue_list = []
+    for req in overdue_report_qs:
+        overdue_list.append({
+            "request": req,
+            "days_overdue": req.overdue_days(today),
+        })
+
+    context["reports"] = {
+        "active_tab": report_tab if report_tab in ("loans", "overdue") else "loans",
+        "loans": loans_report_qs,
+        "loans_count": loans_report_qs.count(),
+        "overdue_list": overdue_list,
+        "overdue_count": len(overdue_list),
+        "filters": {
+            "loan_from": loan_from,
+            "loan_to": loan_to,
+            "loan_status": loan_status,
+            "overdue_from": overdue_from,
+            "overdue_to": overdue_to,
+        },
+    }
+
     return render(request, "manage/home.html", context)
 
 
@@ -538,7 +719,7 @@ def loans_list(request):
 
     return render(
         request,
-        "manage/returns_list.html",
+        "manage/loans.html",
         {
             "loans": loans,
             "filter_type": filter_type,
@@ -996,3 +1177,102 @@ def catalogs(request, view="category", pk=0):
 @admin_required
 def sample(request):
     return render(request, "manage/sample.html")
+
+
+@admin_required
+def account_list(request):
+    search_form = forms.AccountSearchForm(request.GET or None)
+    search_query = (request.GET.get("q") or request.GET.get("search") or "").strip()
+
+    users = User.objects.all().select_related("profile").order_by("email")
+    if search_query:
+        users = users.filter(
+            Q(email__icontains=search_query)
+            | Q(profile__first_name__icontains=search_query)
+            | Q(profile__last_name__icontains=search_query)
+            | Q(profile__contact_number__icontains=search_query)
+        )
+
+    context = {
+        "users": users,
+        "search_form": search_form,
+        "search_query": search_query,
+        "total_count": users.count(),
+    }
+    return render(request, "manage/account_list.html", context)
+
+
+@admin_required
+def activate_user(request, pk):
+    target_user = get_object_or_404(User, pk=pk)
+    target_user.is_active = True
+    target_user.save()
+
+    record_audit(
+        request.user,
+        f"Activated user account '{target_user.email}' (ID #{target_user.id}).",
+    )
+    messages.success(request, f"Account '{target_user.email}' has been activated.")
+    return redirect("account_list")
+
+
+@admin_required
+def deactivate_user(request, pk):
+    target_user = get_object_or_404(User, pk=pk)
+
+    if target_user.id == request.user.id:
+        messages.error(request, "You cannot deactivate your own administrator account.")
+        return redirect("account_list")
+
+    target_user.is_active = False
+    target_user.save()
+
+    record_audit(
+        request.user,
+        f"Deactivated user account '{target_user.email}' (ID #{target_user.id}).",
+    )
+    messages.success(request, f"Account '{target_user.email}' has been deactivated.")
+    return redirect("account_list")
+
+
+@admin_required
+def user_borrowing_history(request, pk):
+    target_user = get_object_or_404(User.objects.select_related("profile"), pk=pk)
+    borrow_requests = (
+        BorrowRequest.objects.filter(user=target_user)
+        .prefetch_related(
+            "items__catalog_item",
+            "items__allocations__equipment_unit",
+            "review_records__user",
+        )
+        .order_by("-created_at")
+    )
+
+    active_count = borrow_requests.filter(
+        status__in=[
+            BorrowRequest.BorrowRequestStatus.ISSUED,
+            BorrowRequest.BorrowRequestStatus.PARTIALLY_RETURNED,
+        ]
+    ).count()
+    returned_count = borrow_requests.filter(
+        status=BorrowRequest.BorrowRequestStatus.RETURNED
+    ).count()
+    overdue_count = borrow_requests.filter(
+        status__in=[
+            BorrowRequest.BorrowRequestStatus.ISSUED,
+            BorrowRequest.BorrowRequestStatus.PARTIALLY_RETURNED,
+        ],
+        due_at__lt=timezone.now(),
+    ).count()
+
+    context = {
+        "target_user": target_user,
+        "borrow_requests": borrow_requests,
+        "stats": {
+            "total": borrow_requests.count(),
+            "active": active_count,
+            "returned": returned_count,
+            "overdue": overdue_count,
+        },
+    }
+    return render(request, "manage/user_borrowing_history.html", context)

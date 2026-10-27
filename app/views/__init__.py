@@ -1,5 +1,9 @@
 from .auth import login_view, logout_view, register_view
 from .manage import (
+    account_list,
+    activate_user,
+    deactivate_user,
+    user_borrowing_history,
     borrow_request_approve,
     borrow_request_reject,
     borrow_request_release,
@@ -20,6 +24,10 @@ from .portal import (
 )
 
 __all__ = [
+    "account_list",
+    "activate_user",
+    "deactivate_user",
+    "user_borrowing_history",
     "catalog",  # For basic users
     "catalogs",  # Admin
     "login_view",

@@ -6,34 +6,56 @@
 <div class="flex flex-wrap items-end justify-between gap-4">
   <div>
     <h1 class="text-2xl font-bold tracking-tight text-gray-900 sm:text-3xl">Catalog</h1>
-    <p class="mt-1 text-sm text-gray-600">Browse active equipment and check current availability.</p>
+    <p class="mt-1 text-sm text-gray-600">Browse active equipment, search by item, and filter by category.</p>
   </div>
 
-  <div class="w-full sm:max-w-sm">
-    <form method="get" class="flex items-end gap-2">
+  <div class="w-full lg:max-w-2xl">
+    <form method="get" class="flex flex-row gap-3 sm:flex-row sm:items-end">
       <div class="flex-1">
-        <label for="{{ search_form.q.id_for_label }}" class="mb-1.5 block text-sm font-medium text-gray-700">
-          {{ search_form.q.label }}
+        <label for="{{ filter_form.q.id_for_label }}" class="mb-1.5 block text-sm font-medium text-gray-700">
+          {{ filter_form.q.label }}
         </label>
-        {{ search_form.q }}
+        {{ filter_form.q }}
+        {% if filter_form.q.errors %}
+        <p class="mt-1 text-xs text-rose-600">{{ filter_form.q.errors.0 }}</p>
+        {% endif %}
       </div>
-      {% include "components/button.html" with text="Search" type="submit" variant="primary" %}
+      <div class="sm:w-48">
+        <label for="{{ filter_form.category.id_for_label }}" class="mb-1.5 block text-sm font-medium text-gray-700">
+          {{ filter_form.category.label }}
+        </label>
+        {{ filter_form.category }}
+        {% if filter_form.category.errors %}
+        <p class="mt-1 text-xs text-rose-600">{{ filter_form.category.errors.0 }}</p>
+        {% endif %}
+      </div>
+      <div class="flex justify-center items-center mt-6">
+        {% include "components/button.html" with text="Search and Filter" type="submit" variant="primary" %}
+      </div>
     </form>
   </div>
 </div>
 
-{% if query %}
+{% if query or selected_category %}
 <div class="mt-4 flex flex-wrap items-center gap-2 text-sm text-gray-600">
-  <span>Results for “{{ query }}”</span>
+  <span>
+    {% if query and selected_category %}
+    Results for “{{ query }}” in {{ selected_category.name }}
+    {% elif query %}
+    Results for “{{ query }}”
+    {% else %}
+    Showing items in “{{ selected_category.name }}”
+    {% endif %}
+  </span>
   <a href="{% url 'portal:catalog' %}" class="font-medium text-blue-700 hover:text-blue-800 hover:underline">
-    Clear search
+    Clear filters
   </a>
 </div>
 {% endif %}
 
-{% if items %}
+{% if page_obj %}
 <div class="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-  {% for item in items %}
+  {% for item in page_obj %}
   <article class="flex flex-col rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
     <div>
       {% include "components/badge.html" with label=item.category.name variant="default" %}
@@ -67,12 +89,20 @@
   </article>
   {% endfor %}
 </div>
+
+{% if page_obj.paginator.num_pages > 1 %}
+<div class="mt-6 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
+  {% include "components/pagination.html" with queryset=page_obj querystring=querystring %}
+</div>
+{% endif %}
 {% else %}
 <div class="mt-6 rounded-xl border border-gray-200 bg-white p-6 text-center shadow-sm sm:p-8">
   <h2 class="text-lg font-semibold text-gray-900">No catalog items found</h2>
   <p class="mt-1 text-sm text-gray-600">
     {% if query %}
-    Try a different item or category name.
+    Try a different search{% if selected_category %} or category{% endif %}.
+    {% elif selected_category %}
+    There are no active catalog items in this category.
     {% else %}
     There are no active catalog items available right now.
     {% endif %}

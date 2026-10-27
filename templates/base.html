@@ -8,12 +8,85 @@
     {% tailwind_css %}
   </head>
 
-  <body class="flex min-h-full flex-col bg-gray-50 font-sans text-gray-900 antialiased">
+  <body class="h-full bg-gray-50 font-sans text-gray-900 antialiased">
     {% include "components/toast.html" %}
-    {% include "components/navbar.html" %}
 
-    <main class="mx-auto w-full max-w-7xl flex-1 px-4 py-8 sm:px-6 lg:px-8">
-      {% block content %}{% endblock %}
-    </main>
+    <div class="flex min-h-full flex-col bg-gray-50 {% if request.user.is_authenticated and request.user.role == 1 %}lg:h-full lg:flex-row lg:overflow-hidden{% endif %}">
+      <!-- Navbar (Sidebar for admin, Top navbar for user portal / guest) -->
+      {% include "components/navbar.html" %}
+
+      <!-- Content Area with Desktop Header for admin -->
+      <div class="flex min-w-0 flex-1 flex-col {% if request.user.is_authenticated and request.user.role == 1 %}lg:h-full lg:overflow-y-auto{% endif %}">
+        {% if request.user.is_authenticated and request.user.role == 1 %}
+          {% include "components/protected_header.html" %}
+        {% endif %}
+
+        <main class="mx-auto w-full max-w-7xl flex-1 px-4 py-8 sm:px-6 lg:px-8">
+          {% block content %}{% endblock %}
+        </main>
+      </div>
+    </div>
+
+    <script>
+      function toggleNavDrawer(open) {
+        var drawer = document.getElementById('nav-drawer');
+        var backdrop = document.getElementById('nav-backdrop');
+        if (!drawer || !backdrop) return;
+        if (open) {
+          drawer.classList.remove('-translate-x-full');
+          backdrop.classList.remove('hidden');
+          document.body.classList.add('overflow-hidden');
+        } else {
+          drawer.classList.add('-translate-x-full');
+          backdrop.classList.add('hidden');
+          document.body.classList.remove('overflow-hidden');
+        }
+      }
+
+      function toggleUserDropdown(event) {
+        if (event) event.stopPropagation();
+        var dropdown = document.getElementById('user-menu-dropdown');
+        var chevron = document.getElementById('user-menu-chevron');
+        var button = document.getElementById('user-menu-button');
+        if (!dropdown) return;
+        var isHidden = dropdown.classList.contains('hidden');
+        if (isHidden) {
+          dropdown.classList.remove('hidden');
+          if (chevron) chevron.classList.add('rotate-180');
+          if (button) button.setAttribute('aria-expanded', 'true');
+        } else {
+          dropdown.classList.add('hidden');
+          if (chevron) chevron.classList.remove('rotate-180');
+          if (button) button.setAttribute('aria-expanded', 'false');
+        }
+      }
+
+      document.addEventListener('click', function(event) {
+        var dropdown = document.getElementById('user-menu-dropdown');
+        var button = document.getElementById('user-menu-button');
+        if (!dropdown || dropdown.classList.contains('hidden')) return;
+        if (button && button.contains(event.target)) return;
+        if (!dropdown.contains(event.target)) {
+          dropdown.classList.add('hidden');
+          var chevron = document.getElementById('user-menu-chevron');
+          if (chevron) chevron.classList.remove('rotate-180');
+          if (button) button.setAttribute('aria-expanded', 'false');
+        }
+      });
+
+      document.addEventListener('keydown', function(event) {
+        if (event.key === 'Escape') {
+          toggleNavDrawer(false);
+          var dropdown = document.getElementById('user-menu-dropdown');
+          if (dropdown && !dropdown.classList.contains('hidden')) {
+            dropdown.classList.add('hidden');
+            var chevron = document.getElementById('user-menu-chevron');
+            var button = document.getElementById('user-menu-button');
+            if (chevron) chevron.classList.remove('rotate-180');
+            if (button) button.setAttribute('aria-expanded', 'false');
+          }
+        }
+      });
+    </script>
   </body>
 </html>

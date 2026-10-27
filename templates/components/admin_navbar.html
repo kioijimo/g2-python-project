@@ -1,105 +1,322 @@
-<header class="border-b border-gray-200 bg-white">
-  <div
-    class="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-4 px-4 py-3 sm:px-6 lg:px-8"
-  >
-    <!-- Left: Brand -->
-    <div class="flex shrink-0 items-center">
-      <a
-        href="{% url 'manage' %}"
-        class="flex items-center gap-2 text-base font-bold text-gray-900 transition hover:text-blue-700"
-      >
-        <span>Campus Equipment System</span>
-      </a>
+{% with current=request.resolver_match.url_name path=request.path %}
+<!-- Desktop Sidebar -->
+<aside class="hidden h-full min-h-0 w-64 shrink-0 flex-col border-r border-gray-200 bg-white lg:flex">
+  <!-- Brand Header -->
+  <div class="flex items-center border-b border-gray-200 px-5 py-[19px]">
+    <a href="{% url 'manage' %}" class="flex items-center focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 rounded-md">
+      <span class="text-base font-bold tracking-tight text-gray-900 transition hover:text-blue-700">
+        Campus Equipment System
+      </span>
+    </a>
+  </div>
+
+  <!-- Navigation Links -->
+  <div class="flex min-h-0 flex-1 flex-col pb-5 pt-7">
+    <div class="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 py-1">
+      <p class="px-3 text-[10px] font-semibold uppercase tracking-[0.18em] text-gray-400">
+        Menu
+      </p>
+      <nav class="mt-2 space-y-1" aria-label="Admin navigation">
+        <!-- 1. Dashboard -->
+        <a
+          href="{% url 'manage' %}"
+          {% if current == 'manage' or current == 'home' %}aria-current="page"{% endif %}
+          class="relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 {% if current == 'manage' or current == 'home' %}bg-blue-50 text-blue-700 font-semibold{% else %}text-gray-700 hover:bg-gray-100 hover:text-gray-900{% endif %}"
+        >
+          {% if current == 'manage' or current == 'home' %}<span class="absolute -left-4 h-6 w-1 rounded-r-full bg-blue-700" aria-hidden="true"></span>{% endif %}
+          <svg class="h-[18px] w-[18px] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM14 5a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1V5zM4 15a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1v-4zM14 15a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z" />
+          </svg>
+          <span>Dashboard</span>
+        </a>
+
+        <!-- 2. Catalogs -->
+        <a
+          href="{% url 'catalogs' %}"
+          {% if current == 'catalogs' or current == 'catalogs_view' or current == 'catalogs_create' %}aria-current="page"{% endif %}
+          class="relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 {% if current == 'catalogs' or current == 'catalogs_view' or current == 'catalogs_create' %}bg-blue-50 text-blue-700 font-semibold{% else %}text-gray-700 hover:bg-gray-100 hover:text-gray-900{% endif %}"
+        >
+          {% if current == 'catalogs' or current == 'catalogs_view' or current == 'catalogs_create' %}<span class="absolute -left-4 h-6 w-1 rounded-r-full bg-blue-700" aria-hidden="true"></span>{% endif %}
+          <svg class="h-[18px] w-[18px] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+          </svg>
+          <span>Catalogs</span>
+        </a>
+
+        <!-- 3. Borrow Requests -->
+        <a
+          href="{% url 'borrow_requests' %}"
+          {% if current == 'borrow_requests' or current == 'borrow_request_review' or current == 'borrow_request_slip' %}aria-current="page"{% endif %}
+          class="relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 {% if current == 'borrow_requests' or current == 'borrow_request_review' or current == 'borrow_request_slip' %}bg-blue-50 text-blue-700 font-semibold{% else %}text-gray-700 hover:bg-gray-100 hover:text-gray-900{% endif %}"
+        >
+          {% if current == 'borrow_requests' or current == 'borrow_request_review' or current == 'borrow_request_slip' %}<span class="absolute -left-4 h-6 w-1 rounded-r-full bg-blue-700" aria-hidden="true"></span>{% endif %}
+          <svg class="h-[18px] w-[18px] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+          </svg>
+          <span>Borrow Requests</span>
+        </a>
+
+        <!-- 4. Returns -->
+        <a
+          href="{% url 'manage_returns' %}"
+          {% if current == 'manage_returns' or 'returns' in path %}aria-current="page"{% endif %}
+          class="relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 {% if current == 'manage_returns' or 'returns' in path %}bg-blue-50 text-blue-700 font-semibold{% else %}text-gray-700 hover:bg-gray-100 hover:text-gray-900{% endif %}"
+        >
+          {% if current == 'manage_returns' or 'returns' in path %}<span class="absolute -left-4 h-6 w-1 rounded-r-full bg-blue-700" aria-hidden="true"></span>{% endif %}
+          <svg class="h-[18px] w-[18px] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
+          </svg>
+          <span>Returns</span>
+        </a>
+
+        <!-- 5. Maintenance -->
+        <a
+          href="{% url 'manage_maintenance' %}"
+          {% if current == 'manage_maintenance' or 'maintenance' in path %}aria-current="page"{% endif %}
+          class="relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 {% if current == 'manage_maintenance' or 'maintenance' in path %}bg-blue-50 text-blue-700 font-semibold{% else %}text-gray-700 hover:bg-gray-100 hover:text-gray-900{% endif %}"
+        >
+          {% if current == 'manage_maintenance' or 'maintenance' in path %}<span class="absolute -left-4 h-6 w-1 rounded-r-full bg-blue-700" aria-hidden="true"></span>{% endif %}
+          <svg class="h-[18px] w-[18px] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+          </svg>
+          <span>Maintenance</span>
+        </a>
+
+        <!-- 6. Accounts -->
+        <a
+          href="{% url 'account_list' %}"
+          {% if current == 'account_list' or current == 'user_borrowing_history' or 'account' in path %}aria-current="page"{% endif %}
+          class="relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 {% if current == 'account_list' or current == 'user_borrowing_history' or 'account' in path %}bg-blue-50 text-blue-700 font-semibold{% else %}text-gray-700 hover:bg-gray-100 hover:text-gray-900{% endif %}"
+        >
+          {% if current == 'account_list' or current == 'user_borrowing_history' or 'account' in path %}<span class="absolute -left-4 h-6 w-1 rounded-r-full bg-blue-700" aria-hidden="true"></span>{% endif %}
+          <svg class="h-[18px] w-[18px] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+          </svg>
+          <span>Accounts</span>
+        </a>
+
+        <!-- 7. Audit Log -->
+        <a
+          href="{% url 'audit' %}"
+          {% if current == 'audit' %}aria-current="page"{% endif %}
+          class="relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 {% if current == 'audit' %}bg-blue-50 text-blue-700 font-semibold{% else %}text-gray-700 hover:bg-gray-100 hover:text-gray-900{% endif %}"
+        >
+          {% if current == 'audit' %}<span class="absolute -left-4 h-6 w-1 rounded-r-full bg-blue-700" aria-hidden="true"></span>{% endif %}
+          <svg class="h-[18px] w-[18px] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+          </svg>
+          <span>Audit Log</span>
+        </a>
+
+        <!-- 8. Settings -->
+        <a
+          href="{% url 'settings' %}"
+          {% if current == 'settings' %}aria-current="page"{% endif %}
+          class="relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 {% if current == 'settings' %}bg-blue-50 text-blue-700 font-semibold{% else %}text-gray-700 hover:bg-gray-100 hover:text-gray-900{% endif %}"
+        >
+          {% if current == 'settings' %}<span class="absolute -left-4 h-6 w-1 rounded-r-full bg-blue-700" aria-hidden="true"></span>{% endif %}
+          <svg class="h-[18px] w-[18px] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
+          </svg>
+          <span>Settings</span>
+        </a>
+      </nav>
     </div>
 
-    <!-- Center: Centered Navlinks -->
-    <nav class="flex flex-1 flex-wrap items-center justify-center gap-2">
-      <!-- 1. Dashboard -->
-      <a
-        href="{% url 'manage' %}"
-        class="rounded-md px-3 py-1.5 text-sm font-medium transition-colors {% if request.resolver_match.url_name == 'manage' or request.resolver_match.url_name == 'home' %} bg-blue-50 text-blue-700 font-semibold {% else %} text-gray-700 hover:bg-gray-100 hover:text-gray-900 {% endif %}"
-      >
-        Dashboard
-      </a>
-
-      <!-- 2. Catalog -->
-      <a
-        href="{% url 'catalogs' %}"
-        class="rounded-md px-3 py-1.5 text-sm font-medium transition-colors {% if request.resolver_match.url_name == 'catalogs' or request.resolver_match.url_name == 'catalogs_view' or request.resolver_match.url_name == 'catalogs_edit' or request.resolver_match.url_name == 'catalogs_archive' %} bg-blue-50 text-blue-700 font-semibold {% else %} text-gray-700 hover:bg-gray-100 hover:text-gray-900 {% endif %}"
-      >
-        Catalogs
-      </a>
-
-      
-      <!-- 2. Loans and Returns -->
-      <a
-        href="{% url 'borrow_requests' %}"
-        class="rounded-md px-3 py-1.5 text-sm font-medium transition-colors {% if request.resolver_match.url_name == 'borrow_requests' or request.resolver_match.url_name == 'process-return' %} bg-blue-50 text-blue-700 font-semibold {% else %} text-gray-700 hover:bg-gray-100 hover:text-gray-900 {% endif %}"
-      >
-        Borrow Requests
-      </a>
-
-      <!-- 3. Returns Management -->
-      <a
-        href="{% url 'manage_returns' %}"
-        class="rounded-md px-3 py-1.5 text-sm font-medium transition-colors
-        {% if request.resolver_match.url_name == 'manage_returns' or 'returns' in request.path %}
-          bg-blue-50 text-blue-700 font-semibold
-        {% else %}
-          text-gray-700 hover:bg-gray-100 hover:text-gray-900
-        {% endif %}"
-      >
-        Returns
-      </a>
-
-      <!-- 4. Maintenance -->
-      <a
-        href="{% url 'manage_maintenance' %}"
-        class="rounded-md px-3 py-1.5 text-sm font-medium transition-colors
-        {% if request.resolver_match.url_name == 'manage_maintenance' or 'maintenance' in request.path %}
-          bg-blue-50 text-blue-700 font-semibold
-        {% else %}
-          text-gray-700 hover:bg-gray-100 hover:text-gray-900
-        {% endif %}"
-      >
-        Maintenance
-      </a>
-
-      <!-- 5. Maintenance -->
-      <a
-        href="{% url 'audit' %}"
-        class="rounded-md px-3 py-1.5 text-sm font-medium transition-colors {% if request.resolver_match.url_name == 'audit' %} bg-blue-50 text-blue-700 font-semibold {% else %} text-gray-700 hover:bg-gray-100 hover:text-gray-900 {% endif %}"
-      >
-        Audit Log
-      </a>
-
-      <!-- 6. Settings -->
-      <a
-        href="{% url 'settings' %}"
-        class="rounded-md px-3 py-1.5 text-sm font-medium transition-colors {% if request.resolver_match.url_name == 'settings' %} bg-blue-50 text-blue-700 font-semibold {% else %} text-gray-700 hover:bg-gray-100 hover:text-gray-900 {% endif %}"
-      >
-        Settings
-      </a>
-    </nav>
-
-    <!-- Right: User Profile & Actions -->
-    <div class="flex shrink-0 items-center gap-3">
-      <div class="hidden text-right sm:block">
-        <p class="text-xs text-gray-500">Signed in as admin</p>
-        <p class="text-sm font-medium text-gray-900">
-          {{ request.user.email }}
-        </p>
-      </div>
-
-      <form method="post" action="{% url 'logout' %}" class="inline">
+    <!-- Pinned Logout -->
+    <div class="shrink-0 border-t border-gray-200 px-4 pt-4">
+      <form method="post" action="{% url 'logout' %}">
         {% csrf_token %}
         <button
           type="submit"
-          class="inline-flex items-center rounded-md border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 shadow-sm transition hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2"
+          class="flex w-full cursor-pointer items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-rose-50 hover:text-rose-700 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2"
         >
-          Log out
+          <svg class="h-[18px] w-[18px] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+          </svg>
+          <span>Log out</span>
         </button>
       </form>
     </div>
   </div>
+</aside>
+
+<!-- Mobile Sticky Top Header -->
+<header class="sticky top-0 z-40 flex h-16 items-center justify-between border-b border-gray-200 bg-white/95 px-4 backdrop-blur lg:hidden">
+  <button
+    type="button"
+    onclick="toggleNavDrawer(true)"
+    class="flex h-10 w-10 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-700 transition-colors hover:bg-gray-100 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2"
+    aria-label="Open navigation menu"
+  >
+    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+    </svg>
+  </button>
+
+  <div class="min-w-0 px-3 text-center">
+    <p class="text-[10px] font-semibold uppercase tracking-wider text-gray-400">
+      Campus Equipment
+    </p>
+    <p class="truncate text-sm font-semibold text-gray-900">
+      {% if current == 'manage' or current == 'home' %}Dashboard
+      {% elif current == 'catalogs' or current == 'catalogs_view' or current == 'catalogs_create' %}Catalogs
+      {% elif current == 'borrow_requests' or current == 'borrow_request_review' %}Requests
+      {% elif current == 'manage_returns' or 'returns' in path %}Returns
+      {% elif current == 'manage_maintenance' or 'maintenance' in path %}Maintenance
+      {% elif current == 'account_list' or current == 'user_borrowing_history' or 'account' in path %}Accounts
+      {% elif current == 'audit' %}Audit Log
+      {% elif current == 'settings' %}Settings
+      {% else %}Admin{% endif %}
+    </p>
+  </div>
+
+  <a
+    href="{% url 'settings' %}"
+    aria-label="Admin settings"
+    class="flex h-9 w-9 items-center justify-center rounded-full bg-blue-700 text-xs font-bold text-white shadow-sm ring-2 ring-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2"
+  >
+    {{ request.user.initials }}
+  </a>
 </header>
+
+<!-- Mobile Slide-out Drawer Dialog -->
+<div id="nav-backdrop" onclick="toggleNavDrawer(false)" class="fixed inset-0 z-40 hidden bg-gray-900/40 backdrop-blur-sm transition-opacity" aria-hidden="true"></div>
+
+<div
+  id="nav-drawer"
+  class="fixed inset-y-0 left-0 z-50 flex w-[286px] max-w-[86vw] -translate-x-full flex-col border-r border-gray-200 bg-white shadow-2xl transition-transform duration-200 ease-in-out"
+  tabindex="-1"
+  aria-label="Mobile Navigation"
+>
+  <!-- Drawer Header (Clean Text, No Logo Badge) -->
+  <div class="flex items-center justify-between border-b border-gray-200 px-5 py-4">
+    <span class="text-base font-bold tracking-tight text-gray-900">Campus Equipment System</span>
+    <button
+      type="button"
+      onclick="toggleNavDrawer(false)"
+      class="flex h-9 w-9 items-center justify-center rounded-lg text-gray-500 hover:bg-gray-100 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-600"
+      aria-label="Close navigation"
+    >
+      <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+      </svg>
+    </button>
+  </div>
+
+  <!-- Drawer Menu Links -->
+  <div class="flex flex-1 flex-col overflow-y-auto px-4 pb-5 pt-6">
+    <p class="px-3 text-[10px] font-semibold uppercase tracking-[0.18em] text-gray-400">
+      Menu
+    </p>
+    <nav class="mt-2 space-y-1">
+      <a
+        href="{% url 'manage' %}"
+        class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 {% if current == 'manage' or current == 'home' %}bg-blue-50 text-blue-700 font-semibold{% else %}text-gray-700 hover:bg-gray-100 hover:text-gray-900{% endif %}"
+      >
+        <svg class="h-[18px] w-[18px] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM14 5a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1V5zM4 15a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1v-4zM14 15a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z" />
+        </svg>
+        <span>Dashboard</span>
+      </a>
+
+      <a
+        href="{% url 'catalogs' %}"
+        class="rounded-md px-3 py-1.5 text-sm font-medium transition-colors {% if request.resolver_match.url_name == 'catalogs' or request.resolver_match.url_name == 'catalogs_view' or request.resolver_match.url_name == 'catalogs_edit' or request.resolver_match.url_name == 'catalogs_archive' %} bg-blue-50 text-blue-700 font-semibold {% else %} text-gray-700 hover:bg-gray-100 hover:text-gray-900 {% endif %}"
+      >
+        <svg class="h-[18px] w-[18px] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+        </svg>
+        <span>Catalogs</span>
+      </a>
+
+      <a
+        href="{% url 'borrow_requests' %}"
+        class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 {% if current == 'borrow_requests' or current == 'borrow_request_review' or current == 'borrow_request_slip' %}bg-blue-50 text-blue-700 font-semibold{% else %}text-gray-700 hover:bg-gray-100 hover:text-gray-900{% endif %}"
+      >
+        <svg class="h-[18px] w-[18px] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+        </svg>
+        <span>Borrow Requests</span>
+      </a>
+
+      <a
+        href="{% url 'manage_returns' %}"
+        class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 {% if current == 'manage_returns' or 'returns' in path %}bg-blue-50 text-blue-700 font-semibold{% else %}text-gray-700 hover:bg-gray-100 hover:text-gray-900{% endif %}"
+      >
+        <svg class="h-[18px] w-[18px] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
+        </svg>
+        <span>Returns</span>
+      </a>
+
+      <a
+        href="{% url 'manage_maintenance' %}"
+        class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 {% if current == 'manage_maintenance' or 'maintenance' in path %}bg-blue-50 text-blue-700 font-semibold{% else %}text-gray-700 hover:bg-gray-100 hover:text-gray-900{% endif %}"
+      >
+        <svg class="h-[18px] w-[18px] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+        </svg>
+        <span>Maintenance</span>
+      </a>
+
+      <a
+        href="{% url 'account_list' %}"
+        class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 {% if current == 'account_list' or current == 'user_borrowing_history' or 'account' in path %}bg-blue-50 text-blue-700 font-semibold{% else %}text-gray-700 hover:bg-gray-100 hover:text-gray-900{% endif %}"
+      >
+        <svg class="h-[18px] w-[18px] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+        </svg>
+        <span>Accounts</span>
+      </a>
+
+      <a
+        href="{% url 'audit' %}"
+        class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 {% if current == 'audit' %}bg-blue-50 text-blue-700 font-semibold{% else %}text-gray-700 hover:bg-gray-100 hover:text-gray-900{% endif %}"
+      >
+        <svg class="h-[18px] w-[18px] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+        </svg>
+        <span>Audit Log</span>
+      </a>
+
+      <a
+        href="{% url 'settings' %}"
+        class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 {% if current == 'settings' %}bg-blue-50 text-blue-700 font-semibold{% else %}text-gray-700 hover:bg-gray-100 hover:text-gray-900{% endif %}"
+      >
+        <svg class="h-[18px] w-[18px] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
+        </svg>
+        <span>Settings</span>
+      </a>
+    </nav>
+
+    <!-- Drawer Footer -->
+    <div class="mt-auto border-t border-gray-200 pt-4">
+      <div class="mb-3 flex items-center gap-3 px-2">
+        <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-blue-700 text-xs font-bold text-white shadow-sm ring-2 ring-blue-100">
+          {{ request.user.initials }}
+        </span>
+        <div class="min-w-0">
+          <p class="truncate text-xs font-semibold text-gray-900">{{ request.user.display_name }}</p>
+          <p class="truncate text-[10px] text-gray-500">Signed in as admin</p>
+        </div>
+      </div>
+      <form method="post" action="{% url 'logout' %}">
+        {% csrf_token %}
+        <button
+          type="submit"
+          class="flex w-full cursor-pointer items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-rose-50 hover:text-rose-700 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2"
+        >
+          <svg class="h-[18px] w-[18px] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+          </svg>
+          <span>Log out</span>
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endwith %}
