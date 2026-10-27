@@ -6,7 +6,7 @@ from .manage import (
     borrow_request_review,
     borrow_request_slip,
     borrow_requests,
-    category,
+    catalogs,
     manage,
     sample,
 )
@@ -20,8 +20,8 @@ from .portal import (
 )
 
 __all__ = [
-    "catalog",
-    "category",
+    "catalog",  # For basic users
+    "catalogs",  # Admin
     "login_view",
     "logout_view",
     "manage",

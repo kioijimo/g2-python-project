@@ -10,7 +10,7 @@ from .views.manage import (
     borrow_request_review,
     borrow_request_slip,
     borrow_requests,
-    category,
+    catalogs,
     loans_list,
     maintenance_manage_view,
     manage,
@@ -26,14 +26,15 @@ from .views.manage import (
 urlpatterns = [
     path("login/", login_view, name="login"),
     path("logout/", logout_view, name="logout"),
-    path("manage/", manage, name="manage"),
     path(
         "admin/",
         RedirectView.as_view(pattern_name="manage", permanent=False),
     ),
-    path("category/", category, name="category"),
     path("sample/", sample, name="sample"),
     path("portal/", include("app.portal_urls")),
+    path("manage/", manage, name="manage"),
+    path(route="manage/catalogs", view=catalogs, name="catalogs"),
+    path(route="manage/catalogs/<str:view>", view=catalogs, name="catalogs_view"),
     path(route="manage/requests/", view=borrow_requests, name="borrow_requests"),
     path(
         "manage/requests/<int:pk>/",

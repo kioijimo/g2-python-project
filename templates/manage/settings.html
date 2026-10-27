@@ -16,7 +16,9 @@ System {% endblock %} {% block content %}
   <form method="POST">
     {% csrf_token %}
 
-    {% include "components/form_field.html" with field=form %}
+    {% for field in form %}
+      <div class="p-2">{{ field.label }}: {{ field }}</div>
+    {% endfor %}
 
     <div class="flex flex-wrap items-center gap-3 border-t border-gray-100 pt-5">
       <button

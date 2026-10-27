@@ -181,6 +181,8 @@ class CatalogItem(models.Model):
         The description of the item brand. Must not exceed `DESCRIPTION_LENGTH` number of characters.
     `status`: int
         The status of the item brand. To see the statuses, check `CatalogItem.CatalogItemStatus` class.
+    `created_at`: datetime
+        The datetime when the catalog item is created.
     """
 
     class CatalogItemStatus(models.IntegerChoices):
@@ -202,6 +204,7 @@ class CatalogItem(models.Model):
     status = models.IntegerField(
         default=CatalogItemStatus.ACTIVE.value, choices=CatalogItemStatus
     )
+    created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return str(self.name)
@@ -221,7 +224,7 @@ class EquipmentUnit(models.Model):
         The inventory status of the equipment unit. To see statuses, check `EquipmentUnit.EquipmentStatus` class.
     `condition`: int
         The condition of the equipment unit. To see conditions, check `EquipmentUnit.EquipmentCondition` class.
-    `created_at`: datetime
+    `acquired_at`: datetime
         The datetime when the unit was acquired.
     """
 

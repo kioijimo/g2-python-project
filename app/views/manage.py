@@ -1,15 +1,17 @@
-from datetime import datetime, timedelta
+from datetime import datetime
 
 from dateutil import relativedelta
 from django.contrib import messages
-from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError
 from django.core.paginator import Paginator
 from django.db import transaction
-from django.db.models import Q
+from django.db.models import Count, Q
+from django.forms.models import ModelForm
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.views.decorators.http import require_POST
+
+from app.services.audit import record_audit
 
 from .. import forms
 from ..decorators import admin_required
@@ -36,10 +38,10 @@ PAGE_ITEMS = 20
 
 
 def _table_paginate(request, queryset):
-    page_obj = Paginator(queryset, PAGE_ITEMS).get_page(request.GET.get("page"))
+    queryset = Paginator(queryset, PAGE_ITEMS).get_page(request.GET.get("page"))
     params = request.GET.copy()
     params.pop("page", None)
-    return page_obj, params.urlencode()
+    return queryset, params.urlencode()
 
 
 def _get_borrow_request(pk):
@@ -72,7 +74,6 @@ def _structure_allocations_from_post(request, items):
     return allocations_by_item
 
 
-@login_required
 @admin_required
 def returns_manage_view(request):
     # Active loans eligible for returns (ISSUED or PARTIALLY_RETURNED)
@@ -100,7 +101,6 @@ def returns_manage_view(request):
     return render(request, "manage/returns.html", context)
 
 
-@login_required
 @admin_required
 @transaction.atomic
 def process_unit_return(request):
@@ -198,7 +198,6 @@ def process_unit_return(request):
     return redirect("manage_returns")
 
 
-@login_required
 @admin_required
 def maintenance_manage_view(request):
     tickets = MaintenanceRecord.objects.select_related("unit", "maintainer").order_by(
@@ -246,7 +245,6 @@ def maintenance_manage_view(request):
     return render(request, "manage/maintenance.html", context)
 
 
-@login_required
 @admin_required
 @transaction.atomic
 def open_maintenance_ticket(request):
@@ -293,7 +291,6 @@ def open_maintenance_ticket(request):
     return redirect("manage_maintenance")
 
 
-@login_required
 @admin_required
 @transaction.atomic
 def resolve_maintenance_ticket(request, ticket_id):
@@ -422,29 +419,6 @@ def manage(request):
     context["settings"] = SystemSetting.objects.first()
 
     return render(request, "manage/home.html", context)
-
-
-@admin_required
-def category(request):
-    context = {}
-
-    catalog_item_form = forms.CategoryItemForm(
-        data=request.POST or None,
-        status=CatalogItem.CatalogItemStatus.ACTIVE,
-    )
-
-    if request.method == "POST" and catalog_item_form.is_valid():
-        catalog_item_form.save()
-
-        catalog_item_form = forms.CategoryItemForm(
-            status=CatalogItem.CatalogItemStatus.ACTIVE
-        )
-
-        messages.success(request, "Added category item successfully.")
-
-    context["forms"] = {"catalog_item": catalog_item_form}
-
-    return render(request, "manage/catalog.html", context)
 
 
 @admin_required
@@ -610,13 +584,13 @@ def borrow_requests(request):
         if date_to:
             queryset = queryset.filter(created_at__date__lte=date_to)
 
-    page_obj, querystring = _table_paginate(request, queryset)
+    queryset, querystring = _table_paginate(request, queryset)
     return render(
         request,
         "manage/borrow_requests.html",
         {
             "filter_form": filter_form,
-            "page_obj": page_obj,
+            "queryset": queryset,
             "querystring": querystring,
         },
     )
@@ -798,6 +772,127 @@ def settings(request):
         form = forms.SystemSettingForm(instance=setting)
 
     return render(request, "manage/settings.html", {"form": form})
+
+
+@admin_required
+def catalogs(request, view="category"):
+    filter_form = None
+    queryset = None
+    data = request.POST or None
+    form = None
+
+    match view.lower():
+        case "category":
+            form = forms.CategoryForm(data)
+        case "item":
+            form = forms.CatalogItemForm(data)
+        case "unit":
+            form = forms.EquipmentUnitForm(data)
+
+    match view.lower():
+        case "category":
+            filter_form = forms.CategoryFilterForm(request.GET)
+            queryset = Category.objects.annotate(
+                item_count=Count("catalogitem")
+            ).order_by("name")
+
+            if request.method == "GET" and filter_form.is_valid():
+                query = filter_form.cleaned_data["q"].strip()
+                status = filter_form.cleaned_data["status"]
+
+                if query:
+                    queryset = queryset.filter(
+                        Q(name__icontains=query) | Q(description__icontains=query)
+                    )
+                if status is not None:
+                    queryset = queryset.filter(status=status)
+        case "item":
+            filter_form = forms.CatalogItemFilterForm(request.GET)
+            queryset = (
+                CatalogItem.objects.select_related("category")
+                .annotate(
+                    total_units=Count("units", distinct=True),
+                    available_units=Count(
+                        "units",
+                        filter=Q(
+                            units__inventory_status=EquipmentUnit.EquipmentStatus.AVAILABLE,
+                            units__condition=EquipmentUnit.EquipmentCondition.FINE,
+                        ),
+                        distinct=True,
+                    ),
+                )
+                .order_by("category__name", "name")
+            )
+
+            if request.method == "GET" and filter_form.is_valid():
+                query = filter_form.cleaned_data["q"].strip()
+                category = filter_form.cleaned_data["category"]
+                status = filter_form.cleaned_data["status"]
+
+                if query:
+                    queryset = queryset.filter(
+                        Q(name__icontains=query)
+                        | Q(description__icontains=query)
+                        | Q(category__name__icontains=query)
+                    )
+                if category:
+                    queryset = queryset.filter(category=category)
+                if status is not None:
+                    queryset = queryset.filter(status=status)
+        case "unit":
+            filter_form = forms.EquipmentUnitFilterForm(request.GET)
+            queryset = EquipmentUnit.objects.select_related(
+                "catalog_item__category"
+            ).order_by("asset_code")
+
+            if request.method == "GET" and filter_form.is_valid():
+                query = filter_form.cleaned_data["q"].strip()
+                category = filter_form.cleaned_data["category"]
+                catalog_item = filter_form.cleaned_data["catalog_item"]
+                inventory_status = filter_form.cleaned_data["inventory_status"]
+
+                if query:
+                    queryset = queryset.filter(
+                        Q(asset_code__icontains=query)
+                        | Q(catalog_item__name__icontains=query)
+                        | Q(catalog_item__category__name__icontains=query)
+                    )
+                if category:
+                    queryset = queryset.filter(catalog_item__category=category)
+                if catalog_item:
+                    queryset = queryset.filter(catalog_item=catalog_item)
+                if inventory_status is not None:
+                    queryset = queryset.filter(inventory_status=inventory_status)
+
+    assert isinstance(form, ModelForm)
+
+    if request.method == "POST" and form.is_valid():
+        form.save()
+
+        created = (
+            view
+            if view == "category"
+            else "catalog item"
+            if view == "item"
+            else "equipment unit"
+        )
+
+        record_audit(request.user, f"Created a new {created}")
+
+        messages.success(request, f"Successfully created a new {created}!")
+        redirect("catalogs")
+
+    queryset, querystring = _table_paginate(request, queryset)
+
+    context = {
+        "view": view,
+        "query": queryset,
+        "querystring": querystring,
+        "form": form,
+        "filter_form": filter_form,
+    }
+
+    return render(request, "manage/catalogs.html", context)
 
 
 @admin_required
