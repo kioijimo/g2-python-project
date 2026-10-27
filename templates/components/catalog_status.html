@@ -1,0 +1,33 @@
+{% if view == 'unit' %}
+  {% if type == 'condition' %}
+    {% with condition=req.get_condition_display %}
+      {% if condition == "Fine" %}
+        {% include "components/badge.html" with label=condition variant="success" %}
+      {% elif condition == "Damaged" %}
+        {% include "components/badge.html" with label=condition variant="danger" %}
+      {% endif %}
+    {% endwith %}
+  {% else %}
+    {% with status=req.get_inventory_status_display %}
+      {% if status == "Available" %}
+        {% include "components/badge.html" with label=status variant="success" %}
+      {% elif status == "Reserved" %}
+        {% include "components/badge.html" with label=status variant="info" %}
+      {% elif status == "Issued" %}
+        {% include "components/badge.html" with label=status variant="user" %}
+      {% elif status == "Maintenance" %}
+        {% include "components/badge.html" with label=status variant="warning" %}
+      {% elif status == "Retired" %}
+        {% include "components/badge.html" with label=status variant="danger" %}
+      {% endif %}
+    {% endwith %}
+  {% endif %}
+{% else %}
+  {% with status=req.get_status_display %}
+    {% if status == "Active" %}
+      {% include "components/badge.html" with label=status variant="success" %}
+    {% elif status == "Archived" %}
+      {% include "components/badge.html" with label=status variant="warning" %}
+    {% endif %}
+  {% endwith %}
+{% endif %}
