@@ -88,7 +88,7 @@ class AuditLogSearchForm(forms.Form):
 class SystemSettingForm(forms.ModelForm):
     class Meta:
         model = models.SystemSetting
-        exclude = ()
+        exclude = ("max_borrow_quantity",)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

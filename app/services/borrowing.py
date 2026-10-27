@@ -6,12 +6,13 @@ from django.utils import timezone
 
 from ..models import (
     BorrowRequest,
+    CatalogItem,
     EquipmentUnit,
     RequestItem,
     SystemSetting,
     UnitAllocation,
 )
-from .catalog import available_units_count
+from .catalog import requestable_units_count
 
 
 def due_date_bounds(settings=None):
@@ -36,36 +37,41 @@ def create_borrow_request(user, purpose, due_at, items):
     if len(items) > 3:
         raise ValidationError("A request can contain at most three catalog items.")
 
-    settings = SystemSetting.load()
-    min_date, max_date = due_date_bounds(settings)
-    due_date = timezone.localtime(due_at).date()
-
-    if not min_date <= due_date <= max_date:
-        raise ValidationError(
-            f"Choose a return date between {min_date.isoformat()} and "
-            f"{max_date.isoformat()}."
+    with transaction.atomic():
+        list(
+            CatalogItem.objects.select_for_update()
+            .filter(pk__in={item.pk for item, _ in items})
+            .order_by("pk")
         )
 
-    selected_ids = set()
+        settings = SystemSetting.load()
+        min_date, max_date = due_date_bounds(settings)
+        due_date = timezone.localtime(due_at).date()
 
-    for catalog_item, quantity in items:
-        if quantity < 1:
-            raise ValidationError("Quantity must be at least one.")
-        if quantity > settings.max_borrow_quantity:
+        if not min_date <= due_date <= max_date:
             raise ValidationError(
-                f"Quantity cannot exceed {settings.max_borrow_quantity} per item."
+                f"Choose a return date between {min_date.isoformat()} and "
+                f"{max_date.isoformat()}."
             )
-        if catalog_item.pk in selected_ids:
-            raise ValidationError("Each catalog item can only be requested once.")
 
-        available = available_units_count(catalog_item)
-        if quantity > available:
-            raise ValidationError(
-                f"Only {available} unit(s) are available for {catalog_item.name}."
-            )
-        selected_ids.add(catalog_item.pk)
+        selected_ids = set()
 
-    with transaction.atomic():
+        for catalog_item, quantity in items:
+            if quantity < 1:
+                raise ValidationError("Quantity must be at least one.")
+            if catalog_item.pk in selected_ids:
+                raise ValidationError(
+                    "Each catalog item can only be requested once."
+                )
+
+            available = requestable_units_count(catalog_item)
+            if quantity > available:
+                raise ValidationError(
+                    f"Only {available} unit(s) are currently available for "
+                    f"{catalog_item.name}."
+                )
+            selected_ids.add(catalog_item.pk)
+
         borrow_request = BorrowRequest.objects.create(
             user=user,
             purpose=purpose,

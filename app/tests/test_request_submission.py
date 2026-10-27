@@ -11,9 +11,12 @@ from app.models import (
     RequestItem,
     UnitAllocation,
 )
+from app.forms import BorrowRequestItemForm
 from app.tests.helpers import (
+    create_borrow_request,
     create_catalog_item,
     create_category,
+    create_request_item,
     create_settings,
     create_units,
     create_user,
@@ -25,7 +28,7 @@ class RequestSubmissionTests(TestCase):
         self.user = create_user()
         self.client.force_login(self.user)
         self.category = create_category("Computing")
-        self.settings = create_settings(max_borrow_quantity=3, max_borrow_days=7)
+        self.settings = create_settings(max_borrow_days=7)
 
     def make_item(self, name, units=1):
         item = create_catalog_item(name, category=self.category)
@@ -161,17 +164,22 @@ class RequestSubmissionTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertFalse(BorrowRequest.objects.exists())
 
-    def test_rejects_quantity_above_configured_maximum(self):
+    def test_allows_quantity_above_old_per_item_limit(self):
         item = self.make_item("Laptop", units=5)
 
         response = self.client.post(
             reverse("portal:request_create"),
-            self.request_data([(item, 4)]),
+            self.request_data([(item, 5)]),
         )
 
-        self.assertEqual(response.status_code, 200)
-        self.assertFalse(BorrowRequest.objects.exists())
-        self.assertContains(response, "Maximum 3 unit")
+        self.assertEqual(response.status_code, 302)
+        borrow_request = BorrowRequest.objects.get(user=self.user)
+        self.assertEqual(borrow_request.items.get().quantity, 5)
+
+    def test_quantity_widget_has_no_maximum(self):
+        form = BorrowRequestItemForm()
+
+        self.assertNotIn("max", form.fields["quantity"].widget.attrs)
 
     def test_rejects_quantity_above_available_units(self):
         item = self.make_item("Laptop", units=1)
@@ -184,6 +192,46 @@ class RequestSubmissionTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertFalse(BorrowRequest.objects.exists())
         self.assertContains(response, "Only 1 unit")
+
+    def test_pending_requests_reduce_requestable_quantity(self):
+        item = self.make_item("Laptop", units=3)
+        other_user = create_user("other@example.com")
+        pending = create_borrow_request(user=other_user)
+        create_request_item(pending, item, quantity=2)
+
+        response = self.client.post(
+            reverse("portal:request_create"),
+            self.request_data([(item, 2)]),
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(BorrowRequest.objects.filter(user=self.user).exists())
+        self.assertContains(response, "Only 1 unit")
+
+        response = self.client.post(
+            reverse("portal:request_create"),
+            self.request_data([(item, 1)]),
+        )
+
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(BorrowRequest.objects.filter(user=self.user).exists())
+
+    def test_cancelled_pending_request_restores_requestable_quantity(self):
+        item = self.make_item("Laptop", units=3)
+        other_user = create_user("other@example.com")
+        pending = create_borrow_request(user=other_user)
+        create_request_item(pending, item, quantity=2)
+
+        pending.status = BorrowRequest.BorrowRequestStatus.CANCELLED
+        pending.save(update_fields=["status"])
+
+        response = self.client.post(
+            reverse("portal:request_create"),
+            self.request_data([(item, 3)]),
+        )
+
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(BorrowRequest.objects.filter(user=self.user).exists())
 
     def test_rejects_due_date_today(self):
         item = self.make_item("Laptop")
@@ -262,6 +310,14 @@ class RequestSubmissionTests(TestCase):
             response.content.decode().count("data-show-row="),
             3,
         )
+
+    def test_form_options_expose_requestable_availability(self):
+        item = self.make_item("Laptop", units=2)
+
+        response = self.client.get(reverse("portal:request_create"))
+
+        self.assertContains(response, 'data-available="2"')
+        self.assertContains(response, item.name)
 
     @patch(
         "app.services.borrowing.RequestItem.objects.bulk_create",

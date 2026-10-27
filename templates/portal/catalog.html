@@ -45,16 +45,21 @@
     <div class="mt-4 flex flex-wrap gap-2">
       {% include "components/badge.html" with label=item.available_count|stringformat:"s"|add:" available" variant="success" %}
       {% include "components/badge.html" with label=item.serviceable_count|stringformat:"s"|add:" serviceable" variant="info" %}
+      {% if item.pending_requested %}
+      {% include "components/badge.html" with label=item.requestable_count|stringformat:"s"|add:" requestable" variant="warning" %}
+      {% endif %}
     </div>
 
     <div class="mt-5 border-t border-gray-100 pt-4">
-      {% if item.available_count %}
+      {% if item.requestable_count %}
       <a
         href="{% url 'portal:request_create' %}?item={{ item.pk }}"
         class="inline-flex items-center justify-center rounded-md bg-blue-700 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2"
       >
         Request this item
       </a>
+      {% elif item.available_count %}
+      <span class="text-sm text-gray-500">All available units are pending review</span>
       {% else %}
       <span class="text-sm text-gray-500">No units currently available</span>
       {% endif %}
