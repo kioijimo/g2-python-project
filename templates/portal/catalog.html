@@ -53,9 +53,9 @@
 </div>
 {% endif %}
 
-{% if items %}
+{% if page_obj %}
 <div class="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-  {% for item in items %}
+  {% for item in page_obj %}
   <article class="flex flex-col rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
     <div>
       {% include "components/badge.html" with label=item.category.name variant="default" %}
@@ -89,6 +89,12 @@
   </article>
   {% endfor %}
 </div>
+
+{% if page_obj.paginator.num_pages > 1 %}
+<div class="mt-6 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
+  {% include "components/pagination.html" with queryset=page_obj querystring=querystring %}
+</div>
+{% endif %}
 {% else %}
 <div class="mt-6 rounded-xl border border-gray-200 bg-white p-6 text-center shadow-sm sm:p-8">
   <h2 class="text-lg font-semibold text-gray-900">No catalog items found</h2>

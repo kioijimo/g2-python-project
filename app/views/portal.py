@@ -1,5 +1,6 @@
 from django.contrib import messages
 from django.core.exceptions import ValidationError
+from django.core.paginator import Paginator
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
 
@@ -11,6 +12,17 @@ from ..services.borrowing import (
     due_at_for_date,
 )
 from ..services.catalog import active_catalog_items
+
+CATALOG_PAGE_ITEMS = 9
+
+
+def _paginate_catalog(request, queryset):
+    page_obj = Paginator(queryset, CATALOG_PAGE_ITEMS).get_page(
+        request.GET.get("page")
+    )
+    params = request.GET.copy()
+    params.pop("page", None)
+    return page_obj, params.urlencode()
 
 
 @basic_user_required
@@ -28,6 +40,14 @@ def catalog(request):
         query = filter_form.cleaned_data["q"].strip()
         selected_category = filter_form.cleaned_data["category"]
 
+    page_obj, querystring = _paginate_catalog(
+        request,
+        active_catalog_items(
+            category=selected_category,
+            search=query,
+        ),
+    )
+
     return render(
         request,
         "portal/catalog.html",
@@ -35,10 +55,8 @@ def catalog(request):
             "filter_form": filter_form,
             "query": query,
             "selected_category": selected_category,
-            "items": active_catalog_items(
-                category=selected_category,
-                search=query,
-            ),
+            "page_obj": page_obj,
+            "querystring": querystring,
         },
     )
 
