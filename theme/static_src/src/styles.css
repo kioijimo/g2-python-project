@@ -1,3 +1,4 @@
+@import url("https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Lexend+Mega:wght@400;500;600;700&display=swap");
 @import "tailwindcss";
 
 /**
@@ -18,4 +19,37 @@
   --color-surface-bg: #f8fafc;
   --color-surface-card: #ffffff;
   --color-surface-border: #e2e8f0;
+
+  --font-bebas: "Bebas Neue", sans-serif;
+  --font-lexend-mega: "Lexend Mega", sans-serif;
+}
+
+@keyframes blobFadeUp {
+  0% {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes blobScaleIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-blob-fade-up {
+  animation: blobFadeUp 1s ease-out forwards;
+}
+
+.animate-blob-scale-in {
+  animation: blobScaleIn 1s ease-out 0.2s forwards;
 }

@@ -1,62 +1,190 @@
 {% extends "auth_base.html" %}
 
-{% block title %}Sign in | Campus Equipment System{% endblock %}
+{% block title %}Sign in | Campus Equipment Borrowing and Inventory System{% endblock %}
 
-{% block container_class %}max-w-md{% endblock %}
+{% block html_class %}h-screen overflow-hidden bg-white{% endblock %}
+{% block body_class %}h-screen w-full overflow-hidden bg-white font-sans text-gray-900 antialiased p-0 m-0{% endblock %}
 
-{% block content %}
-<div class="mb-5 text-center">
-  <h1 class="text-2xl font-bold tracking-tight text-gray-900">Sign in</h1>
-  <p class="mt-1 text-sm text-gray-600">Enter your credentials to access your account</p>
-</div>
+{% block layout %}
+<div class="flex h-screen w-full">
+  <!-- Left panel (brand side): 60% on desktop, hidden on mobile -->
+  <div
+    class="relative hidden w-[60%] md:flex md:items-center md:justify-center overflow-hidden"
+    style="
+      background:
+        radial-gradient(ellipse at 0% 0%,   #60A5FA 0%, transparent 60%),
+        radial-gradient(ellipse at 0% 100%, #3B82F6 0%, transparent 60%),
+        radial-gradient(ellipse at 0% 50%,  #BFDBFE 0%, transparent 25%);
+    "
+  >
+    <!-- Animated Blurred Blobs (Design System Harmonic Glow) -->
+    <div
+      class="pointer-events-none absolute -top-20 -left-20 h-72 w-72 rounded-full bg-blue-300/30 blur-3xl animate-blob-fade-up"
+      aria-hidden="true"
+    ></div>
+    <div
+      class="pointer-events-none absolute bottom-0 left-0 h-80 w-80 rounded-full bg-indigo-200/30 blur-3xl animate-blob-scale-in"
+      aria-hidden="true"
+    ></div>
 
-<div class="rounded-xl border border-gray-200 bg-white/95 p-6 shadow-sm backdrop-blur-sm sm:px-8 sm:py-7">
-  <form method="post" class="space-y-4">
-    {% csrf_token %}
-
-    {% if form.non_field_errors %}
-    <div class="rounded-md border border-rose-200 bg-rose-50 p-3 text-sm text-rose-700" role="alert">
-      {{ form.non_field_errors }}
-    </div>
-    {% endif %}
-
-    <div>
-      <label for="{{ form.username.id_for_label }}" class="mb-1.5 block text-sm font-medium text-gray-700">
-        {{ form.username.label }}
-      </label>
-      {{ form.username }}
-      {% if form.username.errors %}
-      <p class="mt-1 text-xs text-rose-600">{{ form.username.errors.0 }}</p>
-      {% endif %}
-    </div>
-
-    <div>
-      <label for="{{ form.password.id_for_label }}" class="mb-1.5 block text-sm font-medium text-gray-700">
-        {{ form.password.label }}
-      </label>
-      {{ form.password }}
-      {% if form.password.errors %}
-      <p class="mt-1 text-xs text-rose-600">{{ form.password.errors.0 }}</p>
-      {% endif %}
-    </div>
-
-    <div class="pt-2">
-      <button
-        type="submit"
-        class="cursor-pointer inline-flex w-full items-center justify-center rounded-md bg-blue-700 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2"
+    <!-- Centered Content Stack -->
+    <div class="relative z-10 flex flex-col items-center gap-4 text-center px-8 max-w-2xl select-none">
+      <h1
+        class="font-bebas text-[4.25rem] lg:text-[5.5rem] xl:text-[6.5rem] font-bold text-blue-950 tracking-tight leading-none text-center"
+        style="font-family: var(--font-bebas), sans-serif;"
       >
-        Sign in
-      </button>
+        CAMPUS EQUIPMENT
+      </h1>
+      <p
+        class="font-lexend-mega text-blue-700 text-[0.95rem] sm:text-[1.1rem] lg:text-[1.25rem] text-center tracking-widest uppercase -mt-4 lg:-mt-8 font-semibold min-h-[2rem]"
+        style="font-family: var(--font-lexend-mega), sans-serif;"
+      >
+        <span id="typewriter-target"></span><span id="typewriter-cursor" class="inline-block w-2.5 ml-0.5 font-bold animate-pulse">|</span>
+      </p>
     </div>
-  </form>
+  </div>
 
-  <div class="mt-5 border-t border-gray-100 pt-4 text-center">
-    <p class="text-sm text-gray-600">
-      Don't have an account?
-      <a href="{% url 'portal:register' %}" class="cursor-pointer font-medium text-blue-700 hover:text-blue-800 hover:underline">
-        Register
-      </a>
-    </p>
+  <!-- Right panel (form side): full width on mobile, 40% on desktop -->
+  <div class="flex w-full items-center justify-center p-6 md:pr-10 md:w-[40%] bg-white">
+    <div class="w-full max-w-sm md:mr-12 flex flex-col gap-6">
+      <div>
+        <h2 class="text-2xl font-bold tracking-tight text-gray-900">Sign in</h2>
+        <p class="mt-1 text-sm text-gray-600">Enter your credentials to access your account</p>
+      </div>
+
+      <form method="post" action="{% url 'login' %}" class="flex flex-col gap-4">
+        {% csrf_token %}
+
+        {% if form.non_field_errors %}
+        <div class="rounded-md border border-rose-200 bg-rose-50 p-3 text-sm text-rose-700" role="alert">
+          {{ form.non_field_errors }}
+        </div>
+        {% endif %}
+
+        <!-- Email Field -->
+        <div class="flex flex-col gap-1.5">
+          <label for="{{ form.username.id_for_label }}" class="text-sm font-medium text-gray-700">
+            Email
+          </label>
+          <input
+            type="email"
+            name="{{ form.username.name }}"
+            id="{{ form.username.id_for_label }}"
+            value="{{ form.username.value|default:'' }}"
+            placeholder="m@example.com"
+            class="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder-gray-400 shadow-sm transition-colors duration-150 focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600/20"
+            required
+            autofocus
+            autocomplete="email"
+          />
+          {% if form.username.errors %}
+          <p class="text-xs text-rose-600">{{ form.username.errors.0 }}</p>
+          {% endif %}
+        </div>
+
+        <!-- Password Field with Show/Hide Toggle -->
+        <div class="flex flex-col gap-1.5">
+          <label for="{{ form.password.id_for_label }}" class="text-sm font-medium text-gray-700">
+            Password
+          </label>
+          <div class="relative">
+            <input
+              type="password"
+              name="{{ form.password.name }}"
+              id="{{ form.password.id_for_label }}"
+              placeholder="••••••••"
+              class="w-full rounded-md border border-gray-300 bg-white px-3 py-2 pr-10 text-sm text-gray-900 placeholder-gray-400 shadow-sm transition-colors duration-150 focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600/20"
+              required
+              autocomplete="current-password"
+            />
+            <button
+              type="button"
+              id="password-toggle-btn"
+              class="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none p-1 cursor-pointer transition-colors"
+              aria-label="Toggle password visibility"
+            >
+              <!-- Eye open icon -->
+              <svg id="eye-icon" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+              </svg>
+              <!-- Eye off icon (hidden initially) -->
+              <svg id="eye-off-icon" class="h-5 w-5 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18" />
+              </svg>
+            </button>
+          </div>
+          {% if form.password.errors %}
+          <p class="text-xs text-rose-600">{{ form.password.errors.0 }}</p>
+          {% endif %}
+        </div>
+
+        <!-- Submit Button: Design System Primary Button -->
+        <div class="pt-2">
+          <button
+            type="submit"
+            class="cursor-pointer inline-flex w-full items-center justify-center rounded-md bg-blue-700 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2"
+          >
+            Sign in
+          </button>
+        </div>
+      </form>
+
+      <!-- Registration Link -->
+      <div class="border-t border-gray-100 pt-4 text-center">
+        <p class="text-sm text-gray-600">
+          Don't have an account?
+          <a
+            href="{% url 'portal:register' %}"
+            class="font-semibold text-blue-700 hover:text-blue-800 hover:underline cursor-pointer"
+          >
+            Register
+          </a>
+        </p>
+      </div>
+    </div>
   </div>
 </div>
+
+<script>
+  // Typewriter effect for tagline
+  document.addEventListener("DOMContentLoaded", function () {
+    const text = "BORROWING & INVENTORY SYSTEM";
+    const target = document.getElementById("typewriter-target");
+    const cursor = document.getElementById("typewriter-cursor");
+    let index = 0;
+
+    function typeChar() {
+      if (index < text.length) {
+        target.textContent += text.charAt(index);
+        index++;
+        setTimeout(typeChar, 80);
+      } else {
+        // Keep blinking cursor
+        if (cursor) {
+          cursor.classList.add("animate-pulse");
+        }
+      }
+    }
+
+    setTimeout(typeChar, 300);
+
+    // Password visibility toggle
+    const passwordInput = document.getElementById("{{ form.password.id_for_label }}");
+    const toggleBtn = document.getElementById("password-toggle-btn");
+    const eyeIcon = document.getElementById("eye-icon");
+    const eyeOffIcon = document.getElementById("eye-off-icon");
+
+    if (toggleBtn && passwordInput) {
+      toggleBtn.addEventListener("click", function () {
+        const isPassword = passwordInput.getAttribute("type") === "password";
+        passwordInput.setAttribute("type", isPassword ? "text" : "password");
+        if (eyeIcon && eyeOffIcon) {
+          eyeIcon.classList.toggle("hidden", isPassword);
+          eyeOffIcon.classList.toggle("hidden", !isPassword);
+        }
+      });
+    }
+  });
+</script>
 {% endblock %}
