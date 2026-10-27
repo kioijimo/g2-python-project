@@ -15,7 +15,7 @@ from .portal import (
     BorrowRequestForm,
     BorrowRequestItemForm,
     BorrowRequestItemFormSet,
-    CatalogSearchForm,
+    CatalogFilterForm,
     ProfileUpdateForm,
 )
 from .profile import ProfileForm
@@ -39,7 +39,7 @@ __all__ = [
     "EquipmentUnitFilterForm",
     "EquipmentUnitForm",
     "BorrowRequestFilterForm",
-    "CatalogSearchForm",
+    "CatalogFilterForm",
     "CategoryForm",
     "FORM_CHECKBOX_CLASS",
     "FORM_INPUT_CLASS",

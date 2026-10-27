@@ -25,7 +25,7 @@ SERVICEABLE_INVENTORY_STATUSES = (
 )
 
 
-def active_catalog_items(search=""):
+def active_catalog_items(category=None, search=""):
     items = CatalogItem.objects.filter(
         status=CatalogItem.CatalogItemStatus.ACTIVE,
         category__status=Category.CategoryStatus.ACTIVE,
@@ -36,6 +36,9 @@ def active_catalog_items(search=""):
         items = items.filter(
             Q(name__icontains=search) | Q(category__name__icontains=search)
         )
+
+    if category is not None:
+        items = items.filter(category=category)
 
     pending_requested_subquery = (
         RequestItem.objects.filter(

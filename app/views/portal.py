@@ -20,19 +20,25 @@ def portal_home(request):
 
 @basic_user_required
 def catalog(request):
-    search_form = forms.CatalogSearchForm(request.GET or None)
+    filter_form = forms.CatalogFilterForm(request.GET or None)
     query = ""
+    selected_category = None
 
-    if search_form.is_valid():
-        query = search_form.cleaned_data["q"].strip()
+    if filter_form.is_valid():
+        query = filter_form.cleaned_data["q"].strip()
+        selected_category = filter_form.cleaned_data["category"]
 
     return render(
         request,
         "portal/catalog.html",
         {
-            "search_form": search_form,
+            "filter_form": filter_form,
             "query": query,
-            "items": active_catalog_items(query),
+            "selected_category": selected_category,
+            "items": active_catalog_items(
+                category=selected_category,
+                search=query,
+            ),
         },
     )
 
