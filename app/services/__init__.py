@@ -4,7 +4,12 @@ from .borrowing import (
     due_at_for_date,
     due_date_bounds,
 )
-from .catalog import active_catalog_items, available_units_count
+from .catalog import (
+    active_catalog_items,
+    available_units_count,
+    pending_requested_quantity,
+    requestable_units_count,
+)
 
 __all__ = [
     "active_catalog_items",
@@ -13,4 +18,6 @@ __all__ = [
     "create_borrow_request",
     "due_at_for_date",
     "due_date_bounds",
+    "pending_requested_quantity",
+    "requestable_units_count",
 ]
