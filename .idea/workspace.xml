@@ -5,26 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="81d952a8-95d4-4479-88b5-4cff86c96015" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/templates/components/protected_header.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/models.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/tests/test_navigation.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/tests/test_navigation.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/views/manage.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/views/manage.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/auth/login.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/auth/login.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/auth/register.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/auth/register.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/auth_base.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/auth_base.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/base.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/base.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/components/admin_navbar.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/components/admin_navbar.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/components/user_navbar.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/components/user_navbar.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/manage/audit.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/manage/audit.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/manage/borrow_requests.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/manage/borrow_requests.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/manage/catalogs.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/manage/catalogs.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/manage/dashboard.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/manage/dashboard.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/manage/loans.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/manage/loans.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/manage/maintenance.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/manage/maintenance.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/manage/returns.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/manage/returns.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/manage/settings.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/manage/settings.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -113,27 +94,27 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;DefaultHtmlFileTemplate&quot;: &quot;HTML File&quot;,
-    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.MCP Project settings loaded&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.OpenDjangoStructureViewOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
-    &quot;codeWithMe.voiceChat.enabledByDefault&quot;: &quot;false&quot;,
-    &quot;django.template.preview.state&quot;: &quot;SHOW_EDITOR&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;feat/design-system&quot;,
-    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.jshint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.jshint&quot;: &quot;&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "DefaultHtmlFileTemplate": "HTML File",
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "RunOnceActivity.MCP Project settings loaded": "true",
+    "RunOnceActivity.OpenDjangoStructureViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "RunOnceActivity.typescript.service.memoryLimit.init": "true",
+    "codeWithMe.voiceChat.enabledByDefault": "false",
+    "django.template.preview.state": "SHOW_EDITOR",
+    "git-widget-placeholder": "main",
+    "ignore.virus.scanning.warn.message": "true",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.jshint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.jshint": "",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm"
   }
-}</component>
+}]]></component>
   <component name="RunManager">
     <configuration name="g2-python-project" type="Python.DjangoServer" factoryName="Django server">
       <module name="g2-python-project" />
