@@ -25,7 +25,7 @@
       <!-- 2. Catalog -->
       <a
         href="{% url 'catalogs' %}"
-        class="rounded-md px-3 py-1.5 text-sm font-medium transition-colors {% if request.resolver_match.url_name == 'catalogs' or request.resolver_match.url_name == 'catalogs_view' or request.resolver_match.url_name == 'catalogs_create' %} bg-blue-50 text-blue-700 font-semibold {% else %} text-gray-700 hover:bg-gray-100 hover:text-gray-900 {% endif %}"
+        class="rounded-md px-3 py-1.5 text-sm font-medium transition-colors {% if request.resolver_match.url_name == 'catalogs' or request.resolver_match.url_name == 'catalogs_view' or request.resolver_match.url_name == 'catalogs_edit' or request.resolver_match.url_name == 'catalogs_archive' %} bg-blue-50 text-blue-700 font-semibold {% else %} text-gray-700 hover:bg-gray-100 hover:text-gray-900 {% endif %}"
       >
         Catalogs
       </a>

@@ -161,8 +161,6 @@ class Category(models.Model):
     status = models.IntegerField(choices=CategoryStatus)
     created_at = models.DateTimeField(auto_now_add=True)
 
-    objects = models.Manager()
-
     def __str__(self):
         return str(self.name)
 

@@ -8,6 +8,7 @@ from django.db import transaction
 from django.db.models import Count, Q
 from django.forms.models import ModelForm
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import resolve
 from django.utils import timezone
 from django.views.decorators.http import require_POST
 
@@ -72,6 +73,90 @@ def _structure_allocations_from_post(request, items):
         ) or request.POST.getlist("unit_ids")
 
     return allocations_by_item
+
+
+def _filter_catalogs(request, view):
+    filter_form = None
+    queryset = None
+
+    match view.lower():
+        case "category":
+            filter_form = forms.CategoryFilterForm(request.GET)
+            queryset = Category.objects.annotate(
+                item_count=Count("catalogitem")
+            ).order_by("name")
+
+            if request.method == "GET" and filter_form.is_valid():
+                query = filter_form.cleaned_data["q"].strip()
+                status = filter_form.cleaned_data["status"]
+
+                if query:
+                    queryset = queryset.filter(
+                        Q(name__icontains=query) | Q(description__icontains=query)
+                    )
+                if status is not None:
+                    queryset = queryset.filter(status=status)
+        case "item":
+            filter_form = forms.CatalogItemFilterForm(request.GET)
+            queryset = (
+                CatalogItem.objects.select_related("category")
+                .annotate(
+                    total_units=Count("units", distinct=True),
+                    available_units=Count(
+                        "units",
+                        filter=Q(
+                            units__inventory_status=EquipmentUnit.EquipmentStatus.AVAILABLE,
+                            units__condition=EquipmentUnit.EquipmentCondition.FINE,
+                        ),
+                        distinct=True,
+                    ),
+                )
+                .order_by("category__name", "name")
+            )
+
+            if request.method == "GET" and filter_form.is_valid():
+                query = filter_form.cleaned_data["q"].strip()
+                category = filter_form.cleaned_data["category"]
+                status = filter_form.cleaned_data["status"]
+
+                if query:
+                    queryset = queryset.filter(
+                        Q(name__icontains=query)
+                        | Q(description__icontains=query)
+                        | Q(category__name__icontains=query)
+                    )
+                if category:
+                    queryset = queryset.filter(category=category)
+                if status is not None:
+                    queryset = queryset.filter(status=status)
+        case "unit":
+            filter_form = forms.EquipmentUnitFilterForm(request.GET)
+            queryset = EquipmentUnit.objects.select_related(
+                "catalog_item__category"
+            ).order_by("asset_code")
+
+            if request.method == "GET" and filter_form.is_valid():
+                query = filter_form.cleaned_data["q"].strip()
+                category = filter_form.cleaned_data["category"]
+                catalog_item = filter_form.cleaned_data["catalog_item"]
+                inventory_status = filter_form.cleaned_data["inventory_status"]
+
+                if query:
+                    queryset = queryset.filter(
+                        Q(asset_code__icontains=query)
+                        | Q(catalog_item__name__icontains=query)
+                        | Q(catalog_item__category__name__icontains=query)
+                    )
+                if category:
+                    queryset = queryset.filter(catalog_item__category=category)
+                if catalog_item:
+                    queryset = queryset.filter(catalog_item=catalog_item)
+                if inventory_status is not None:
+                    queryset = queryset.filter(inventory_status=inventory_status)
+
+    queryset, querystring = _table_paginate(request, queryset)
+
+    return filter_form, queryset, querystring
 
 
 @admin_required
@@ -783,12 +868,98 @@ def settings(request):
 
 
 @admin_required
-def catalogs(request, view="category"):
-    filter_form = None
-    queryset = None
-    data = request.POST or None
+def catalogs(request, view="category", pk=0):
     form = None
+    target = None
+    url_name = resolve(request.path).url_name
 
+    filter_form, queryset, querystring = _filter_catalogs(request, view)
+
+    if url_name == "catalogs_archive":
+        model_map = {
+            "category": Category,
+            "item": CatalogItem,
+            "unit": EquipmentUnit,
+        }
+        model = model_map.get(view.lower())
+        target = get_object_or_404(model, pk=pk) if model else None
+
+        if request.method == "POST" and target:
+            posted = (
+                view
+                if view == "category"
+                else "catalog item"
+                if view == "item"
+                else "equipment unit"
+            )
+            if view.lower() == "category":
+                target.status = Category.CategoryStatus.ARCHIVED
+                target.save(update_fields=["status"])
+            elif view.lower() == "item":
+                target.status = CatalogItem.CatalogItemStatus.ARCHIVED
+                target.save(update_fields=["status"])
+            elif view.lower() == "unit":
+                target.inventory_status = EquipmentUnit.EquipmentStatus.RETIRED
+                target.save(update_fields=["inventory_status"])
+
+            name = target.name if view != "unit" else target.asset_code
+            record_audit(
+                request.user,
+                f"{'Retired' if view == 'unit' else 'Archived'} '{name}' {posted}",
+            )
+            messages.success(
+                request,
+                f"Successfully {'retired' if view == 'unit' else 'archived'} '{name}' {posted}!",
+            )
+            return redirect("catalogs_view", view=view)
+
+        context = {
+            "view": view,
+            "queryset": queryset,
+            "querystring": querystring,
+            "form": form,
+            "filter_form": filter_form,
+            "target": target,
+        }
+        return render(request, "manage/catalogs.html", context)
+
+    if url_name == "catalogs_edit":
+        data = request.POST or None
+        if view.lower() == "category":
+            target = get_object_or_404(Category, pk=pk)
+            form = forms.CategoryForm(data, instance=target)
+        elif view.lower() == "item":
+            target = get_object_or_404(CatalogItem, pk=pk)
+            form = forms.CatalogItemForm(data, instance=target)
+        elif view.lower() == "unit":
+            target = get_object_or_404(EquipmentUnit, pk=pk)
+            form = forms.EquipmentUnitForm(data, instance=target)
+
+        if request.method == "POST" and isinstance(form, ModelForm) and form.is_valid():
+            target = form.save()
+            posted = (
+                view
+                if view == "category"
+                else "catalog item"
+                if view == "item"
+                else "equipment unit"
+            )
+            name = target.name if view != "unit" else target.asset_code
+            record_audit(request.user, f"Edited '{name}' {posted}")
+            messages.success(request, f"Successfully edited '{name}' {posted}!")
+            return redirect("catalogs_view", view=view)
+
+        context = {
+            "view": view,
+            "queryset": queryset,
+            "querystring": querystring,
+            "form": form,
+            "filter_form": filter_form,
+            "target": target,
+        }
+        return render(request, "manage/catalogs.html", context)
+
+    data = request.POST or None
     match view.lower():
         case "category":
             form = forms.CategoryForm(data)
@@ -797,110 +968,30 @@ def catalogs(request, view="category"):
         case "unit":
             form = forms.EquipmentUnitForm(data)
 
-    match view.lower():
-        case "category":
-            filter_form = forms.CategoryFilterForm(request.GET)
-            queryset = Category.objects.annotate(
-                item_count=Count("catalogitem")
-            ).order_by("name")
-
-            if request.method == "GET" and filter_form.is_valid():
-                query = filter_form.cleaned_data["q"].strip()
-                status = filter_form.cleaned_data["status"]
-
-                if query:
-                    queryset = queryset.filter(
-                        Q(name__icontains=query) | Q(description__icontains=query)
-                    )
-                if status is not None:
-                    queryset = queryset.filter(status=status)
-        case "item":
-            filter_form = forms.CatalogItemFilterForm(request.GET)
-            queryset = (
-                CatalogItem.objects.select_related("category")
-                .annotate(
-                    total_units=Count("units", distinct=True),
-                    available_units=Count(
-                        "units",
-                        filter=Q(
-                            units__inventory_status=EquipmentUnit.EquipmentStatus.AVAILABLE,
-                            units__condition=EquipmentUnit.EquipmentCondition.FINE,
-                        ),
-                        distinct=True,
-                    ),
-                )
-                .order_by("category__name", "name")
-            )
-
-            if request.method == "GET" and filter_form.is_valid():
-                query = filter_form.cleaned_data["q"].strip()
-                category = filter_form.cleaned_data["category"]
-                status = filter_form.cleaned_data["status"]
-
-                if query:
-                    queryset = queryset.filter(
-                        Q(name__icontains=query)
-                        | Q(description__icontains=query)
-                        | Q(category__name__icontains=query)
-                    )
-                if category:
-                    queryset = queryset.filter(category=category)
-                if status is not None:
-                    queryset = queryset.filter(status=status)
-        case "unit":
-            filter_form = forms.EquipmentUnitFilterForm(request.GET)
-            queryset = EquipmentUnit.objects.select_related(
-                "catalog_item__category"
-            ).order_by("asset_code")
-
-            if request.method == "GET" and filter_form.is_valid():
-                query = filter_form.cleaned_data["q"].strip()
-                category = filter_form.cleaned_data["category"]
-                catalog_item = filter_form.cleaned_data["catalog_item"]
-                inventory_status = filter_form.cleaned_data["inventory_status"]
-
-                if query:
-                    queryset = queryset.filter(
-                        Q(asset_code__icontains=query)
-                        | Q(catalog_item__name__icontains=query)
-                        | Q(catalog_item__category__name__icontains=query)
-                    )
-                if category:
-                    queryset = queryset.filter(catalog_item__category=category)
-                if catalog_item:
-                    queryset = queryset.filter(catalog_item=catalog_item)
-                if inventory_status is not None:
-                    queryset = queryset.filter(inventory_status=inventory_status)
-
-    assert isinstance(form, ModelForm)
-
-    if request.method == "POST" and form.is_valid():
-        form.save()
-
-        created = (
+    if request.method == "POST" and isinstance(form, ModelForm) and form.is_valid():
+        target = form.save()
+        posted = (
             view
             if view == "category"
             else "catalog item"
             if view == "item"
             else "equipment unit"
         )
-
-        record_audit(request.user, f"Created a new {created}")
-
-        messages.success(request, f"Successfully created a new {created}!")
-        redirect("catalogs")
-
-    query
+        name = target.name if view != "unit" else target.asset_code
+        record_audit(request.user, f"Created '{name}' {posted}")
+        messages.success(request, f"Successfully created '{name}' {posted}!")
+        return redirect("catalogs_view", view=view)
 
     context = {
         "view": view,
-        "query": queryset,
+        "queryset": queryset,
+        "querystring": querystring,
         "form": form,
         "filter_form": filter_form,
+        "target": target,
     }
 
     return render(request, "manage/catalogs.html", context)
-
 
 @admin_required
 def sample(request):
