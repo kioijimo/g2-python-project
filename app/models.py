@@ -121,7 +121,7 @@ class User(AbstractBaseUser):
                 return clean[:2].upper()
             if len(clean) == 1:
                 return clean.upper()
-        return "CE" 
+        return "CE"
 
     def __str__(self):
         return self.email
@@ -573,8 +573,12 @@ class SystemSetting(models.Model):
         The maximum allowed days the users can keep their borrowed equipment(s) without their BORROW_REQUEST being marked as OVERDUE.
     """
 
-    max_borrow_quantity = models.IntegerField(default=MAX_BORROW_QUANTITY)
-    max_borrow_days = models.IntegerField(default=MAX_BORROW_DAYS)
+    max_borrow_quantity = models.IntegerField(
+        default=MAX_BORROW_QUANTITY, validators=[MinValueValidator(1)]
+    )
+    max_borrow_days = models.IntegerField(
+        default=MAX_BORROW_DAYS, validators=[MinValueValidator(1)]
+    )
 
     @classmethod
     def load(cls):
