@@ -1,10 +1,21 @@
 from .auth import LoginForm, RegisterForm
-from .manage import CategoryForm, CategoryItemForm, UserForm
+from .manage import (
+    AuditLogSearchForm,
+    BorrowRequestFilterForm,
+    CatalogItemFilterForm,
+    CatalogItemForm,
+    CategoryFilterForm,
+    CategoryForm,
+    EquipmentUnitFilterForm,
+    EquipmentUnitForm,
+    SystemSettingForm,
+    UserForm,
+)
 from .portal import (
     BorrowRequestForm,
     BorrowRequestItemForm,
     BorrowRequestItemFormSet,
-    CatalogSearchForm,
+    CatalogFilterForm,
     ProfileUpdateForm,
 )
 from .profile import ProfileForm
@@ -18,12 +29,18 @@ from .styling import (
 )
 
 __all__ = [
+    "AuditLogSearchForm",
     "BorrowRequestForm",
     "BorrowRequestItemForm",
     "BorrowRequestItemFormSet",
-    "CatalogSearchForm",
+    "CatalogItemFilterForm",
+    "CategoryFilterForm",
+    "CatalogItemForm",
+    "EquipmentUnitFilterForm",
+    "EquipmentUnitForm",
+    "BorrowRequestFilterForm",
+    "CatalogFilterForm",
     "CategoryForm",
-    "CategoryItemForm",
     "FORM_CHECKBOX_CLASS",
     "FORM_INPUT_CLASS",
     "FORM_SELECT_CLASS",
@@ -34,5 +51,6 @@ __all__ = [
     "ProfileUpdateForm",
     "RegisterForm",
     "UserForm",
+    "SystemSettingForm",
     "apply_widget_styling",
 ]

@@ -16,7 +16,7 @@
   <!-- Card 1: Available Units -->
   <div class="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
     <div class="flex items-center justify-between">
-      <span class="text-sm font-medium text-gray-500">Available Units</span>
+      <span class="text-xs font-semibold uppercase tracking-wider text-gray-500">Available Units</span>
       <span class="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-50 text-emerald-700">
         <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -32,7 +32,7 @@
   <!-- Card 2: Pending Requests -->
   <div class="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
     <div class="flex items-center justify-between">
-      <span class="text-sm font-medium text-gray-500">Pending Requests</span>
+      <span class="text-xs font-semibold uppercase tracking-wider text-gray-500">Pending Requests</span>
       <span class="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-amber-50 text-amber-700">
         <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -41,14 +41,14 @@
     </div>
     <div class="mt-3">
       <div class="text-3xl font-bold tracking-tight text-gray-900">{{ stats.pending_requests }}</div>
-      <p class="mt-1 text-xs text-gray-500">Awaiting approval</p>
+      <p class="mt-1 text-xs text-gray-500">Awaiting review & approval</p>
     </div>
   </div>
 
   <!-- Card 3: Active Loans -->
   <div class="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
     <div class="flex items-center justify-between">
-      <span class="text-sm font-medium text-gray-500">Active Loans</span>
+      <span class="text-xs font-semibold uppercase tracking-wider text-gray-500">Active Loans</span>
       <span class="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-blue-50 text-blue-700">
         <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 7.5h-.75A2.25 2.25 0 004.5 9.75v7.5a2.25 2.25 0 002.25 2.25h7.5a2.25 2.25 0 002.25-2.25v-7.5a2.25 2.25 0 00-2.25-2.25h-.75m-6 3.75l3 3m0 0l3-3m-3 3V1.5m6 9h.75a2.25 2.25 0 012.25 2.25v7.5a2.25 2.25 0 01-2.25 2.25h-7.5a2.25 2.25 0 01-2.25-2.25v-.75" />
@@ -64,7 +64,7 @@
   <!-- Card 4: Overdue Loans -->
   <div class="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
     <div class="flex items-center justify-between">
-      <span class="text-sm font-medium text-gray-500">Overdue Loans</span>
+      <span class="text-xs font-semibold uppercase tracking-wider text-gray-500">Overdue Loans</span>
       <span class="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-rose-50 text-rose-700">
         <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
@@ -73,7 +73,7 @@
     </div>
     <div class="mt-3">
       <div class="text-3xl font-bold tracking-tight text-rose-600">{{ stats.overdue_loans }}</div>
-      <p class="mt-1 text-xs text-gray-500">Exceeded 7-day borrowing limit</p>
+      <p class="mt-1 text-xs text-gray-500">Exceeded due date</p>
     </div>
   </div>
 </div>
@@ -101,6 +101,308 @@
       <canvas id="categoryUsageChart"></canvas>
     </div>
   </div>
+</div>
+
+<!-- Reports & Analytics Section -->
+<div id="reports-section" class="mt-10 scroll-mt-6">
+  <!-- Section Header and Tab Selector -->
+  <div class="mb-6 flex flex-wrap items-center justify-between gap-4">
+    <div>
+      <h2 class="text-xl font-bold tracking-tight text-gray-900 sm:text-2xl">Reports & Analytics</h2>
+      <p class="mt-1 text-sm text-gray-600">Audit date-filtered loan transactions and active overdue equipment with CSV exports.</p>
+    </div>
+
+    <!-- Segmented Tab Selector -->
+    <div class="inline-flex rounded-lg bg-gray-100 p-1">
+      <a
+        href="?report_tab=loans{% if reports.filters.loan_from %}&loan_from={{ reports.filters.loan_from }}{% endif %}{% if reports.filters.loan_to %}&loan_to={{ reports.filters.loan_to }}{% endif %}{% if reports.filters.loan_status %}&loan_status={{ reports.filters.loan_status }}{% endif %}#reports-section"
+        class="cursor-pointer inline-flex items-center gap-2 rounded-md px-4 py-2 text-sm font-semibold transition {% if reports.active_tab == 'loans' %}bg-white text-gray-900 shadow-sm{% else %}text-gray-600 hover:text-gray-900{% endif %}"
+      >
+        <svg class="h-4 w-4 {% if reports.active_tab == 'loans' %}text-blue-700{% else %}text-gray-400{% endif %}" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+        </svg>
+        <span>Loan Report</span>
+        <span class="ml-1 rounded-full px-2 py-0.5 text-xs {% if reports.active_tab == 'loans' %}bg-blue-50 text-blue-700 font-bold{% else %}bg-gray-200 text-gray-600{% endif %}">
+          {{ reports.loans_count }}
+        </span>
+      </a>
+
+      <a
+        href="?report_tab=overdue{% if reports.filters.overdue_from %}&overdue_from={{ reports.filters.overdue_from }}{% endif %}{% if reports.filters.overdue_to %}&overdue_to={{ reports.filters.overdue_to }}{% endif %}#reports-section"
+        class="cursor-pointer inline-flex items-center gap-2 rounded-md px-4 py-2 text-sm font-semibold transition {% if reports.active_tab == 'overdue' %}bg-white text-gray-900 shadow-sm{% else %}text-gray-600 hover:text-gray-900{% endif %}"
+      >
+        <svg class="h-4 w-4 {% if reports.active_tab == 'overdue' %}text-rose-600{% else %}text-gray-400{% endif %}" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+        </svg>
+        <span>Overdue Report</span>
+        <span class="ml-1 rounded-full px-2 py-0.5 text-xs {% if reports.active_tab == 'overdue' %}bg-rose-50 text-rose-700 font-bold{% else %}bg-gray-200 text-gray-600{% endif %}">
+          {{ reports.overdue_count }}
+        </span>
+      </a>
+    </div>
+  </div>
+
+  {% if reports.active_tab == 'loans' %}
+  <!-- Loan Report Filter Card -->
+  <div class="mb-6 rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+    <form method="get" action="#reports-section" class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 lg:items-end">
+      <input type="hidden" name="report_tab" value="loans" />
+
+      <div>
+        <label for="loan_from" class="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-700">From Date</label>
+        <input
+          type="date"
+          id="loan_from"
+          name="loan_from"
+          value="{{ reports.filters.loan_from }}"
+          class="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm transition focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2"
+        />
+      </div>
+
+      <div>
+        <label for="loan_to" class="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-700">To Date</label>
+        <input
+          type="date"
+          id="loan_to"
+          name="loan_to"
+          value="{{ reports.filters.loan_to }}"
+          class="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm transition focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2"
+        />
+      </div>
+
+      <div>
+        <label for="loan_status" class="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-700">Status</label>
+        <select
+          id="loan_status"
+          name="loan_status"
+          class="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm transition focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2"
+        >
+          <option value="all" {% if reports.filters.loan_status == 'all' or not reports.filters.loan_status %}selected{% endif %}>All Statuses</option>
+          <option value="3" {% if reports.filters.loan_status == '3' %}selected{% endif %}>Issued (Active)</option>
+          <option value="4" {% if reports.filters.loan_status == '4' %}selected{% endif %}>Partially Returned</option>
+          <option value="5" {% if reports.filters.loan_status == '5' %}selected{% endif %}>Returned</option>
+        </select>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <button
+          type="submit"
+          class="cursor-pointer inline-flex flex-1 items-center justify-center rounded-md bg-blue-700 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2"
+        >
+          Filter
+        </button>
+        <a
+          href="?report_tab=loans#reports-section"
+          class="cursor-pointer inline-flex items-center justify-center rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 shadow-sm transition hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2"
+          title="Reset filters"
+        >
+          Reset
+        </a>
+        <a
+          href="?export=loans_csv{% if reports.filters.loan_from %}&loan_from={{ reports.filters.loan_from }}{% endif %}{% if reports.filters.loan_to %}&loan_to={{ reports.filters.loan_to }}{% endif %}{% if reports.filters.loan_status %}&loan_status={{ reports.filters.loan_status }}{% endif %}"
+          class="cursor-pointer inline-flex items-center justify-center gap-1.5 rounded-md bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2"
+        >
+          <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+          </svg>
+          <span>Export CSV</span>
+        </a>
+      </div>
+    </form>
+  </div>
+
+  <!-- Loan Report Data Table -->
+  <div class="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
+    <div class="overflow-x-auto">
+      <table class="w-full text-left text-sm">
+        <thead class="border-b border-gray-200 bg-gray-50 text-xs font-semibold uppercase tracking-wider text-gray-500">
+          <tr>
+            <th class="px-6 py-3.5">Loan ID</th>
+            <th class="px-6 py-3.5">Borrower</th>
+            <th class="px-6 py-3.5">Requested Items</th>
+            <th class="px-6 py-3.5">Allocated Units</th>
+            <th class="px-6 py-3.5">Requested At</th>
+            <th class="px-6 py-3.5">Due Date</th>
+            <th class="px-6 py-3.5">Status</th>
+            <th class="px-6 py-3.5 text-right">Action</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100">
+          {% for loan in reports.loans %}
+          <tr class="transition-colors hover:bg-gray-50/50">
+            <td class="px-6 py-4 font-mono text-xs font-semibold text-gray-900">#{{ loan.pk }}</td>
+            <td class="px-6 py-4">
+              <div class="font-medium text-gray-900">{{ loan.user.display_name }}</div>
+              <div class="text-xs text-gray-500">{{ loan.user.email }}</div>
+            </td>
+            <td class="px-6 py-4 text-gray-700">
+              {% for it in loan.items.all %}
+                <span class="inline-block">{{ it.catalog_item.name }} <span class="text-xs text-gray-500">(x{{ it.quantity }})</span>{% if not forloop.last %}, {% endif %}</span>
+              {% empty %}
+                <span class="text-xs text-gray-400">None</span>
+              {% endfor %}
+            </td>
+            <td class="px-6 py-4 text-xs font-mono text-gray-600">
+              {% with units=loan.items.all %}
+                {% for it in units %}
+                  {% for alloc in it.allocations.all %}
+                    <span class="inline-block rounded bg-gray-100 px-1.5 py-0.5 text-gray-800 font-medium">{{ alloc.equipment_unit.asset_code }}</span>
+                  {% endfor %}
+                {% empty %}
+                  <span class="text-gray-400">---</span>
+                {% endfor %}
+              {% endwith %}
+            </td>
+            <td class="px-6 py-4 text-gray-600">{{ loan.created_at|date:"Y-m-d H:i" }}</td>
+            <td class="px-6 py-4 text-gray-600">{{ loan.due_at|date:"Y-m-d" }}</td>
+            <td class="px-6 py-4">
+              {% include "components/borrow_request_status.html" with req=loan %}
+            </td>
+            <td class="px-6 py-4 text-right">
+              <a
+                href="{% url 'borrow_request_review' loan.pk %}"
+                class="cursor-pointer inline-flex items-center justify-center rounded-md border border-gray-300 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 shadow-sm transition hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2"
+              >
+                Review
+              </a>
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="8" class="px-6 py-12 text-center text-sm text-gray-500">
+              No loan transactions found matching the selected filters.
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  {% else %}
+  <!-- Overdue Report Filter Card -->
+  <div class="mb-6 rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+    <form method="get" action="#reports-section" class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 lg:items-end">
+      <input type="hidden" name="report_tab" value="overdue" />
+
+      <div>
+        <label for="overdue_from" class="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-700">Due Date From</label>
+        <input
+          type="date"
+          id="overdue_from"
+          name="overdue_from"
+          value="{{ reports.filters.overdue_from }}"
+          class="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm transition focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2"
+        />
+      </div>
+
+      <div>
+        <label for="overdue_to" class="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-700">Due Date To</label>
+        <input
+          type="date"
+          id="overdue_to"
+          name="overdue_to"
+          value="{{ reports.filters.overdue_to }}"
+          class="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm transition focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2"
+        />
+      </div>
+
+      <div class="flex items-center gap-2">
+        <button
+          type="submit"
+          class="cursor-pointer inline-flex flex-1 items-center justify-center rounded-md bg-blue-700 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2"
+        >
+          Filter
+        </button>
+        <a
+          href="?report_tab=overdue#reports-section"
+          class="cursor-pointer inline-flex items-center justify-center rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 shadow-sm transition hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2"
+          title="Reset filters"
+        >
+          Reset
+        </a>
+        <a
+          href="?export=overdue_csv{% if reports.filters.overdue_from %}&overdue_from={{ reports.filters.overdue_from }}{% endif %}{% if reports.filters.overdue_to %}&overdue_to={{ reports.filters.overdue_to }}{% endif %}"
+          class="cursor-pointer inline-flex items-center justify-center gap-1.5 rounded-md bg-rose-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-rose-700 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:ring-offset-2"
+        >
+          <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+          </svg>
+          <span>Export CSV</span>
+        </a>
+      </div>
+    </form>
+  </div>
+
+  <!-- Overdue Report Data Table -->
+  <div class="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
+    <div class="overflow-x-auto">
+      <table class="w-full text-left text-sm">
+        <thead class="border-b border-gray-200 bg-gray-50 text-xs font-semibold uppercase tracking-wider text-gray-500">
+          <tr>
+            <th class="px-6 py-3.5">Loan ID</th>
+            <th class="px-6 py-3.5">Borrower</th>
+            <th class="px-6 py-3.5">Contact</th>
+            <th class="px-6 py-3.5">Equipment</th>
+            <th class="px-6 py-3.5">Due Date</th>
+            <th class="px-6 py-3.5">Overdue</th>
+            <th class="px-6 py-3.5">Status</th>
+            <th class="px-6 py-3.5 text-right">Action</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100">
+          {% for item in reports.overdue_list %}
+          <tr class="transition-colors hover:bg-gray-50/50">
+            <td class="px-6 py-4 font-mono text-xs font-semibold text-gray-900">#{{ item.request.pk }}</td>
+            <td class="px-6 py-4">
+              <div class="font-medium text-gray-900">{{ item.request.user.display_name }}</div>
+              <div class="text-xs text-gray-500">{{ item.request.user.email }}</div>
+            </td>
+            <td class="px-6 py-4 text-gray-600 text-xs">
+              {{ item.request.user.profile.contact_number|default:"N/A" }}
+            </td>
+            <td class="px-6 py-4 text-gray-700">
+              {% for it in item.request.items.all %}
+                <div>
+                  <span class="inline-block">{{ it.catalog_item.name }} <span class="text-xs text-gray-500">(x{{ it.quantity }})</span></span>
+                </div>
+                {% for alloc in it.allocations.all %}
+                  <span class="inline-block rounded bg-gray-100 px-1.5 py-0.5 text-xs font-mono font-medium text-gray-800">{{ alloc.equipment_unit.asset_code }}</span>
+                {% endfor %}
+              {% empty %}
+                <span class="text-xs text-gray-400">None</span>
+              {% endfor %}
+            </td>
+            <td class="px-6 py-4 text-gray-900 font-medium">{{ item.request.due_at|date:"Y-m-d" }}</td>
+            <td class="px-6 py-4">
+              <span class="inline-flex items-center rounded-full bg-rose-50 px-2.5 py-0.5 text-xs font-bold text-rose-700 ring-1 ring-inset ring-rose-600/20">
+                {{ item.days_overdue }} days late
+              </span>
+            </td>
+            <td class="px-6 py-4">
+              {% include "components/borrow_request_status.html" with req=item.request %}
+            </td>
+            <td class="px-6 py-4 text-right">
+              <a
+                href="{% url 'borrow_request_review' item.request.pk %}"
+                class="cursor-pointer inline-flex items-center justify-center rounded-md border border-gray-300 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 shadow-sm transition hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2"
+              >
+                Review
+              </a>
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="8" class="px-6 py-12 text-center text-sm text-gray-500">
+              Great! There are no overdue equipment loans matching the criteria.
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  {% endif %}
 </div>
 
 <!-- Safe JSON Data Injection -->
@@ -174,9 +476,9 @@
           data: categoryData.data,
           backgroundColor: [
             '#1d4ed8', // Brand Blue
-            '#047857', // Emerald
-            '#7e22ce', // Purple
-            '#b45309'  // Amber
+            '#059669', // Emerald
+            '#0284c7', // Sky
+            '#d97706'  // Amber
           ],
           borderColor: '#ffffff',
           borderWidth: 2,

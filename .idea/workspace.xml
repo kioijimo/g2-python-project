@@ -4,11 +4,42 @@
     <option name="autoReloadType" value="ALL" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="81d952a8-95d4-4479-88b5-4cff86c96015" name="Changes" comment="" />
+    <list default="true" id="81d952a8-95d4-4479-88b5-4cff86c96015" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/templates/components/protected_header.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/models.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/tests/test_navigation.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/tests/test_navigation.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/views/manage.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/views/manage.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/auth/login.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/auth/login.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/auth/register.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/auth/register.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/auth_base.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/auth_base.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/base.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/base.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/components/admin_navbar.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/components/admin_navbar.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/components/user_navbar.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/components/user_navbar.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/manage/audit.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/manage/audit.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/manage/borrow_requests.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/manage/borrow_requests.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/manage/catalogs.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/manage/catalogs.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/manage/dashboard.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/manage/dashboard.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/manage/loans.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/manage/loans.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/manage/maintenance.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/manage/maintenance.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/manage/returns.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/manage/returns.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/manage/settings.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/manage/settings.html" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="HTML File" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="McpProjectServerCommands">
     <commands />
@@ -16,23 +47,23 @@
   </component>
   <component name="NextEditCompletionFeaturesState">
     <decayedCancelled>
-      <entry key="MS100" value="1.000000001672847" />
-      <entry key="MS500" value="1.0306489630879865" />
-      <entry key="S2" value="1.8589214979637099" />
-      <entry key="S5" value="3.1446696877819145" />
-      <entry key="S10" value="4.197875699723545" />
-      <entry key="S30" value="6.157604344368633" />
-      <entry key="S60" value="7.741694930107122" />
-      <entry key="M2" value="9.228349625688475" />
-      <entry key="M5" value="13.59565957782713" />
-      <entry key="M10" value="24.35876769630561" />
-      <entry key="M15" value="33.73971811706832" />
-      <entry key="M30" value="52.02345672302939" />
-      <entry key="H1" value="68.48651744223551" />
-      <entry key="H2" value="80.08375213920387" />
-      <entry key="H4" value="87.06055609071927" />
-      <entry key="D1" value="93.60330228283894" />
-      <entry key="W1" value="94.79857919754332" />
+      <entry key="MS100" value="1.5590951989143877" />
+      <entry key="MS500" value="5.584307610669342" />
+      <entry key="S2" value="11.066222354007895" />
+      <entry key="S5" value="13.634531980381349" />
+      <entry key="S10" value="14.819560649274813" />
+      <entry key="S30" value="21.177922311764643" />
+      <entry key="S60" value="32.82834305911784" />
+      <entry key="M2" value="45.85961205954811" />
+      <entry key="M5" value="58.11852760112269" />
+      <entry key="M10" value="63.24411393709318" />
+      <entry key="M15" value="65.09227670725727" />
+      <entry key="M30" value="67.35850027462239" />
+      <entry key="H1" value="79.15813644659922" />
+      <entry key="H2" value="151.09989924551743" />
+      <entry key="H4" value="301.1985520219207" />
+      <entry key="D1" value="625.899745520658" />
+      <entry key="W1" value="716.5107001453465" />
     </decayedCancelled>
     <decayedSelected>
       <entry key="MS100" value="0.0" />
@@ -40,46 +71,72 @@
       <entry key="S2" value="0.0" />
       <entry key="S5" value="0.0" />
       <entry key="S10" value="0.0" />
-      <entry key="S30" value="0.0" />
-      <entry key="S60" value="0.0" />
-      <entry key="M2" value="0.0" />
-      <entry key="M5" value="0.0" />
-      <entry key="M10" value="0.0" />
-      <entry key="M15" value="0.0" />
-      <entry key="M30" value="0.0" />
-      <entry key="H1" value="0.0" />
-      <entry key="H2" value="0.0" />
-      <entry key="H4" value="0.0" />
-      <entry key="D1" value="0.0" />
-      <entry key="W1" value="0.0" />
+      <entry key="S30" value="2.942385440386567E-196" />
+      <entry key="S60" value="2.421795350308973E-98" />
+      <entry key="M2" value="2.2949346062516233E-49" />
+      <entry key="M5" value="1.284056245209801E-19" />
+      <entry key="M10" value="2.6261366817881675E-9" />
+      <entry key="M15" value="8.370696943684999E-6" />
+      <entry key="M30" value="0.028663697681538237" />
+      <entry key="H1" value="1.7207438294259279" />
+      <entry key="H2" value="13.414708547733689" />
+      <entry key="H4" value="37.511914095363906" />
+      <entry key="D1" value="88.4415007107661" />
+      <entry key="W1" value="102.45684319790271" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="0.7845840991786849" />
-      <entry key="MS500" value="0.9816888926428443" />
-      <entry key="S2" value="1.8345047452575867" />
-      <entry key="S5" value="3.1270260505577614" />
-      <entry key="S10" value="4.185796404728024" />
-      <entry key="S30" value="6.1511355906203615" />
-      <entry key="S60" value="7.737334347470386" />
-      <entry key="M2" value="9.22566483229885" />
-      <entry key="M5" value="13.594383744357616" />
-      <entry key="M10" value="24.35801328374095" />
-      <entry key="M15" value="33.73908973312186" />
-      <entry key="M30" value="52.022902322575604" />
-      <entry key="H1" value="68.48607326095373" />
-      <entry key="H2" value="80.08345842400749" />
-      <entry key="H4" value="87.06038562837801" />
-      <entry key="D1" value="93.60326998007235" />
-      <entry key="W1" value="94.79857447847994" />
+      <entry key="MS100" value="1.4920599389297486" />
+      <entry key="MS500" value="5.532231252394149" />
+      <entry key="S2" value="11.040082774568813" />
+      <entry key="S5" value="13.621646509237129" />
+      <entry key="S10" value="14.812551943402818" />
+      <entry key="S30" value="21.17412190564071" />
+      <entry key="S60" value="32.824827993484185" />
+      <entry key="M2" value="45.85687006614614" />
+      <entry key="M5" value="58.11704118741834" />
+      <entry key="M10" value="63.243287113751826" />
+      <entry key="M15" value="65.09171170843133" />
+      <entry key="M30" value="67.38676984769687" />
+      <entry key="H1" value="80.87716229028624" />
+      <entry key="H2" value="164.5089323481952" />
+      <entry key="H4" value="338.7027640022992" />
+      <entry key="D1" value="714.3382628013243" />
+      <entry key="W1" value="818.9670505071476" />
     </decayedShown>
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "node.js.selected.package.tslint": "(autodetect)"
+  <component name="ProjectColorInfo">{
+  &quot;customColor&quot;: &quot;&quot;,
+  &quot;associatedIndex&quot;: 3
+}</component>
+  <component name="ProjectId" id="3LDQtc0At09MEUeHJvTUVy6uWTW" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;DefaultHtmlFileTemplate&quot;: &quot;HTML File&quot;,
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.MCP Project settings loaded&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.OpenDjangoStructureViewOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
+    &quot;codeWithMe.voiceChat.enabledByDefault&quot;: &quot;false&quot;,
+    &quot;django.template.preview.state&quot;: &quot;SHOW_EDITOR&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;feat/design-system&quot;,
+    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.jshint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.jshint&quot;: &quot;&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;
   }
-}]]></component>
+}</component>
   <component name="RunManager">
-    <configuration default="true" type="DjangoTestsConfigurationType">
+    <configuration name="g2-python-project" type="Python.DjangoServer" factoryName="Django server">
+      <module name="g2-python-project" />
       <option name="ENV_FILES" value="" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -92,141 +149,39 @@
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <option name="DEBUG_JUST_MY_CODE" value="false" />
-      <module name="" />
-      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="RUN_TOOL" value="" />
-      <option name="TARGET" value="" />
-      <option name="SETTINGS_FILE" value="" />
-      <option name="CUSTOM_SETTINGS" value="false" />
-      <option name="USE_OPTIONS" value="false" />
-      <option name="OPTIONS" value="" />
-      <method v="2" />
-    </configuration>
-    <configuration default="true" type="PythonConfigurationType" factoryName="Python">
-      <option name="ENV_FILES" value="" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="" />
-      <option name="IS_MODULE_SDK" value="false" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="DEBUG_JUST_MY_CODE" value="false" />
-      <module name="" />
-      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="RUN_TOOL" value="" />
-      <option name="SCRIPT_NAME" value="" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
-    <configuration default="true" type="Python.Celery" factoryName="Python.Celery.App">
-      <option name="ENV_FILES" value="" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="" />
-      <option name="IS_MODULE_SDK" value="false" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="DEBUG_JUST_MY_CODE" value="false" />
-      <module name="" />
-      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="RUN_TOOL" value="" />
-      <method v="2" />
-    </configuration>
-    <configuration default="true" type="Python.Celery" factoryName="Python.Celery.Task">
-      <option name="ENV_FILES" value="" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="" />
-      <option name="IS_MODULE_SDK" value="false" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="DEBUG_JUST_MY_CODE" value="false" />
-      <module name="" />
-      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="RUN_TOOL" value="" />
-      <method v="2" />
-    </configuration>
-    <configuration default="true" type="Python.FlaskServer">
-      <option name="ENV_FILES" value="" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="" />
-      <option name="IS_MODULE_SDK" value="false" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="DEBUG_JUST_MY_CODE" value="false" />
-      <module name="" />
-      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
       <option name="RUN_TOOL" value="" />
       <option name="launchJavascriptDebuger" value="false" />
-      <method v="2" />
-    </configuration>
-    <configuration default="true" type="Tox" factoryName="Tox">
-      <option name="ENV_FILES" value="" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="" />
-      <option name="IS_MODULE_SDK" value="false" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="DEBUG_JUST_MY_CODE" value="false" />
-      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="RUN_TOOL" value="" />
-      <method v="2" />
-    </configuration>
-    <configuration default="true" type="docs" factoryName="Docutils task">
-      <option name="ENV_FILES" value="" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="" />
-      <option name="IS_MODULE_SDK" value="false" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="DEBUG_JUST_MY_CODE" value="false" />
-      <module name="" />
-      <option name="RUN_TOOL" value="" />
-      <option name="docutils_input_file" value="" />
-      <option name="docutils_output_file" value="" />
-      <option name="docutils_params" value="" />
-      <option name="docutils_task" value="" />
-      <option name="docutils_open_in_browser" value="false" />
-      <method v="2" />
-    </configuration>
-    <configuration default="true" type="docs" factoryName="Sphinx task">
-      <option name="ENV_FILES" value="" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="" />
-      <option name="IS_MODULE_SDK" value="false" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="DEBUG_JUST_MY_CODE" value="false" />
-      <module name="" />
-      <option name="RUN_TOOL" value="" />
-      <option name="docutils_input_file" value="" />
-      <option name="docutils_output_file" value="" />
-      <option name="docutils_params" value="" />
-      <option name="docutils_task" value="" />
-      <option name="docutils_open_in_browser" value="false" />
+      <option name="port" value="8000" />
+      <option name="host" value="" />
+      <option name="additionalOptions" value="" />
+      <option name="browserUrl" value="" />
+      <option name="runTestServer" value="false" />
+      <option name="runNoReload" value="false" />
+      <option name="useCustomRunCommand" value="false" />
+      <option name="customRunCommand" value="" />
       <method v="2" />
     </configuration>
   </component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-js-predefined-d6986cc7102b-4abd2a77f808-JavaScript-PY-262.8665.369" />
+        <option value="bundled-python-sdk-6fa658e1df1a-5bd6d13a2a75-com.jetbrains.pycharm.pro.sharedIndexes.bundled-PY-262.8665.369" />
+      </set>
+    </attachedChunks>
+  </component>
   <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="81d952a8-95d4-4479-88b5-4cff86c96015" name="Changes" comment="" />
+      <created>1792986377420</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1792986377420</updated>
+      <workItem from="1792986379757" duration="9431000" />
+    </task>
     <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
   </component>
 </project>

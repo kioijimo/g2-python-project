@@ -61,7 +61,7 @@
             {{ borrow_request.purpose|truncatechars:48 }}
           </td>
           <td class="whitespace-nowrap px-6 py-4">
-            {% include "components/request_status_badge.html" with borrow_request=borrow_request %}
+            {% include "components/borrow_request_status.html" with req=borrow_request %}
           </td>
           <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-700">
             {{ borrow_request.due_at|date:"M j, Y" }}

@@ -1,6 +1,22 @@
-from django.db.models import Count, Q
+from django.db.models import (
+    Count,
+    F,
+    IntegerField,
+    OuterRef,
+    Q,
+    Subquery,
+    Sum,
+    Value,
+)
+from django.db.models.functions import Coalesce, Greatest
 
-from ..models import CatalogItem, Category, EquipmentUnit
+from ..models import (
+    BorrowRequest,
+    CatalogItem,
+    Category,
+    EquipmentUnit,
+    RequestItem,
+)
 
 SERVICEABLE_INVENTORY_STATUSES = (
     EquipmentUnit.EquipmentStatus.AVAILABLE,
@@ -9,7 +25,7 @@ SERVICEABLE_INVENTORY_STATUSES = (
 )
 
 
-def active_catalog_items(search=""):
+def active_catalog_items(category=None, search=""):
     items = CatalogItem.objects.filter(
         status=CatalogItem.CatalogItemStatus.ACTIVE,
         category__status=Category.CategoryStatus.ACTIVE,
@@ -20,6 +36,19 @@ def active_catalog_items(search=""):
         items = items.filter(
             Q(name__icontains=search) | Q(category__name__icontains=search)
         )
+
+    if category is not None:
+        items = items.filter(category=category)
+
+    pending_requested_subquery = (
+        RequestItem.objects.filter(
+            catalog_item=OuterRef("pk"),
+            borrow_request__status=BorrowRequest.BorrowRequestStatus.PENDING,
+        )
+        .values("catalog_item")
+        .annotate(total=Sum("quantity"))
+        .values("total")
+    )
 
     return (
         items.select_related("category")
@@ -40,6 +69,19 @@ def active_catalog_items(search=""):
                 ),
                 distinct=True,
             ),
+            pending_requested=Coalesce(
+                Subquery(
+                    pending_requested_subquery,
+                    output_field=IntegerField(),
+                ),
+                Value(0),
+            ),
+        )
+        .annotate(
+            requestable_count=Greatest(
+                F("available_count") - F("pending_requested"),
+                Value(0),
+            )
         )
         .order_by("category__name", "name")
     )
@@ -50,3 +92,21 @@ def available_units_count(catalog_item):
         condition=EquipmentUnit.EquipmentCondition.FINE,
         inventory_status=EquipmentUnit.EquipmentStatus.AVAILABLE,
     ).count()
+
+
+def pending_requested_quantity(catalog_item):
+    return (
+        RequestItem.objects.filter(
+            catalog_item=catalog_item,
+            borrow_request__status=BorrowRequest.BorrowRequestStatus.PENDING,
+        ).aggregate(total=Sum("quantity"))["total"]
+        or 0
+    )
+
+
+def requestable_units_count(catalog_item):
+    return max(
+        available_units_count(catalog_item)
+        - pending_requested_quantity(catalog_item),
+        0,
+    )

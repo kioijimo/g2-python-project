@@ -1,5 +1,6 @@
 from django.contrib import messages
 from django.core.exceptions import ValidationError
+from django.core.paginator import Paginator
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
 
@@ -12,6 +13,17 @@ from ..services.borrowing import (
 )
 from ..services.catalog import active_catalog_items
 
+CATALOG_PAGE_ITEMS = 9
+
+
+def _paginate_catalog(request, queryset):
+    page_obj = Paginator(queryset, CATALOG_PAGE_ITEMS).get_page(
+        request.GET.get("page")
+    )
+    params = request.GET.copy()
+    params.pop("page", None)
+    return page_obj, params.urlencode()
+
 
 @basic_user_required
 def portal_home(request):
@@ -20,19 +32,31 @@ def portal_home(request):
 
 @basic_user_required
 def catalog(request):
-    search_form = forms.CatalogSearchForm(request.GET or None)
+    filter_form = forms.CatalogFilterForm(request.GET or None)
     query = ""
+    selected_category = None
 
-    if search_form.is_valid():
-        query = search_form.cleaned_data["q"].strip()
+    if filter_form.is_valid():
+        query = filter_form.cleaned_data["q"].strip()
+        selected_category = filter_form.cleaned_data["category"]
+
+    page_obj, querystring = _paginate_catalog(
+        request,
+        active_catalog_items(
+            category=selected_category,
+            search=query,
+        ),
+    )
 
     return render(
         request,
         "portal/catalog.html",
         {
-            "search_form": search_form,
+            "filter_form": filter_form,
             "query": query,
-            "items": active_catalog_items(query),
+            "selected_category": selected_category,
+            "page_obj": page_obj,
+            "querystring": querystring,
         },
     )
 
@@ -113,7 +137,6 @@ def request_create(request):
         {
             "form": form,
             "formset": formset,
-            "max_borrow_quantity": settings.max_borrow_quantity,
             "max_borrow_days": settings.max_borrow_days,
         },
     )

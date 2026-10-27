@@ -85,6 +85,44 @@ class User(AbstractBaseUser):
         """Allow future admin tooling to check for staff status."""
         return self.role == self.UserRoles.ADMIN
 
+    @property
+    def display_name(self):
+        """Return user's full name if profile exists, otherwise username from email."""
+        try:
+            profile = getattr(self, "profile", None)
+            if profile:
+                first = (profile.first_name or "").strip()
+                last = (profile.last_name or "").strip()
+                full = f"{first} {last}".strip()
+                if full:
+                    return full
+        except Exception:
+            pass
+        return self.email.split("@")[0] if self.email else "User"
+
+    @property
+    def initials(self):
+        """Return 2-letter uppercase initials for avatar display."""
+        try:
+            profile = getattr(self, "profile", None)
+            if profile:
+                first = (profile.first_name or "").strip()
+                last = (profile.last_name or "").strip()
+                if first and last:
+                    return f"{first[0]}{last[0]}".upper()
+                if first:
+                    return first[:2].upper()
+        except Exception:
+            pass
+        if self.email:
+            name_part = self.email.split("@")[0]
+            clean = "".join(ch for ch in name_part if ch.isalnum())
+            if len(clean) >= 2:
+                return clean[:2].upper()
+            if len(clean) == 1:
+                return clean.upper()
+        return "CE" 
+
     def __str__(self):
         return self.email
 
@@ -181,6 +219,8 @@ class CatalogItem(models.Model):
         The description of the item brand. Must not exceed `DESCRIPTION_LENGTH` number of characters.
     `status`: int
         The status of the item brand. To see the statuses, check `CatalogItem.CatalogItemStatus` class.
+    `created_at`: datetime
+        The datetime when the catalog item is created.
     """
 
     class CatalogItemStatus(models.IntegerChoices):
@@ -202,6 +242,7 @@ class CatalogItem(models.Model):
     status = models.IntegerField(
         default=CatalogItemStatus.ACTIVE.value, choices=CatalogItemStatus
     )
+    created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return str(self.name)
@@ -221,7 +262,7 @@ class EquipmentUnit(models.Model):
         The inventory status of the equipment unit. To see statuses, check `EquipmentUnit.EquipmentStatus` class.
     `condition`: int
         The condition of the equipment unit. To see conditions, check `EquipmentUnit.EquipmentCondition` class.
-    `created_at`: datetime
+    `acquired_at`: datetime
         The datetime when the unit was acquired.
     """
 
@@ -308,6 +349,36 @@ class BorrowRequest(models.Model):
             self.BorrowRequestStatus.APPROVED,
         )
 
+    @property
+    def is_pending(self):
+        return self.status == self.BorrowRequestStatus.PENDING
+
+    @property
+    def is_approved(self):
+        return self.status == self.BorrowRequestStatus.APPROVED
+
+    @property
+    def is_issued(self):
+        return self.status in (
+            self.BorrowRequestStatus.ISSUED,
+            self.BorrowRequestStatus.PARTIALLY_RETURNED,
+        )
+
+    @property
+    def review_record(self):
+        """The admin decision record for this request, if it has been reviewed."""
+        return self.review_records.first()
+
+    @property
+    def reviewed_by(self):
+        record = self.review_record
+        return record.user if record else None
+
+    @property
+    def reviewed_at(self):
+        record = self.review_record
+        return record.created_at if record else None
+
     def overdue_days(self, as_of=None):
         if self.status not in (
             self.BorrowRequestStatus.ISSUED,
@@ -386,21 +457,30 @@ class UnitAllocation(models.Model):
 
 class LoanRecord(models.Model):
     """
-    A record when a borrow request gets approved.
+    A record of an admin decision on a borrow request.
+
+    The record is created when an admin reviews the request. For an approved
+    request it also represents the loan that will be released.
 
     Attributes
     ----------
     `borrow_request`: BorrowRequest
-        The request the loan record is attached to. Strictly must be one-to-one.
+        The request the loan record is attached to. Strictly must be one per
+        request.
     `user`: User
-        The admin user that provisioned the request.
+        The admin user that reviewed the request.
     `created_at`: datetime
-        The date and time the record has been created.
+        The date and time the admin reviewed the request.
+    `released_at`: datetime
+        The date and time the approved loan was released, if it has been.
     """
 
-    borrow_request = models.ForeignKey(BorrowRequest, on_delete=models.PROTECT)
+    borrow_request = models.ForeignKey(
+        BorrowRequest, on_delete=models.PROTECT, related_name="review_records"
+    )
     user = models.ForeignKey(User, on_delete=models.PROTECT)
     created_at = models.DateTimeField(auto_now_add=True)
+    released_at = models.DateTimeField(null=True, blank=True)
 
 
 class ReturnRecord(models.Model):

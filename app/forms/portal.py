@@ -3,8 +3,38 @@ from django.forms.models import BaseInlineFormSet, inlineformset_factory
 
 from .. import models
 from ..services.borrowing import due_date_bounds
-from ..services.catalog import active_catalog_items, available_units_count
+from ..services.catalog import active_catalog_items, requestable_units_count
 from .styling import apply_widget_styling
+
+
+class CatalogItemSelect(forms.Select):
+    def create_option(
+        self,
+        name,
+        value,
+        label,
+        selected,
+        index,
+        subindex=None,
+        attrs=None,
+    ):
+        option = super().create_option(
+            name,
+            value,
+            label,
+            selected,
+            index,
+            subindex,
+            attrs,
+        )
+        instance = getattr(value, "instance", None)
+        if instance is not None:
+            option["attrs"]["data-available"] = getattr(
+                instance,
+                "requestable_count",
+                0,
+            )
+        return option
 
 
 class ProfileUpdateForm(forms.ModelForm):
@@ -17,7 +47,7 @@ class ProfileUpdateForm(forms.ModelForm):
         apply_widget_styling(self)
 
 
-class CatalogSearchForm(forms.Form):
+class CatalogFilterForm(forms.Form):
     q = forms.CharField(
         required=False,
         max_length=models.NAME_LENGTH,
@@ -26,9 +56,18 @@ class CatalogSearchForm(forms.Form):
             attrs={"placeholder": "Search by item or category"}
         ),
     )
+    category = forms.ModelChoiceField(
+        required=False,
+        label="Category",
+        queryset=models.Category.objects.none(),
+        empty_label="All categories",
+    )
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.fields["category"].queryset = models.Category.objects.filter(
+            status=models.Category.CategoryStatus.ACTIVE
+        ).order_by("name")
         apply_widget_styling(self)
 
 
@@ -74,6 +113,9 @@ class BorrowRequestItemForm(forms.ModelForm):
     class Meta:
         model = models.RequestItem
         fields = ("catalog_item", "quantity")
+        widgets = {
+            "catalog_item": CatalogItemSelect,
+        }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -83,16 +125,10 @@ class BorrowRequestItemForm(forms.ModelForm):
         catalog_field.empty_label = "Select a catalog item"
         catalog_field.label_from_instance = (
             lambda item: f"{item.name} ({item.category.name}) - "
-            f"{item.available_count} available"
+            f"{item.requestable_count} available"
         )
 
-        settings = models.SystemSetting.load()
-        self.fields["quantity"].widget.attrs.update(
-            {
-                "min": 1,
-                "max": settings.max_borrow_quantity,
-            }
-        )
+        self.fields["quantity"].widget.attrs.update({"min": 1})
         apply_widget_styling(self)
 
 
@@ -103,7 +139,6 @@ class BaseBorrowRequestItemFormSet(BaseInlineFormSet):
         if any(self.errors):
             return
 
-        settings = models.SystemSetting.load()
         selected_ids = set()
         selected_count = 0
 
@@ -135,13 +170,7 @@ class BaseBorrowRequestItemFormSet(BaseInlineFormSet):
             if quantity is None:
                 continue
 
-            if quantity > settings.max_borrow_quantity:
-                form.add_error(
-                    "quantity",
-                    f"Maximum {settings.max_borrow_quantity} unit(s) per item.",
-                )
-
-            available = available_units_count(catalog_item)
+            available = requestable_units_count(catalog_item)
             if quantity > available:
                 form.add_error(
                     "quantity",

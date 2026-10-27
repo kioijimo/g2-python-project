@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+
+{% block title %}Returns Management | Campus Equipment System{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<div class="mb-8 flex flex-wrap items-center justify-between gap-4">
+  <div>
+    <h1 class="text-2xl font-bold tracking-tight text-gray-900 sm:text-3xl">Returns Management</h1>
+    <p class="mt-1 text-sm text-gray-600">Log unit-level equipment returns, inspect conditions, and restock available inventory.</p>
+  </div>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+  <!-- Return Form -->
+  <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+    <h2 class="text-lg font-semibold text-gray-900 mb-4">Process Unit Return</h2>
+    <form action="{% url 'process_unit_return' %}" method="POST" class="space-y-4">
+      {% csrf_token %}
+      <div>
+        <label class="block text-xs font-semibold uppercase tracking-wide text-gray-700 mb-1.5">Active Borrow Request</label>
+        <select name="borrow_request_id" required class="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm transition focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2">
+          <option value="">-- Select Issued Request --</option>
+          {% for req in active_requests %}
+            <option value="{{ req.id }}">#REQ-{{ req.id }} | {{ req.user.email }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div>
+        <label class="block text-xs font-semibold uppercase tracking-wide text-gray-700 mb-1.5">Asset Code</label>
+        <input type="text" name="asset_code" placeholder="e.g. AST-0012" required class="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm transition focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2">
+      </div>
+
+      <div>
+        <label class="block text-xs font-semibold uppercase tracking-wide text-gray-700 mb-1.5">Returned Condition</label>
+        <select name="condition" required class="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm transition focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2">
+          <option value="{{ EquipmentCondition.FINE }}">Fine / Serviceable (Restock to Available)</option>
+          <option value="{{ EquipmentCondition.DAMAGED }}">Damaged (Route to Maintenance)</option>
+        </select>
+      </div>
+
+      <button type="submit" class="cursor-pointer inline-flex w-full items-center justify-center rounded-md bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2">
+        Log Unit Return
+      </button>
+    </form>
+  </div>
+
+  <!-- Recent Returns Audit Table -->
+  <div class="lg:col-span-2 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
+    <div class="px-6 py-4 border-b border-gray-200 font-semibold text-gray-900">
+      Recent Unit Return Logs
+    </div>
+    <div class="overflow-x-auto">
+      <table class="w-full text-left text-sm">
+        <thead class="border-b border-gray-200 bg-gray-50 text-xs font-semibold uppercase tracking-wider text-gray-500">
+          <tr>
+            <th class="px-6 py-3.5">Timestamp</th>
+            <th class="px-6 py-3.5">Request ID</th>
+            <th class="px-6 py-3.5">Asset Code</th>
+            <th class="px-6 py-3.5">Condition</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100">
+          {% for record in recent_returns %}
+          <tr class="transition-colors hover:bg-gray-50/50">
+            <td class="px-6 py-4 text-gray-600">{{ record.created_at|date:"M d, Y H:i" }}</td>
+            <td class="px-6 py-4 font-mono font-medium text-gray-900">#REQ-{{ record.borrow_request.id }}</td>
+            <td class="px-6 py-4 font-mono font-semibold text-gray-900">{{ record.equipment_unit.asset_code }}</td>
+            <td class="px-6 py-4">
+              {% if record.condition == EquipmentCondition.FINE %}
+                <span class="inline-flex items-center rounded-full bg-emerald-50 px-2.5 py-0.5 text-xs font-medium text-emerald-700 ring-1 ring-inset ring-emerald-600/20">Fine</span>
+              {% else %}
+                <span class="inline-flex items-center rounded-full bg-rose-50 px-2.5 py-0.5 text-xs font-medium text-rose-700 ring-1 ring-inset ring-rose-600/20">Damaged</span>
+              {% endif %}
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="4" class="px-6 py-12 text-center text-sm text-gray-500">No unit returns logged yet.</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

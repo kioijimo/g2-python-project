@@ -1,0 +1,27 @@
+{% if queryset.paginator.num_pages > 1 %}
+<nav
+  class="flex flex-wrap items-center justify-between gap-3 border-t border-gray-100 px-6 py-4"
+  aria-label="Pagination"
+>
+  <p class="text-sm text-gray-600">
+    Page {{ queryset.number }} of {{ queryset.paginator.num_pages }}
+  </p>
+  <div class="flex items-center gap-2">
+    {% if queryset.has_previous %}
+    <a
+      href="?page={{ page_obj.previous_page_number }}{% if querystring %}&{{ querystring }}{% endif %}"
+      class="inline-flex items-center justify-center rounded-md border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2"
+    >
+      Previous
+    </a>
+    {% endif %} {% if queryset.has_next %}
+    <a
+      href="?page={{ page_obj.next_page_number }}{% if querystring %}&{{ querystring }}{% endif %}"
+      class="inline-flex items-center justify-center rounded-md border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2"
+    >
+      Next
+    </a>
+    {% endif %}
+  </div>
+</nav>
+{% endif %}

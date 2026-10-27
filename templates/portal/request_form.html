@@ -7,11 +7,11 @@
   <div class="mb-6">
     <h1 class="text-2xl font-bold tracking-tight text-gray-900 sm:text-3xl">New Request</h1>
     <p class="mt-1 text-sm text-gray-600">
-      Request up to three different catalog items. Availability is checked when you submit.
+      Choose up to three distinct catalog items. Quantity is limited by current availability.
     </p>
   </div>
 
-  <form method="post" class="space-y-6">
+  <form method="post" class="space-y-6" data-request-form>
     {% csrf_token %}
 
     {% if form.non_field_errors %}
@@ -52,7 +52,7 @@
       <div class="mb-5 border-b border-gray-100 pb-4">
         <h2 class="text-lg font-semibold text-gray-900">Items</h2>
         <p class="mt-1 text-sm text-gray-600">
-          Choose one to three distinct items. Maximum {{ max_borrow_quantity }} unit{{ max_borrow_quantity|pluralize }} per item.
+          Choose one to three distinct items. Each quantity is limited by current availability.
         </p>
       </div>
 
@@ -98,6 +98,8 @@
               {% if item_form.quantity.errors %}
               <p class="mt-1 text-xs text-rose-600">{{ item_form.quantity.errors.0 }}</p>
               {% endif %}
+              <p class="mt-1 text-xs text-gray-500" data-quantity-availability></p>
+              <p class="mt-1 text-xs text-rose-600" data-quantity-guard-error role="alert" hidden></p>
             </div>
 
             <div class="flex items-end sm:col-span-2">
@@ -147,9 +149,134 @@
     const rows = Array.from(document.querySelectorAll("[data-request-item-row]"));
     const addButton = document.getElementById("add-request-item");
 
+    const requestForm = document.querySelector("[data-request-form]");
+
     if (!rows.length || !addButton) {
       return;
     }
+
+    const validators = [];
+
+    rows.forEach(function (row) {
+      const select = row.querySelector('select[name$="-catalog_item"]');
+      const quantity = row.querySelector('input[name$="-quantity"]');
+      const availabilityHint = row.querySelector("[data-quantity-availability]");
+      const guardError = row.querySelector("[data-quantity-guard-error]");
+
+      if (!select || !quantity) {
+        return;
+      }
+
+      function selectedAvailability() {
+        const option = select.options[select.selectedIndex];
+
+        if (!option || !option.value) {
+          return null;
+        }
+
+        const value = option.dataset.available;
+        return value === undefined ? null : Number(value);
+      }
+
+      function clearGuardError() {
+        quantity.setCustomValidity("");
+        quantity.removeAttribute("aria-invalid");
+
+        if (guardError) {
+          guardError.hidden = true;
+          guardError.textContent = "";
+        }
+      }
+
+      function applyAvailabilityLimit(available) {
+        if (available === null) {
+          quantity.removeAttribute("max");
+          return;
+        }
+
+        const limit = Math.max(0, available);
+        quantity.max = String(limit);
+
+        if (limit === 0) {
+          quantity.value = "";
+          return;
+        }
+
+        const requested = Number(quantity.value);
+
+        if (Number.isFinite(requested) && requested > limit) {
+          quantity.value = String(limit);
+        }
+      }
+
+      function updateAvailabilityHint(available) {
+        if (!availabilityHint) {
+          return;
+        }
+
+        // if (available === null) {
+        //   availabilityHint.textContent = "";
+        //   return;
+        // }
+        //
+        // if (available === 0) {
+        //   availabilityHint.textContent = "No units are currently available.";
+        //   return;
+        // }
+        //
+        // availabilityHint.textContent =
+        //   available + (available === 1 ? " unit available." : " units available.");
+      }
+
+      function validateAvailability() {
+        clearGuardError();
+
+        const available = selectedAvailability();
+        applyAvailabilityLimit(available);
+        updateAvailabilityHint(available);
+
+        if (available === null) {
+          return true;
+        }
+
+        if (quantity.value.trim() === "") {
+          return true;
+        }
+
+        const requested = Number(quantity.value);
+
+        if (!Number.isFinite(requested) || requested < 1) {
+          return true;
+        }
+
+        if (requested <= available) {
+          return true;
+        }
+
+        let message = "Only " + available + " units are available.";
+
+        if (available === 0) {
+          message = "No units are currently available for this item.";
+        } else if (available === 1) {
+          message = "Only 1 unit is available.";
+        }
+
+        quantity.setCustomValidity(message);
+        quantity.setAttribute("aria-invalid", "true");
+
+        if (guardError) {
+          guardError.textContent = message;
+          guardError.hidden = false;
+        }
+
+        return false;
+      }
+
+      validators.push(validateAvailability);
+      select.addEventListener("change", validateAvailability);
+      quantity.addEventListener("input", validateAvailability);
+      validateAvailability();
+    });
 
     let initialVisible = 1;
     rows.forEach(function (row, index) {
@@ -199,10 +326,36 @@
           }
         });
 
+        const select = row.querySelector('select[name$="-catalog_item"]');
+        if (select) {
+          select.dispatchEvent(new Event("change"));
+        }
+
         row.hidden = true;
         updateAddButton();
       });
     });
+
+    if (requestForm) {
+      requestForm.addEventListener("submit", function (event) {
+        validators.forEach(function (validate) {
+          validate();
+        });
+
+        const invalidQuantity = rows
+          .map(function (row) {
+            return row.querySelector(
+              'input[name$="-quantity"][aria-invalid="true"]',
+            );
+          })
+          .find(Boolean);
+
+        if (invalidQuantity) {
+          event.preventDefault();
+          invalidQuantity.focus();
+        }
+      });
+    }
 
     updateAddButton();
   });

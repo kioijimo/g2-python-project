@@ -1,0 +1,18 @@
+{% comment %} Usage: {% include "components/form_field.html" with field=form.email %} {% endcomment %}
+<div>
+  <label
+    for="{{ field.id_for_label }}"
+    class="mb-1.5 block text-sm font-medium text-gray-700"
+  >
+    {{ field.label }}{% if field.field.required %}<span
+      class="ml-0.5 text-rose-600"
+      aria-hidden="true"
+      >*</span
+    >{% endif %}
+  </label>
+  {{ field }} {% if field.errors %}
+  <p class="mt-1 text-xs text-rose-600">{{ field.errors.0 }}</p>
+  {% elif field.help_text %}
+  <p class="mt-1 text-xs text-gray-500">{{ field.help_text }}</p>
+  {% endif %}
+</div>
