@@ -138,17 +138,15 @@ class ReturnsManagementTests(TestCase):
         self.assertEqual(self.borrow_request.overdue_days(), 3)
         self.assertContains(
             response,
-            f'data-return-selected-btn="{self.borrow_request.id}"',
-        )
-        self.assertContains(
-            response,
             f'data-selectable-row="{self.borrow_request.id}"',
         )
         self.assertContains(response, "bg-brand-primary-subtle")
-        self.assertContains(response, "toggleRowSelection(this, event)")
+        self.assertContains(response, "toggleRowSelection(this)")
         self.assertNotContains(response, '<th class="px-4 py-3.5 w-10 text-center">Select</th>')
         self.assertNotContains(response, "data-select-all=")
-        self.assertContains(response, "checkedCount >= 2")
+        self.assertNotContains(response, "Return Selected Units")
+        self.assertNotContains(response, "Return All Remaining")
+        self.assertNotContains(response, "condition_LAP-003")
 
     def test_single_unit_partial_return_and_overdue_days_preserved(self):
         response = self.client.post(
