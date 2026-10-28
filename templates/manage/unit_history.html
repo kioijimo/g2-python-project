@@ -14,14 +14,14 @@
     </a>
     <span>/</span>
     <a
-      href="{% url 'catalogs_view' 'item' %}?category={{ unit.catalog_item.category_id }}"
+      href="{% url 'catalogs_view' 'item' %}{{ breadcrumb_querystring.category }}"
       class="hover:text-text-primary transition"
     >
       {{ unit.catalog_item.category.name }}
     </a>
     <span>/</span>
     <a
-      href="{% url 'catalogs_view' 'unit' %}?category={{ unit.catalog_item.category_id }}&catalog_item={{ unit.catalog_item_id }}"
+      href="{% url 'catalogs_view' 'unit' %}{{ breadcrumb_querystring.item }}"
       class="hover:text-text-primary transition"
     >
       {{ unit.catalog_item.name }}

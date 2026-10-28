@@ -1075,6 +1075,14 @@ def catalogs(request, view="category", pk=0):
             request, f"Successfully {config.action.lower()} '{name}' {config.label}!"
         )
 
+    breadcrumb = (
+        ""
+        if not request.GET
+        else "?" + "&".join(f"{k}={v}" for k, v in request.GET.items())
+    )
+
+    print(breadcrumb)
+
     views = {
         "category": CatalogViewConfig(
             Category,
@@ -1148,7 +1156,7 @@ def catalogs(request, view="category", pk=0):
         target.save(update_fields=[config.status_field])
 
         _audit(request, config, target)
-        return redirect("catalogs_view", view=view)
+        return redirect(reverse("catalogs_view", kwargs={"view": view}) + breadcrumb)
 
     if url_name == "catalogs_edit":
         target = get_object_or_404(config.model, pk=pk)
@@ -1161,7 +1169,7 @@ def catalogs(request, view="category", pk=0):
     if form.is_valid():
         form.save()
         _audit(request, config, target)
-        return redirect("catalogs_view", view=view)
+        return redirect(reverse("catalogs_view", kwargs={"view": view}) + breadcrumb)
     elif (
         request.method == "POST"
         and url_name != "catalogs_edit"
@@ -1173,6 +1181,7 @@ def catalogs(request, view="category", pk=0):
         "view": view.lower(),
         "queryset": config.queryset,
         "querystring": config.querystring,
+        "breadcrumb_querystring": breadcrumb,
         "form": form,
         "filter_form": config.filter_form,
         "target": target,
@@ -1451,6 +1460,10 @@ def equipment_unit_history(request, pk, action=None):
         "action": action,
         "unit": unit,
         "form": form,
+        "breadcrumb_querystring": {
+            "category": f"?catalog={unit.catalog_item.category_id}",
+            "item": f"?catalog={unit.catalog_item.category_id}&catalog_item={unit.catalog_item_id}",
+        },
         "allocations": allocations_page,
         "return_records": return_records,
         "maintenance_records": maintenance_page,

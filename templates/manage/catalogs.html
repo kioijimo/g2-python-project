@@ -167,12 +167,12 @@
                 History
               </a>
               {% endif %}
-              <a href="{% url 'catalogs_edit' view=view pk=q.pk %}"
+              <a href="{% url 'catalogs_edit' view=view pk=q.pk %}{{ breadcrumb_querystring }}"
                 class="cursor-pointer inline-flex items-center justify-center rounded-md border border-border-default bg-surface-card px-3 py-1.5 text-xs font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-brand-primary focus:ring-offset-2">
                 Edit
               </a>
               {% if q.status > 0 or q.inventory_status > 0 %}
-              <a href="{% url 'catalogs_archive' view=view pk=q.pk %}"
+              <a href="{% url 'catalogs_archive' view=view pk=q.pk %}{{ breadcrumb_querystring }}"
                 class="cursor-pointer inline-flex items-center justify-center rounded-md bg-brand-primary px-3 py-1.5 text-xs font-semibold text-white shadow-sm hover:bg-rose-700 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:ring-offset-2">
                 {% if view == 'unit' %} Retire {% else %} Archive {% endif %}
               </a>
@@ -228,7 +228,7 @@
     </div>
     {% endif %}
     <div class="flex justify-end gap-2 pt-5 border-t border-border-default mt-5">
-      <a href="{% url 'catalogs_view' view %}" type="button" onclick="this.closest('dialog').close()"
+      <a href="{% url 'catalogs_view' view %}{{ breadcrumb_querystring }}" type="button" onclick="this.closest('dialog').close()"
         class="cursor-pointer rounded-md border border-border-default bg-surface-card px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-brand-primary">Cancel</a>
       <button type="submit" id="modal-submit"
         class="cursor-pointer rounded-md {% if request.resolver_match.url_name != 'catalogs_archive' %}bg-brand-primary hover:bg-brand-primary-hover focus:ring-brand-primary{% else %}bg-brand-primary hover:bg-rose-700 focus:ring-rose-500{% endif %} px-4 py-2 text-sm font-semibold text-white shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2">
