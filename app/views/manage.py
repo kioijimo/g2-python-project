@@ -782,12 +782,18 @@ def manage(request):
             }
         )
 
+    loans_total_count = loans_report_qs.count()
+    overdue_total_count = len(overdue_list)
+    loans_page, reports_querystring = _table_paginate(request, loans_report_qs)
+    overdue_page, _ = _table_paginate(request, overdue_list)
+
     context["reports"] = {
         "active_tab": report_tab if report_tab in ("loans", "overdue") else "loans",
-        "loans": loans_report_qs,
-        "loans_count": loans_report_qs.count(),
-        "overdue_list": overdue_list,
-        "overdue_count": len(overdue_list),
+        "loans": loans_page,
+        "loans_count": loans_total_count,
+        "overdue_list": overdue_page,
+        "overdue_count": overdue_total_count,
+        "querystring": reports_querystring,
         "filters": {
             "loan_from": loan_from,
             "loan_to": loan_to,
@@ -1700,18 +1706,24 @@ def equipment_unit_history(request, pk):
         reverse=True,
     )
 
+    total_borrows_count = len(allocations)
+    total_maint_count = len(maintenance_records)
+    allocations_page, querystring = _table_paginate(request, allocations)
+    maintenance_page, _ = _table_paginate(request, maintenance_records)
+
     context = {
         "unit": unit,
-        "allocations": allocations,
+        "allocations": allocations_page,
         "return_records": return_records,
-        "maintenance_records": maintenance_records,
+        "maintenance_records": maintenance_page,
+        "querystring": querystring,
         "timeline_events": timeline_events,
         "stats": {
-            "total_borrows": len(allocations),
+            "total_borrows": total_borrows_count,
             "total_returns": len(return_records),
             "fine_returns": fine_returns,
             "damaged_returns": damaged_returns,
-            "total_maintenance": len(maintenance_records),
+            "total_maintenance": total_maint_count,
             "active_maintenance": active_maintenance,
         },
     }

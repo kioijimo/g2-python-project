@@ -1,5 +1,5 @@
 {% with page=page_obj|default:queryset %}
-{% if page and page.paginator.num_pages > 1 %}
+{% if page.paginator %}
 <nav
   class="flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-border-default bg-surface-card px-4 sm:px-6 py-3.5"
   aria-label="Pagination"
@@ -91,5 +91,53 @@
     {% endif %}
   </div>
 </nav>
+{% elif page is not None %}
+{% with total=page|length %}
+<nav
+  class="flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-border-default bg-surface-card px-4 sm:px-6 py-3.5"
+  aria-label="Pagination"
+>
+  <p class="text-xs sm:text-sm text-text-secondary">
+    Showing
+    <span class="font-semibold text-text-primary">{% if total > 0 %}1{% else %}0{% endif %}</span>
+    to
+    <span class="font-semibold text-text-primary">{{ total }}</span>
+    of
+    <span class="font-semibold text-text-primary">{{ total }}</span>
+    results
+  </p>
+
+  <div class="flex items-center gap-1 sm:gap-1.5">
+    <span
+      class="inline-flex cursor-not-allowed items-center justify-center rounded-lg border border-border-default/50 bg-background-default/50 px-2.5 sm:px-3 py-1.5 text-xs sm:text-sm font-medium text-text-secondary/50 shadow-none"
+      aria-disabled="true"
+    >
+      <svg class="h-4 w-4 mr-1 text-text-secondary/50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+      </svg>
+      <span>Previous</span>
+    </span>
+
+    <div class="flex items-center gap-1">
+      <span
+        class="inline-flex h-8 min-w-[2rem] items-center justify-center rounded-lg bg-brand-primary px-2.5 text-xs sm:text-sm font-bold text-white shadow-xs"
+        aria-current="page"
+      >
+        1
+      </span>
+    </div>
+
+    <span
+      class="inline-flex cursor-not-allowed items-center justify-center rounded-lg border border-border-default/50 bg-background-default/50 px-2.5 sm:px-3 py-1.5 text-xs sm:text-sm font-medium text-text-secondary/50 shadow-none"
+      aria-disabled="true"
+    >
+      <span>Next</span>
+      <svg class="h-4 w-4 ml-1 text-text-secondary/50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+      </svg>
+    </span>
+  </div>
+</nav>
+{% endwith %}
 {% endif %}
 {% endwith %}

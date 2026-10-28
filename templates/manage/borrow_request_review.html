@@ -146,6 +146,7 @@
           </tbody>
         </table>
       </div>
+      {% include "components/pagination.html" with queryset=item_rows %}
     </div>
 
     {% if borrow_request.is_pending %}

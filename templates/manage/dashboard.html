@@ -278,6 +278,7 @@
         </tbody>
       </table>
     </div>
+    {% include "components/pagination.html" with queryset=reports.loans querystring=reports.querystring %}
   </div>
 
   {% else %}
@@ -402,6 +403,7 @@
         </tbody>
       </table>
     </div>
+    {% include "components/pagination.html" with queryset=reports.overdue_list querystring=reports.querystring %}
   </div>
   {% endif %}
 </div>

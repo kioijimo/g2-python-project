@@ -149,6 +149,9 @@
           </tbody>
         </table>
       </div>
+      <div class="mt-4 -mx-6 -mb-6 sm:-mx-8 sm:-mb-8 overflow-hidden rounded-b-xl">
+        {% include "components/pagination.html" with queryset=borrow_request.items.all %}
+      </div>
     </section>
   </div>
 

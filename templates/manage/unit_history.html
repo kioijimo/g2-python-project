@@ -218,6 +218,7 @@
       </tbody>
     </table>
   </div>
+  {% include "components/pagination.html" with queryset=allocations querystring=querystring %}
 </div>
 
 <!-- Maintenance History Table -->
@@ -295,6 +296,7 @@
       </tbody>
     </table>
   </div>
+  {% include "components/pagination.html" with queryset=maintenance_records querystring=querystring %}
 </div>
 
 <!-- Chronological Activity Timeline -->
