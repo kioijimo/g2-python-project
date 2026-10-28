@@ -130,7 +130,7 @@
             {% include "components/catalog_status.html" with view=view req=q type="condition" %}
           </td>
           {% endif %}
-          <td class="flex gap-2 px-6 py-4 {% if q.status > 0 or q.inventory_status > 0 %}justify-center text-center{% else %}justify-end text-end mr-9{% endif %}">
+          <td class="flex gap-2 px-6 py-4 justify-center text-center">
             <a href="{% url 'catalogs_edit' view=view pk=q.pk %}"
               class="nline-flex items-center justify-center rounded-md border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2">
               Edit

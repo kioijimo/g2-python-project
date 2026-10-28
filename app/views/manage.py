@@ -1,5 +1,5 @@
 import csv
-from django.http import HttpResponse
+from dataclasses import dataclass
 from datetime import datetime
 
 from dateutil import relativedelta
@@ -8,9 +8,11 @@ from django.core.exceptions import ValidationError
 from django.core.paginator import Paginator
 from django.db import transaction
 from django.db.models import Count, Q
-from django.forms.models import ModelForm
+from django.db.models.query import QuerySet
+from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import resolve
+from django.urls.exceptions import Http404
 from django.utils import timezone
 from django.views.decorators.http import require_POST
 
@@ -26,6 +28,7 @@ from ..models import (
     EquipmentUnit,
     LoanRecord,
     MaintenanceRecord,
+    Profile,
     RequestItem,
     ReturnRecord,
     SystemSetting,
@@ -76,90 +79,6 @@ def _structure_allocations_from_post(request, items):
         ) or request.POST.getlist("unit_ids")
 
     return allocations_by_item
-
-
-def _filter_catalogs(request, view):
-    filter_form = None
-    queryset = None
-
-    match view.lower():
-        case "category":
-            filter_form = forms.CategoryFilterForm(request.GET)
-            queryset = Category.objects.annotate(
-                item_count=Count("catalogitem")
-            ).order_by("name")
-
-            if request.method == "GET" and filter_form.is_valid():
-                query = filter_form.cleaned_data["q"].strip()
-                status = filter_form.cleaned_data["status"]
-
-                if query:
-                    queryset = queryset.filter(
-                        Q(name__icontains=query) | Q(description__icontains=query)
-                    )
-                if status is not None:
-                    queryset = queryset.filter(status=status)
-        case "item":
-            filter_form = forms.CatalogItemFilterForm(request.GET)
-            queryset = (
-                CatalogItem.objects.select_related("category")
-                .annotate(
-                    total_units=Count("units", distinct=True),
-                    available_units=Count(
-                        "units",
-                        filter=Q(
-                            units__inventory_status=EquipmentUnit.EquipmentStatus.AVAILABLE,
-                            units__condition=EquipmentUnit.EquipmentCondition.FINE,
-                        ),
-                        distinct=True,
-                    ),
-                )
-                .order_by("category__name", "name")
-            )
-
-            if request.method == "GET" and filter_form.is_valid():
-                query = filter_form.cleaned_data["q"].strip()
-                category = filter_form.cleaned_data["category"]
-                status = filter_form.cleaned_data["status"]
-
-                if query:
-                    queryset = queryset.filter(
-                        Q(name__icontains=query)
-                        | Q(description__icontains=query)
-                        | Q(category__name__icontains=query)
-                    )
-                if category:
-                    queryset = queryset.filter(category=category)
-                if status is not None:
-                    queryset = queryset.filter(status=status)
-        case "unit":
-            filter_form = forms.EquipmentUnitFilterForm(request.GET)
-            queryset = EquipmentUnit.objects.select_related(
-                "catalog_item__category"
-            ).order_by("asset_code")
-
-            if request.method == "GET" and filter_form.is_valid():
-                query = filter_form.cleaned_data["q"].strip()
-                category = filter_form.cleaned_data["category"]
-                catalog_item = filter_form.cleaned_data["catalog_item"]
-                inventory_status = filter_form.cleaned_data["inventory_status"]
-
-                if query:
-                    queryset = queryset.filter(
-                        Q(asset_code__icontains=query)
-                        | Q(catalog_item__name__icontains=query)
-                        | Q(catalog_item__category__name__icontains=query)
-                    )
-                if category:
-                    queryset = queryset.filter(catalog_item__category=category)
-                if catalog_item:
-                    queryset = queryset.filter(catalog_item=catalog_item)
-                if inventory_status is not None:
-                    queryset = queryset.filter(inventory_status=inventory_status)
-
-    queryset, querystring = _table_paginate(request, queryset)
-
-    return filter_form, queryset, querystring
 
 
 @admin_required
@@ -413,27 +332,36 @@ def resolve_maintenance_ticket(request, ticket_id):
     return redirect("manage_maintenance")
 
 
-
 def _export_loans_csv(queryset):
     response = HttpResponse(content_type="text/csv")
     timestamp = timezone.now().strftime("%Y%m%d_%H%M%S")
-    response["Content-Disposition"] = f'attachment; filename="loan_report_{timestamp}.csv"'
+    response["Content-Disposition"] = (
+        f'attachment; filename="loan_report_{timestamp}.csv"'
+    )
 
     writer = csv.writer(response)
-    writer.writerow([
-        "Loan ID",
-        "Borrower Name",
-        "Borrower Email",
-        "Items Requested",
-        "Allocated Asset Codes",
-        "Status",
-        "Requested At",
-        "Released At",
-        "Due Date",
-    ])
+    writer.writerow(
+        [
+            "Loan ID",
+            "Borrower Name",
+            "Borrower Email",
+            "Items Requested",
+            "Allocated Asset Codes",
+            "Status",
+            "Requested At",
+            "Released At",
+            "Due Date",
+        ]
+    )
     for loan in queryset:
-        borrower_name = getattr(loan.user, "display_name", None) or loan.user.get_full_name() or loan.user.username
-        items_desc = "; ".join(f"{item.catalog_item.name} (x{item.quantity})" for item in loan.items.all())
+        borrower_name = (
+            getattr(loan.user, "display_name", None)
+            or loan.user.get_full_name()
+            or loan.user.username
+        )
+        items_desc = "; ".join(
+            f"{item.catalog_item.name} (x{item.quantity})" for item in loan.items.all()
+        )
         asset_codes = []
         for item in loan.items.all():
             for alloc in item.allocations.all():
@@ -448,43 +376,55 @@ def _export_loans_csv(queryset):
         created_str = timezone.localtime(loan.created_at).strftime("%Y-%m-%d %H:%M")
         due_str = timezone.localtime(loan.due_at).strftime("%Y-%m-%d")
 
-        writer.writerow([
-            f"#{loan.pk}",
-            borrower_name,
-            loan.user.email,
-            items_desc,
-            asset_codes_str,
-            loan.get_status_display(),
-            created_str,
-            released_str,
-            due_str,
-        ])
+        writer.writerow(
+            [
+                f"#{loan.pk}",
+                borrower_name,
+                loan.user.email,
+                items_desc,
+                asset_codes_str,
+                loan.get_status_display(),
+                created_str,
+                released_str,
+                due_str,
+            ]
+        )
     return response
 
 
 def _export_overdue_csv(queryset):
     response = HttpResponse(content_type="text/csv")
     timestamp = timezone.now().strftime("%Y%m%d_%H%M%S")
-    response["Content-Disposition"] = f'attachment; filename="overdue_report_{timestamp}.csv"'
+    response["Content-Disposition"] = (
+        f'attachment; filename="overdue_report_{timestamp}.csv"'
+    )
 
     writer = csv.writer(response)
-    writer.writerow([
-        "Loan ID",
-        "Borrower Name",
-        "Borrower Email",
-        "Contact Number",
-        "Items Requested",
-        "Allocated Asset Codes",
-        "Due Date",
-        "Days Overdue",
-        "Status",
-    ])
+    writer.writerow(
+        [
+            "Loan ID",
+            "Borrower Name",
+            "Borrower Email",
+            "Contact Number",
+            "Items Requested",
+            "Allocated Asset Codes",
+            "Due Date",
+            "Days Overdue",
+            "Status",
+        ]
+    )
     today = timezone.localdate()
     for loan in queryset:
         profile = getattr(loan.user, "profile", None)
-        borrower_name = getattr(loan.user, "display_name", None) or loan.user.get_full_name() or loan.user.username
+        borrower_name = (
+            getattr(loan.user, "display_name", None)
+            or loan.user.get_full_name()
+            or loan.user.username
+        )
         contact = getattr(profile, "contact_number", "") or "N/A"
-        items_desc = "; ".join(f"{item.catalog_item.name} (x{item.quantity})" for item in loan.items.all())
+        items_desc = "; ".join(
+            f"{item.catalog_item.name} (x{item.quantity})" for item in loan.items.all()
+        )
         asset_codes = []
         for item in loan.items.all():
             for alloc in item.allocations.all():
@@ -493,18 +433,21 @@ def _export_overdue_csv(queryset):
         due_str = timezone.localtime(loan.due_at).strftime("%Y-%m-%d")
         days = loan.overdue_days(today)
 
-        writer.writerow([
-            f"#{loan.pk}",
-            borrower_name,
-            loan.user.email,
-            contact,
-            items_desc,
-            asset_codes_str,
-            due_str,
-            days,
-            loan.get_status_display(),
-        ])
+        writer.writerow(
+            [
+                f"#{loan.pk}",
+                borrower_name,
+                loan.user.email,
+                contact,
+                items_desc,
+                asset_codes_str,
+                due_str,
+                days,
+                loan.get_status_display(),
+            ]
+        )
     return response
+
 
 @admin_required
 def manage(request):
@@ -664,10 +607,12 @@ def manage(request):
     today = timezone.localdate()
     overdue_list = []
     for req in overdue_report_qs:
-        overdue_list.append({
-            "request": req,
-            "days_overdue": req.overdue_days(today),
-        })
+        overdue_list.append(
+            {
+                "request": req,
+                "days_overdue": req.overdue_days(today),
+            }
+        )
 
     context["reports"] = {
         "active_tab": report_tab if report_tab in ("loans", "overdue") else "loans",
@@ -850,13 +795,13 @@ def borrow_requests(request):
         if date_to:
             queryset = queryset.filter(created_at__date__lte=date_to)
 
-    page_obj, querystring = _table_paginate(request, queryset)
+    queryset, querystring = _table_paginate(request, queryset)
     return render(
         request,
         "manage/borrow_requests.html",
         {
             "filter_form": filter_form,
-            "page_obj": page_obj,
+            "queryset": queryset,
             "querystring": querystring,
         },
     )
@@ -1050,129 +995,190 @@ def settings(request):
 
 @admin_required
 def catalogs(request, view="category", pk=0):
-    form = None
-    target = None
+    @dataclass()
+    class CatalogViewConfig:
+        model: type
+        form: type
+        filter_form: type
+        queryset: QuerySet
+        querystring: str
+        identifier: str
+        label: str
+        status_field: str
+        status: int
+        action: str
+
+    def _apply_valid_filter(request, config):
+        if request.method != "GET":
+            return
+
+        config.filter_form = config.filter_form(request.GET)
+
+        if not config.filter_form.is_valid():
+            return
+
+        match view.lower():
+            case "category":
+                query = config.filter_form.cleaned_data["q"].strip()
+                status = config.filter_form.cleaned_data["status"]
+
+                if query:
+                    config.queryset = config.queryset.filter(
+                        Q(name__icontains=query) | Q(description__icontains=query)
+                    )
+                if status is not None:
+                    config.queryset = config.queryset.filter(status=status)
+            case "item":
+                query = config.filter_form.cleaned_data["q"].strip()
+                category = config.filter_form.cleaned_data["category"]
+                status = config.filter_form.cleaned_data["status"]
+
+                if query:
+                    config.queryset = config.queryset.filter(
+                        Q(name__icontains=query)
+                        | Q(description__icontains=query)
+                        | Q(category__name__icontains=query)
+                    )
+                if category:
+                    config.queryset = config.queryset.filter(category=category)
+                if status is not None:
+                    config.queryset = config.queryset.filter(status=status)
+            case "unit":
+                query = config.filter_form.cleaned_data["q"].strip()
+                category = config.filter_form.cleaned_data["category"]
+                catalog_item = config.filter_form.cleaned_data["catalog_item"]
+                inventory_status = config.filter_form.cleaned_data["inventory_status"]
+
+                if query:
+                    config.queryset = config.queryset.filter(
+                        Q(asset_code__icontains=query)
+                        | Q(catalog_item__name__icontains=query)
+                        | Q(catalog_item__category__name__icontains=query)
+                    )
+                if category:
+                    config.queryset = config.queryset.filter(
+                        catalog_item__category=category
+                    )
+                if catalog_item:
+                    config.queryset = config.queryset.filter(catalog_item=catalog_item)
+                if inventory_status is not None:
+                    config.queryset = config.queryset.filter(
+                        inventory_status=inventory_status
+                    )
+
+        config.queryset, config.querystring = _table_paginate(request, config.queryset)
+
+    def _audit(request, config, target):
+        name = getattr(target, config.identifier)
+        record_audit(request.user, f"{config.action} '{name}' {config.label}")
+        messages.success(
+            request, f"Successfully {config.action.lower()} '{name}' {config.label}!"
+        )
+
+    views = {
+        "category": CatalogViewConfig(
+            Category,
+            forms.CategoryForm,
+            forms.CategoryFilterForm,
+            Category.objects.annotate(item_count=Count("catalogitem")).order_by("name"),
+            "",
+            "name",
+            "category",
+            "status",
+            Category.CategoryStatus.ARCHIVED,
+            "Archived",
+        ),
+        "item": CatalogViewConfig(
+            CatalogItem,
+            forms.CatalogItemForm,
+            forms.CatalogItemFilterForm,
+            (
+                CatalogItem.objects.select_related("category")
+                .annotate(
+                    total_units=Count("units", distinct=True),
+                    available_units=Count(
+                        "units",
+                        filter=Q(
+                            units__inventory_status=EquipmentUnit.EquipmentStatus.AVAILABLE,
+                            units__condition=EquipmentUnit.EquipmentCondition.FINE,
+                        ),
+                        distinct=True,
+                    ),
+                )
+                .order_by("category__name", "name")
+            ),
+            "",
+            "name",
+            "catalog item",
+            "status",
+            CatalogItem.CatalogItemStatus.ARCHIVED,
+            "Archived",
+        ),
+        "unit": CatalogViewConfig(
+            EquipmentUnit,
+            forms.EquipmentUnitForm,
+            forms.EquipmentUnitFilterForm,
+            EquipmentUnit.objects.select_related("catalog_item__category").order_by(
+                "asset_code"
+            ),
+            "",
+            "asset_code",
+            "equipment unit",
+            "inventory_status",
+            EquipmentUnit.EquipmentStatus.RETIRED,
+            "Retired",
+        ),
+    }
+
     url_name = resolve(request.path).url_name
 
-    filter_form, queryset, querystring = _filter_catalogs(request, view)
+    config = views.get(view.lower())
+
+    if config == None:
+        raise Http404(f"No catalog of {view.title()} view!")
+
+    form = target = None
+
+    if request.method == "GET":
+        _apply_valid_filter(request, config)
 
     if url_name == "catalogs_archive":
-        model_map = {
-            "category": Category,
-            "item": CatalogItem,
-            "unit": EquipmentUnit,
-        }
-        model = model_map.get(view.lower())
-        target = get_object_or_404(model, pk=pk) if model else None
+        target = get_object_or_404(config.model, pk=pk)
+        target.status = config.status
+        target.save(update_fields=[config.status_field])
 
-        if request.method == "POST" and target:
-            posted = (
-                view
-                if view == "category"
-                else "catalog item"
-                if view == "item"
-                else "equipment unit"
-            )
-            if view.lower() == "category":
-                target.status = Category.CategoryStatus.ARCHIVED
-                target.save(update_fields=["status"])
-            elif view.lower() == "item":
-                target.status = CatalogItem.CatalogItemStatus.ARCHIVED
-                target.save(update_fields=["status"])
-            elif view.lower() == "unit":
-                target.inventory_status = EquipmentUnit.EquipmentStatus.RETIRED
-                target.save(update_fields=["inventory_status"])
-
-            name = target.name if view != "unit" else target.asset_code
-            record_audit(
-                request.user,
-                f"{'Retired' if view == 'unit' else 'Archived'} '{name}' {posted}",
-            )
-            messages.success(
-                request,
-                f"Successfully {'retired' if view == 'unit' else 'archived'} '{name}' {posted}!",
-            )
-            return redirect("catalogs_view", view=view)
-
-        context = {
-            "view": view,
-            "queryset": queryset,
-            "querystring": querystring,
-            "form": form,
-            "filter_form": filter_form,
-            "target": target,
-        }
-        return render(request, "manage/catalogs.html", context)
-
-    if url_name == "catalogs_edit":
-        data = request.POST or None
-        if view.lower() == "category":
-            target = get_object_or_404(Category, pk=pk)
-            form = forms.CategoryForm(data, instance=target)
-        elif view.lower() == "item":
-            target = get_object_or_404(CatalogItem, pk=pk)
-            form = forms.CatalogItemForm(data, instance=target)
-        elif view.lower() == "unit":
-            target = get_object_or_404(EquipmentUnit, pk=pk)
-            form = forms.EquipmentUnitForm(data, instance=target)
-
-        if request.method == "POST" and isinstance(form, ModelForm) and form.is_valid():
-            target = form.save()
-            posted = (
-                view
-                if view == "category"
-                else "catalog item"
-                if view == "item"
-                else "equipment unit"
-            )
-            name = target.name if view != "unit" else target.asset_code
-            record_audit(request.user, f"Edited '{name}' {posted}")
-            messages.success(request, f"Successfully edited '{name}' {posted}!")
-            return redirect("catalogs_view", view=view)
-
-        context = {
-            "view": view,
-            "queryset": queryset,
-            "querystring": querystring,
-            "form": form,
-            "filter_form": filter_form,
-            "target": target,
-        }
-        return render(request, "manage/catalogs.html", context)
-
-    data = request.POST or None
-    match view.lower():
-        case "category":
-            form = forms.CategoryForm(data)
-        case "item":
-            form = forms.CatalogItemForm(data)
-        case "unit":
-            form = forms.EquipmentUnitForm(data)
-
-    if request.method == "POST" and isinstance(form, ModelForm) and form.is_valid():
-        target = form.save()
-        posted = (
-            view
-            if view == "category"
-            else "catalog item"
-            if view == "item"
-            else "equipment unit"
-        )
-        name = target.name if view != "unit" else target.asset_code
-        record_audit(request.user, f"Created '{name}' {posted}")
-        messages.success(request, f"Successfully created '{name}' {posted}!")
+        _audit(request, config, target)
         return redirect("catalogs_view", view=view)
 
+    if url_name == "catalogs_edit":
+        target = get_object_or_404(config.model, pk=pk)
+        config.action = "Edited"
+    else:
+        config.action = "Created"
+
+    form = config.form(request.POST or None, instance=target)
+
+    if form.is_valid():
+        _audit(request, config, target)
+        return redirect("catalogs_view", view=view)
+    elif (
+        request.method == "POST"
+        and url_name != "catalogs_edit"
+        and url_name != "catalogs_archive"
+    ):
+        target = form
+
     context = {
-        "view": view,
-        "queryset": queryset,
-        "querystring": querystring,
+        "view": view.lower(),
+        "queryset": config.queryset,
+        "querystring": config.querystring,
         "form": form,
-        "filter_form": filter_form,
+        "filter_form": config.filter_form,
         "target": target,
     }
 
     return render(request, "manage/catalogs.html", context)
+
 
 @admin_required
 def sample(request):
