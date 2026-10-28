@@ -48,11 +48,27 @@
       </thead>
       <tbody class="divide-y divide-gray-100">
         {% for log in logs %}
-        <tr class="transition-colors hover:bg-gray-50/50">
+        <tr
+          {% if log.target_url %}
+          data-row-href="{{ log.target_url }}"
+          tabindex="0"
+          role="link"
+          title="Click to view {{ log.target_label }}"
+          class="group cursor-pointer transition-colors hover:bg-brand-primary-subtle/30 focus:bg-brand-primary-subtle/30 focus:outline-none"
+          {% else %}
+          class="transition-colors hover:bg-gray-50/50"
+          {% endif %}
+        >
           <td class="px-6 py-4 text-text-secondary font-mono text-xs">{{ log.created_at|date:"Y-m-d H:i:s" }}</td>
           <td class="px-6 py-4 text-text-primary font-medium">{{ log.user.email }}</td>
           <td class="px-6 py-4 text-gray-700 text-center">
+            {% if log.target_url %}
+            <a href="{{ log.target_url }}" class="group-hover:text-brand-primary group-hover:underline">
+              {{ log.action }}
+            </a>
+            {% else %}
             {{ log.action }}
+            {% endif %}
           </td>
         </tr>
         {% empty %}
@@ -68,4 +84,32 @@
 
   {% include "components/pagination.html" with queryset=logs querystring=querystring %}
 </div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    document.querySelectorAll("tr[data-row-href]").forEach(function (row) {
+      row.addEventListener("click", function (event) {
+        if (event.target.closest("a, button, input, select, textarea, form")) {
+          return;
+        }
+        const href = row.getAttribute("data-row-href");
+        if (href) {
+          window.location.href = href;
+        }
+      });
+      row.addEventListener("keydown", function (event) {
+        if (event.target !== row) {
+          return;
+        }
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          const href = row.getAttribute("data-row-href");
+          if (href) {
+            window.location.href = href;
+          }
+        }
+      });
+    });
+  });
+</script>
 {% endblock %}

@@ -5,6 +5,7 @@ from django.urls import reverse
 from django.utils import timezone
 
 from app.models import (
+    AuditLog,
     BorrowRequest,
     CatalogItem,
     Category,
@@ -310,3 +311,24 @@ class ReturnsManagementTests(TestCase):
         self.assertContains(review_response, "border-emerald-200 bg-emerald-50")
         self.assertContains(review_response, "border-rose-200 bg-rose-50")
         self.assertContains(review_response, "border-amber-200 bg-amber-50")
+
+    def test_recent_return_logs_and_audit_logs_rows_are_clickable_to_request_details(self):
+        ReturnRecord.objects.create(
+            borrow_request=self.borrow_request,
+            equipment_unit=self.lap_003,
+            condition=EquipmentUnit.EquipmentCondition.FINE,
+        )
+        AuditLog.objects.create(
+            user=self.admin,
+            action=f"Approved borrow request #{self.borrow_request.pk} for student '{self.beatrice.email}'.",
+        )
+
+        expected_review_url = reverse("borrow_request_review", args=[self.borrow_request.pk])
+
+        returns_res = self.client.get(reverse("manage_returns"))
+        self.assertEqual(returns_res.status_code, 200)
+        self.assertContains(returns_res, f'data-row-href="{expected_review_url}"')
+
+        audit_res = self.client.get(reverse("audit"))
+        self.assertEqual(audit_res.status_code, 200)
+        self.assertContains(audit_res, f'data-row-href="{expected_review_url}"')

@@ -1,3 +1,4 @@
+import re
 import csv
 from dataclasses import dataclass
 from datetime import datetime
@@ -11,7 +12,7 @@ from django.db.models import Count, Q
 from django.db.models.query import QuerySet
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
-from django.urls import resolve
+from django.urls import resolve, reverse
 from django.urls.exceptions import Http404
 from django.utils import timezone
 from django.views.decorators.http import require_POST
@@ -1131,16 +1132,76 @@ def borrow_request_slip(request, pk):
     )
 
 
+def _resolve_audit_log_target(action, units_by_code, categories_by_name, items_by_name):
+    if not action:
+        return None, None
+
+    req_match = re.search(r"(?:BorrowRequest|borrow request|Request)\s*#(\d+)", action)
+    if req_match:
+        req_id = int(req_match.group(1))
+        return reverse("borrow_request_review", args=[req_id]), f"Request #{req_id} details"
+
+    acct_match = re.search(r"\(ID\s*#(\d+)\)", action)
+    if acct_match:
+        user_id = int(acct_match.group(1))
+        return reverse("user_borrowing_history", args=[user_id]), f"User #{user_id} borrowing history"
+
+    for quoted in re.findall(r"'([^']+)'", action):
+        if quoted in units_by_code:
+            unit = units_by_code[quoted]
+            return (
+                reverse("equipment_unit_history", args=[unit.pk]),
+                f"Unit {unit.asset_code} history",
+            )
+        if quoted in items_by_name:
+            item = items_by_name[quoted]
+            return (
+                f"{reverse('catalogs_view', kwargs={'view': 'unit'})}?category={item.category_id}&catalog_item={item.pk}",
+                f"Catalog item {item.name}",
+            )
+        if quoted in categories_by_name:
+            cat = categories_by_name[quoted]
+            return (
+                f"{reverse('catalogs_view', kwargs={'view': 'item'})}?category={cat.pk}",
+                f"Category {cat.name}",
+            )
+
+    lower_action = action.lower()
+    if "maintenance" in lower_action:
+        return reverse("manage_maintenance"), "Maintenance Management"
+    if "equipment unit" in lower_action:
+        return reverse("catalogs_view", kwargs={"view": "unit"}), "Equipment Units"
+    if "catalog item" in lower_action:
+        return reverse("catalogs_view", kwargs={"view": "item"}), "Catalog Items"
+    if "category" in lower_action:
+        return reverse("catalogs_view", kwargs={"view": "category"}), "Equipment Categories"
+    if "setting" in lower_action or "max_borrow" in lower_action:
+        return reverse("settings"), "System Settings"
+
+    return None, None
+
+
 @admin_required
 def audit(request):
     search_form = forms.AuditLogSearchForm(request.GET)
-    logs = AuditLog.objects.all().order_by("-created_at")
+    logs = AuditLog.objects.select_related("user").order_by("-created_at")
 
     if search_form.is_valid():
         query = search_form.cleaned_data["q"].strip()
         logs = logs.filter(Q(action__icontains=query) | Q(user__email__icontains=query))
 
     logs, querystring = _table_paginate(request, logs)
+
+    units_by_code = {u.asset_code: u for u in EquipmentUnit.objects.only("id", "asset_code")}
+    categories_by_name = {c.name: c for c in Category.objects.only("id", "name")}
+    items_by_name = {
+        i.name: i for i in CatalogItem.objects.only("id", "name", "category_id")
+    }
+
+    for log in logs:
+        log.target_url, log.target_label = _resolve_audit_log_target(
+            log.action, units_by_code, categories_by_name, items_by_name
+        )
 
     return render(
         request,
@@ -1504,3 +1565,154 @@ def user_borrowing_history(request, pk):
         },
     }
     return render(request, "manage/user_borrowing_history.html", context)
+
+
+@admin_required
+def equipment_unit_history(request, pk):
+    unit = get_object_or_404(
+        EquipmentUnit.objects.select_related("catalog_item__category"),
+        pk=pk,
+    )
+    allocations = list(
+        UnitAllocation.objects.filter(equipment_unit=unit)
+        .select_related(
+            "request_item__borrow_request__user__profile",
+            "request_item__catalog_item",
+        )
+        .order_by("-allocated_at")
+    )
+    return_records = list(
+        ReturnRecord.objects.filter(equipment_unit=unit)
+        .select_related("borrow_request__user__profile")
+        .order_by("-created_at")
+    )
+    returns_by_request_id = {ret.borrow_request_id: ret for ret in return_records}
+
+    for alloc in allocations:
+        alloc.borrow_request = alloc.request_item.borrow_request
+        return_rec = returns_by_request_id.get(alloc.borrow_request.id)
+        alloc.return_record = return_rec
+        alloc.is_returned = return_rec is not None
+        alloc.is_damaged_return = (
+            return_rec is not None
+            and return_rec.condition == EquipmentUnit.EquipmentCondition.DAMAGED
+        )
+        alloc.show_return_status = alloc.borrow_request.status in (
+            BorrowRequest.BorrowRequestStatus.ISSUED,
+            BorrowRequest.BorrowRequestStatus.PARTIALLY_RETURNED,
+            BorrowRequest.BorrowRequestStatus.RETURNED,
+        )
+
+    maintenance_records = list(
+        MaintenanceRecord.objects.filter(unit=unit)
+        .select_related("maintainer__profile")
+        .order_by("-created_at")
+    )
+
+    fine_returns = len(
+        [
+            r
+            for r in return_records
+            if r.condition == EquipmentUnit.EquipmentCondition.FINE
+        ]
+    )
+    damaged_returns = len(
+        [
+            r
+            for r in return_records
+            if r.condition == EquipmentUnit.EquipmentCondition.DAMAGED
+        ]
+    )
+    active_maintenance = len(
+        [
+            m
+            for m in maintenance_records
+            if m.status == MaintenanceRecord.MaintenanceStatus.ACTIVE
+        ]
+    )
+
+    timeline_events = []
+    for alloc in allocations:
+        timeline_events.append(
+            {
+                "timestamp": alloc.allocated_at,
+                "priority": 1,
+                "title": f"Allocated to Request #{alloc.borrow_request.pk}",
+                "subtitle": f"Borrower: {alloc.borrow_request.user.display_name} ({alloc.borrow_request.user.email}) — Purpose: {alloc.borrow_request.purpose}",
+                "badge_label": alloc.borrow_request.get_status_display(),
+                "badge_variant": "info",
+                "link_url": reverse(
+                    "borrow_request_review", args=[alloc.borrow_request.pk]
+                ),
+                "link_text": f"Request #{alloc.borrow_request.pk}",
+            }
+        )
+    for ret in return_records:
+        is_dmg = ret.condition == EquipmentUnit.EquipmentCondition.DAMAGED
+        timeline_events.append(
+            {
+                "timestamp": ret.created_at,
+                "priority": 2,
+                "title": f"Returned from Request #{ret.borrow_request_id}",
+                "subtitle": f"Returned by {ret.borrow_request.user.display_name} ({ret.borrow_request.user.email}) in {ret.get_condition_display()} condition.",
+                "badge_label": "Returned (Damaged)" if is_dmg else "Returned (Fine)",
+                "badge_variant": "danger" if is_dmg else "success",
+                "link_url": reverse(
+                    "borrow_request_review", args=[ret.borrow_request_id]
+                ),
+                "link_text": f"Request #{ret.borrow_request_id}",
+            }
+        )
+    for maint in maintenance_records:
+        is_active = maint.status == MaintenanceRecord.MaintenanceStatus.ACTIVE
+        event_ts = (
+            maint.resolved_at
+            if maint.status == MaintenanceRecord.MaintenanceStatus.FINISHED
+            and maint.resolved_at
+            else maint.created_at
+        )
+        timeline_events.append(
+            {
+                "timestamp": event_ts,
+                "priority": 3,
+                "title": f"Maintenance Ticket #{maint.pk} ({maint.get_status_display()})",
+                "subtitle": f"Issue: {maint.issue} | Action: {maint.action} | Maintainer: {maint.maintainer.email}",
+                "badge_label": f"Maintenance ({maint.get_status_display()})",
+                "badge_variant": "warning" if is_active else "success",
+                "link_url": reverse("manage_maintenance"),
+                "link_text": "Maintenance",
+            }
+        )
+    timeline_events.append(
+        {
+            "timestamp": unit.acquired_at,
+            "priority": 0,
+            "title": f"Unit {unit.asset_code} Registered in Inventory",
+            "subtitle": f"Catalog Item: {unit.catalog_item.name} ({unit.catalog_item.category.name})",
+            "badge_label": "Acquired",
+            "badge_variant": "neutral",
+            "link_url": None,
+            "link_text": None,
+        }
+    )
+    timeline_events.sort(
+        key=lambda e: (e["priority"] > 0, e["timestamp"], e["priority"]),
+        reverse=True,
+    )
+
+    context = {
+        "unit": unit,
+        "allocations": allocations,
+        "return_records": return_records,
+        "maintenance_records": maintenance_records,
+        "timeline_events": timeline_events,
+        "stats": {
+            "total_borrows": len(allocations),
+            "total_returns": len(return_records),
+            "fine_returns": fine_returns,
+            "damaged_returns": damaged_returns,
+            "total_maintenance": len(maintenance_records),
+            "active_maintenance": active_maintenance,
+        },
+    }
+    return render(request, "manage/unit_history.html", context)

@@ -15,6 +15,7 @@ from .views.manage import (
     borrow_request_slip,
     borrow_requests,
     catalogs,
+    equipment_unit_history,
     loans_list,
     maintenance_manage_view,
     manage,
@@ -38,6 +39,11 @@ urlpatterns = [
     path("portal/", include("app.portal_urls")),
     path("manage/", manage, name="manage"),
     path(route="manage/catalogs/", view=catalogs, name="catalogs"),
+    path(
+        route="manage/catalogs/unit/<int:pk>/history/",
+        view=equipment_unit_history,
+        name="equipment_unit_history",
+    ),
     path(route="manage/catalogs/<str:view>", view=catalogs, name="catalogs_view"),
     path(
         route="manage/catalogs/<str:view>/<int:pk>/edit",

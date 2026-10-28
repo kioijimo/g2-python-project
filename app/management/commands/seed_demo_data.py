@@ -198,6 +198,9 @@ class Command(BaseCommand):
                     inventory_status=inv_status,
                     condition=cond,
                 )
+                acquired_dt = now - timedelta(days=22)
+                EquipmentUnit.objects.filter(pk=u.pk).update(acquired_at=acquired_dt)
+                u.acquired_at = acquired_dt
                 units[code] = u
                 return u
 

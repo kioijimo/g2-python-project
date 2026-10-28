@@ -182,9 +182,19 @@
       </thead>
       <tbody class="divide-y divide-gray-100">
         {% for record in recent_returns %}
-        <tr class="transition-colors hover:bg-gray-50/50">
+        <tr
+          data-row-href="{% url 'borrow_request_review' record.borrow_request.id %}"
+          tabindex="0"
+          role="link"
+          title="Click to view Request #{{ record.borrow_request.id }} details"
+          class="group cursor-pointer transition-colors hover:bg-brand-primary-subtle/30 focus:bg-brand-primary-subtle/30 focus:outline-none"
+        >
           <td class="px-6 py-4 text-text-secondary whitespace-nowrap">{{ record.created_at|date:"M d, Y H:i" }}</td>
-          <td class="px-6 py-4 font-mono font-medium text-text-primary whitespace-nowrap">#REQ-{{ record.borrow_request.id }}</td>
+          <td class="px-6 py-4 font-mono font-medium text-text-primary whitespace-nowrap">
+            <a href="{% url 'borrow_request_review' record.borrow_request.id %}" class="group-hover:text-brand-primary group-hover:underline">
+              #REQ-{{ record.borrow_request.id }}
+            </a>
+          </td>
           <td class="px-6 py-4 font-mono font-semibold text-text-primary whitespace-nowrap">{{ record.equipment_unit.asset_code }}</td>
           <td class="px-6 py-4">
             {% if record.condition == EquipmentCondition.FINE %}
@@ -290,6 +300,30 @@
   }
 
   document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('tr[data-row-href]').forEach(function (row) {
+      row.addEventListener('click', function (event) {
+        if (event.target.closest('a, button, input, select, textarea, form')) {
+          return;
+        }
+        var href = row.getAttribute('data-row-href');
+        if (href) {
+          window.location.href = href;
+        }
+      });
+      row.addEventListener('keydown', function (event) {
+        if (event.target !== row) {
+          return;
+        }
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault();
+          var href = row.getAttribute('data-row-href');
+          if (href) {
+            window.location.href = href;
+          }
+        }
+      });
+    });
+
     var select = document.getElementById('borrow-request-select');
     if (!select) return;
     updateSelectedBorrowRequestTable(select.value);

@@ -1,7 +1,16 @@
 from django.test import TestCase
 from django.urls import reverse
 
-from app.models import CatalogItem, Category, EquipmentUnit
+from django.utils import timezone
+from app.models import (
+    BorrowRequest,
+    CatalogItem,
+    Category,
+    EquipmentUnit,
+    MaintenanceRecord,
+    ReturnRecord,
+    UnitAllocation,
+)
 from app.tests.helpers import (
     create_admin,
     create_borrow_request,
@@ -270,3 +279,108 @@ class ManageCatalogTests(TestCase):
         self.assertContains(response, 'name="catalog_item"')
         self.assertContains(response, 'name="inventory_status"')
         self.assertContains(response, 'name="category"')
+
+    def test_category_row_links_to_filtered_catalog_items(self):
+        other_category = create_category("Audio-Visual")
+        electronics_item = create_catalog_item("Digital Multimeter", category=self.category)
+        av_item = create_catalog_item("4K Projector", category=other_category)
+
+        cat_response = self.client.get(reverse("catalogs_view", kwargs={"view": "category"}))
+        self.assertEqual(cat_response.status_code, 200)
+        expected_href = f"{reverse('catalogs_view', kwargs={'view': 'item'})}?category={self.category.pk}"
+        self.assertContains(cat_response, f'data-row-href="{expected_href}"')
+
+        filtered_items_response = self.client.get(expected_href)
+        self.assertEqual(filtered_items_response.status_code, 200)
+        self.assertContains(filtered_items_response, electronics_item.name)
+        self.assertNotContains(filtered_items_response, av_item.name)
+
+    def test_catalog_item_row_links_to_filtered_equipment_units(self):
+        item1 = create_catalog_item("Epson Projector", category=self.category)
+        item2 = create_catalog_item("Fluke Multimeter", category=self.category)
+        unit1 = EquipmentUnit.objects.create(
+            catalog_item=item1,
+            asset_code="PRJ-003",
+            inventory_status=EquipmentUnit.EquipmentStatus.AVAILABLE,
+            condition=EquipmentUnit.EquipmentCondition.FINE,
+        )
+        unit2 = EquipmentUnit.objects.create(
+            catalog_item=item2,
+            asset_code="DMM-009",
+            inventory_status=EquipmentUnit.EquipmentStatus.AVAILABLE,
+            condition=EquipmentUnit.EquipmentCondition.FINE,
+        )
+
+        item_response = self.client.get(reverse("catalogs_view", kwargs={"view": "item"}))
+        self.assertEqual(item_response.status_code, 200)
+        expected_href = (
+            f"{reverse('catalogs_view', kwargs={'view': 'unit'})}"
+            f"?category={self.category.pk}&catalog_item={item1.pk}"
+        )
+        self.assertContains(item_response, f'data-row-href="{expected_href}"')
+
+        filtered_units_response = self.client.get(expected_href)
+        self.assertEqual(filtered_units_response.status_code, 200)
+        self.assertContains(filtered_units_response, unit1.asset_code)
+        self.assertNotContains(filtered_units_response, unit2.asset_code)
+
+    def test_equipment_unit_row_links_to_unit_history_with_borrow_and_maintenance_records(self):
+        projector = create_catalog_item("Epson PowerLite Projector", category=self.category)
+        unit = EquipmentUnit.objects.create(
+            catalog_item=projector,
+            asset_code="PRJ-003",
+            inventory_status=EquipmentUnit.EquipmentStatus.MAINTENANCE,
+            condition=EquipmentUnit.EquipmentCondition.DAMAGED,
+        )
+        borrower = create_user("john.padilla@example.com")
+        borrow_req = create_borrow_request(
+            user=borrower,
+            purpose="Senior capstone defense presentation",
+            status=BorrowRequest.BorrowRequestStatus.RETURNED,
+        )
+        req_item = create_request_item(borrow_req, projector, quantity=1)
+        UnitAllocation.objects.create(
+            request_item=req_item,
+            equipment_unit=unit,
+            status=UnitAllocation.UnitAllocationStatus.RELEASED,
+            allocated_at=timezone.now(),
+        )
+        ReturnRecord.objects.create(
+            borrow_request=borrow_req,
+            equipment_unit=unit,
+            condition=EquipmentUnit.EquipmentCondition.DAMAGED,
+        )
+        MaintenanceRecord.objects.create(
+            maintainer=self.admin,
+            unit=unit,
+            issue="Cracked HDMI port casing from BorrowRequest.",
+            action="Ordered replacement daughterboard port.",
+            status=MaintenanceRecord.MaintenanceStatus.ACTIVE,
+            resolved_at=timezone.now(),
+        )
+
+        unit_list_response = self.client.get(
+            reverse("catalogs_view", kwargs={"view": "unit"}),
+            {"q": "PRJ-003"},
+        )
+        self.assertEqual(unit_list_response.status_code, 200)
+        history_url = reverse("equipment_unit_history", args=[unit.pk])
+        self.assertContains(unit_list_response, f'data-row-href="{history_url}"')
+
+        history_response = self.client.get(history_url)
+        self.assertEqual(history_response.status_code, 200)
+        self.assertContains(history_response, "PRJ-003")
+        self.assertContains(history_response, "Epson PowerLite Projector")
+        self.assertContains(history_response, "Senior capstone defense presentation")
+        self.assertContains(history_response, "john.padilla@example.com")
+        self.assertContains(history_response, "Returned (Damaged)")
+        self.assertContains(history_response, "Cracked HDMI port casing from BorrowRequest.")
+        self.assertContains(history_response, "Ordered replacement daughterboard port.")
+        content = history_response.content.decode("utf-8")
+        maint_pos = content.index(f"Maintenance Ticket #")
+        return_pos = content.index(f"Returned from Request #{borrow_req.pk}")
+        alloc_pos = content.index(f"Allocated to Request #{borrow_req.pk}")
+        acq_pos = content.index("Unit PRJ-003 Registered in Inventory")
+        self.assertLess(maint_pos, return_pos)
+        self.assertLess(return_pos, alloc_pos)
+        self.assertLess(alloc_pos, acq_pos)
