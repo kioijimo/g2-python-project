@@ -5,8 +5,6 @@ from .views.auth import login_view, logout_view
 from .views.manage import (
     account_list,
     activate_user,
-    deactivate_user,
-    user_borrowing_history,
     audit,
     borrow_request_approve,
     borrow_request_reject,
@@ -15,6 +13,7 @@ from .views.manage import (
     borrow_request_slip,
     borrow_requests,
     catalogs,
+    deactivate_user,
     equipment_unit_history,
     loans_list,
     maintenance_manage_view,
@@ -26,6 +25,7 @@ from .views.manage import (
     returns_manage_view,
     sample,
     settings,
+    user_borrowing_history,
 )
 
 urlpatterns = [
@@ -43,6 +43,16 @@ urlpatterns = [
         route="manage/catalogs/unit/<int:pk>/history/",
         view=equipment_unit_history,
         name="equipment_unit_history",
+    ),
+    path(
+        route="manage/catalogs/unit/<int:pk>/history/<str:action>",
+        view=equipment_unit_history,
+        name="unit_history_archive",
+    ),
+    path(
+        route="manage/catalogs/unit/<int:pk>/history/<str:action>",
+        view=equipment_unit_history,
+        name="unit_history_edit",
     ),
     path(route="manage/catalogs/<str:view>", view=catalogs, name="catalogs_view"),
     path(

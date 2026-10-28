@@ -31,8 +31,14 @@
   </div>
 
   <div class="flex flex-wrap items-center justify-between gap-4">
-    <div>
+    <div class="flex-1">
       <div class="flex flex-wrap items-center gap-3">
+        <a
+          href="{% url 'catalogs_view' 'unit' %}?category={{ unit.catalog_item.category_id }}&catalog_item={{ unit.catalog_item_id }}"
+          class="cursor-pointer inline-flex items-center justify-center rounded-md border border-border-default bg-surface-card px-4 py-2 text-sm font-medium text-gray-700 shadow-sm transition hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-brand-primary focus:ring-offset-2"
+        >
+          &larr; Back to Units
+        </a>
         <h1 class="text-2xl font-bold tracking-tight text-text-primary sm:text-3xl font-mono">
           {{ unit.asset_code }}
         </h1>
@@ -45,18 +51,18 @@
     </div>
 
     <div class="flex flex-wrap items-center gap-2">
-      <a
-        href="{% url 'catalogs_view' 'unit' %}?category={{ unit.catalog_item.category_id }}&catalog_item={{ unit.catalog_item_id }}"
-        class="cursor-pointer inline-flex items-center justify-center rounded-md border border-border-default bg-surface-card px-4 py-2 text-sm font-medium text-gray-700 shadow-sm transition hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-brand-primary focus:ring-offset-2"
+      {% if unit.inventory_status != 0 %}
+      <a href="{% url 'unit_history_archive' pk=unit.id action='archive' %}"
+        class="cursor-pointer inline-flex items-center justify-center rounded-md bg-brand-accent px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-brand-accent-hover focus:outline-none focus:ring-2 focus:ring-brand-accent focus:ring-offset-2"
       >
-        &larr; Back to Units
-      </a>
-      <a
-        href="{% url 'catalogs_edit' view='unit' pk=unit.pk %}"
+        Retire Unit
+      <a/>
+      {% endif %}
+      <a href="{% url 'unit_history_edit' pk=unit.id action='edit' %}"
         class="cursor-pointer inline-flex items-center justify-center rounded-md bg-brand-primary px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-brand-primary-hover focus:outline-none focus:ring-2 focus:ring-brand-primary focus:ring-offset-2"
       >
         Edit Unit
-      </a>
+      <a/>
     </div>
   </div>
 </div>
@@ -329,4 +335,56 @@
     {% endfor %}
   </div>
 </div>
+
+<dialog id="form-modal" class="m-auto w-full max-w-lg rounded-xl border border-border-default bg-surface-card p-6 shadow-xl backdrop:bg-black/60">
+  <h2 id="modal-title" class="text-xl font-bold tracking-tight text-text-primary sm:text-2xl">
+    {% if action == 'archive' %}
+      Retire
+    {% elif action == 'edit' %}
+      Edit
+    {% endif %}
+    Equipment Unit
+  </h2>
+  {% if action == 'archive' %}
+  <p class="mt-4 text-text-primary">You are about to retire <span class="font-bold">{{ target.asset_code }}</span>. Are you sure you want to proceed?</p>
+  {% endif %}
+  <form method="post" id="catalog-form" class="mt-4">
+    {% csrf_token %}
+    {% if action != 'archive' %}
+    <div class="space-y-4">
+      {% for field in form %}
+        <div>
+          <label for="{{ field.id_for_label }}" class="mb-1 block text-sm font-medium text-gray-700">
+            {{ field.label }}
+          </label>
+          {{ field }}
+          {% if field.errors %}
+          <p class="mt-1 text-xs text-rose-600">{{ field.errors.0 }}</p>
+          {% endif %}
+        </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+    <div class="flex justify-end gap-2 pt-5 border-t border-border-default mt-5">
+      <a href="{% url 'equipment_unit_history' unit.id %}" type="button" onclick="this.closest('dialog').close()"
+        class="cursor-pointer rounded-md border border-border-default bg-surface-card px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-brand-primary">Cancel</a>
+      <button type="submit" id="modal-submit"
+        class="cursor-pointer rounded-md {% if request.resolver_match.url_name != 'catalogs_archive' %}bg-brand-primary hover:bg-brand-primary-hover focus:ring-brand-primary{% else %}bg-brand-primary hover:bg-rose-700 focus:ring-rose-500{% endif %} px-4 py-2 text-sm font-semibold text-white shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2">
+          {% if action == 'archive' %}
+            Retire Unit
+          {% elif action == 'edit' %}
+            Save Changes
+          {% endif %}
+      </button>
+    </div>
+  </form>
+</dialog>
+
+{% if action != None %}
+{% block extra_js %}
+<script>
+  document.querySelector("#form-modal").showModal()
+</script>
+{% endblock %}
+{% endif %}
 {% endblock %}
