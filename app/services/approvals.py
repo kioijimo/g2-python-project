@@ -133,7 +133,9 @@ def approve_borrow_request(borrow_request, actor, allocations_by_item):
             user=actor,
         )
 
-        record_audit(actor, f"Approved borrow request #{request.pk}.")
+        record_audit(
+            actor, f"Approved borrow request #{request.pk} from user {actor.email}."
+        )
 
     return request
 
@@ -156,7 +158,9 @@ def reject_borrow_request(borrow_request, actor):
             user=actor,
         )
 
-        record_audit(actor, f"Rejected borrow request #{request.pk}.")
+        record_audit(
+            actor, f"Rejected borrow request #{request.pk} from user {actor.email}."
+        )
 
     return request
 
@@ -179,9 +183,7 @@ def release_borrow_request(borrow_request, actor):
             .first()
         )
         if loan is None:
-            raise ValidationError(
-                "Approve the request before releasing its equipment."
-            )
+            raise ValidationError("Approve the request before releasing its equipment.")
         if loan.released_at is not None:
             raise ValidationError("This request has already been released.")
 
@@ -236,6 +238,9 @@ def release_borrow_request(borrow_request, actor):
         request.status = BorrowRequest.BorrowRequestStatus.ISSUED
         request.save(update_fields=["status"])
 
-        record_audit(actor, f"Released borrow request #{request.pk} as a loan.")
+        record_audit(
+            actor,
+            f"Released borrow request #{request.pk} as a loan for user {actor.email}.",
+        )
 
     return loan

@@ -868,10 +868,6 @@ def borrow_request_approve(request, pk):
     except ValidationError as error:
         messages.error(request, " ".join(error.messages))
     else:
-        record_audit(
-            request.user,
-            f"Approved borrow request #{borrow_request.id}",
-        )
         messages.success(request, "Borrow request approved and units reserved.")
 
     return redirect("borrow_request_review", pk=pk)
@@ -890,10 +886,6 @@ def borrow_request_reject(request, pk):
     except ValidationError as error:
         messages.error(request, " ".join(error.messages))
     else:
-        record_audit(
-            request.user,
-            f"Rejected borrow request #{borrow_request.id}",
-        )
         messages.success(request, "Borrow request rejected.")
 
     return redirect("borrow_request_review", pk=pk)
@@ -910,10 +902,6 @@ def borrow_request_release(request, pk):
         messages.error(request, " ".join(error.messages))
         return redirect("borrow_request_review", pk=pk)
 
-    record_audit(
-        request.user,
-        f"Borrow rerquest #{borrow_request.id} reserved units released.",
-    )
     messages.success(request, "Equipment released. The loan is now active.")
     return redirect("borrow_request_slip", pk=pk)
 
