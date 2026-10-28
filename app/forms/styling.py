@@ -1,25 +1,25 @@
 from django import forms
 
 FORM_INPUT_CLASS = (
-    "w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 "
-    "placeholder-gray-400 shadow-sm transition-colors duration-150 "
-    "focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600/20"
+    "w-full rounded-md border border-border-default bg-surface-card px-3 py-2 text-sm text-text-primary "
+    "placeholder-text-secondary/60 shadow-sm transition-colors duration-150 "
+    "focus:border-brand-primary focus:outline-none focus:ring-2 focus:ring-brand-primary/20"
 )
 
 FORM_SELECT_CLASS = (
-    "w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 "
+    "w-full rounded-md border border-border-default bg-surface-card px-3 py-2 text-sm text-text-primary "
     "shadow-sm transition-colors duration-150 "
-    "focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600/20"
+    "focus:border-brand-primary focus:outline-none focus:ring-2 focus:ring-brand-primary/20"
 )
 
 FORM_TEXTAREA_CLASS = (
-    "w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 "
-    "placeholder-gray-400 shadow-sm transition-colors duration-150 "
-    "focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600/20"
+    "w-full rounded-md border border-border-default bg-surface-card px-3 py-2 text-sm text-text-primary "
+    "placeholder-text-secondary/60 shadow-sm transition-colors duration-150 "
+    "focus:border-brand-primary focus:outline-none focus:ring-2 focus:ring-brand-primary/20"
 )
 
 FORM_CHECKBOX_CLASS = (
-    "h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-2 focus:ring-blue-500"
+    "h-4 w-4 rounded border-border-default text-brand-primary focus:ring-2 focus:ring-brand-primary"
 )
 
 INPUT_CLASS = FORM_INPUT_CLASS

@@ -6,31 +6,32 @@
 <!-- Page Header -->
 <div class="mb-8 flex flex-wrap items-center justify-between gap-4">
   <div>
-    <h1 class="text-2xl font-bold tracking-tight text-gray-900 sm:text-3xl">
+
+    <h1 class="text-2xl font-bold tracking-tight text-text-primary sm:text-3xl">
       Account Management
     </h1>
-    <p class="mt-1 text-sm text-gray-600">
+    <p class="mt-1 text-sm text-text-secondary">
       Manage user accounts, search users, inspect borrowing records, and toggle account activation status.
     </p>
   </div>
-  <div class="text-sm font-medium text-gray-500">
-    Total accounts: <span class="font-semibold text-gray-900">{{ total_count }}</span>
+  <div class="text-sm font-medium text-text-secondary">
+    Total accounts: <span class="font-semibold text-text-primary">{{ total_count }}</span>
   </div>
 </div>
 
 <!-- Search & Filter Card -->
-<div class="mt-6 rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+<div class="mt-6 rounded-xl border border-border-default bg-surface-card p-6 shadow-sm">
   <form method="get" class="grid gap-4 sm:grid-cols-2 lg:grid-cols-[minmax(0,1fr)_auto_auto] lg:items-end">
     {% include "components/form_field.html" with field=search_form.q %}
     <button
       type="submit"
-      class="cursor-pointer inline-flex items-center justify-center rounded-md bg-blue-700 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2"
+      class="cursor-pointer inline-flex items-center justify-center rounded-md bg-brand-primary px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-brand-primary-hover focus:outline-none focus:ring-2 focus:ring-brand-primary focus:ring-offset-2"
     >
       Search
     </button>
     <a
       href="{% url 'account_list' %}"
-      class="cursor-pointer inline-flex items-center justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm transition hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2"
+      class="cursor-pointer inline-flex items-center justify-center rounded-md border border-border-default bg-surface-card px-4 py-2 text-sm font-medium text-gray-700 shadow-sm transition hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-brand-primary focus:ring-offset-2"
     >
       Clear
     </a>
@@ -38,10 +39,10 @@
 </div>
 
 <!-- Accounts Table Card -->
-<div class="mt-6 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
+<div class="mt-6 overflow-hidden rounded-xl border border-border-default bg-surface-card shadow-sm">
   <div class="overflow-x-auto">
     <table class="w-full text-left text-sm">
-      <thead class="border-b border-gray-200 bg-gray-50 text-xs font-semibold uppercase tracking-wider text-gray-500">
+      <thead class="border-b border-border-default bg-gray-50 text-xs font-semibold uppercase tracking-wider text-text-secondary">
         <tr>
           <th class="px-6 py-3.5">User</th>
           <th class="px-6 py-3.5">Contact Number</th>
@@ -55,20 +56,20 @@
         <tr class="transition-colors hover:bg-gray-50/50">
           <td class="px-6 py-4">
             <div class="flex items-center gap-3">
-              <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-blue-700 text-xs font-bold text-white shadow-sm ring-2 ring-blue-100">
+              <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand-primary text-xs font-bold text-white shadow-sm ring-2 ring-brand-primary-subtle">
                 {{ u.initials }}
               </span>
               <div class="min-w-0">
-                <div class="font-medium text-gray-900">
+                <div class="font-medium text-text-primary">
                   {{ u.display_name }}
                 </div>
-                <div class="text-xs text-gray-500">
+                <div class="text-xs text-text-secondary">
                   {{ u.email }}
                 </div>
               </div>
             </div>
           </td>
-          <td class="px-6 py-4 text-gray-600">
+          <td class="px-6 py-4 text-text-secondary">
             {% if u.profile and u.profile.contact_number %}
               {{ u.profile.contact_number }}
             {% else %}
@@ -94,10 +95,10 @@
               <!-- Borrowing History Link -->
               <a
                 href="{% url 'user_borrowing_history' u.pk %}"
-                class="cursor-pointer inline-flex items-center gap-1.5 rounded-md border border-gray-300 bg-white px-2.5 py-1.5 text-xs font-medium text-gray-700 shadow-sm transition hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2"
+                class="cursor-pointer inline-flex items-center gap-1.5 rounded-md border border-border-default bg-surface-card px-2.5 py-1.5 text-xs font-medium text-gray-700 shadow-sm transition hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-brand-primary focus:ring-offset-2"
                 title="View borrowing history"
               >
-                <svg class="h-3.5 w-3.5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg class="h-3.5 w-3.5 text-text-secondary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
                 <span>History</span>
@@ -105,7 +106,7 @@
 
               <!-- Activate / Deactivate Action -->
               {% if u.id == request.user.id %}
-                <span class="inline-flex items-center px-2 py-1 text-xs text-gray-400 italic">
+                <span class="inline-flex items-center px-2 py-1 text-xs text-text-secondary italic">
                   Current
                 </span>
               {% elif u.is_active %}
@@ -136,7 +137,7 @@
         </tr>
         {% empty %}
         <tr>
-          <td colspan="5" class="px-6 py-12 text-center text-sm text-gray-500">
+          <td colspan="5" class="px-6 py-12 text-center text-sm text-text-secondary">
             {% if search_query %}
               No accounts found matching "{{ search_query }}".
             {% else %}

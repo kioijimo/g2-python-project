@@ -5,10 +5,11 @@
 {% block content %}
 <div class="mb-8 flex flex-wrap items-center justify-between gap-4">
   <div>
-    <h1 class="text-2xl font-bold tracking-tight text-gray-900 sm:text-3xl">
+
+    <h1 class="text-2xl font-bold tracking-tight text-text-primary sm:text-3xl">
       {% if view == 'category' %}Equipment Categories{% elif view == 'item' %}Catalog Items{% else %}Equipment Units{% endif %}
     </h1>
-    <p class="mt-1 text-sm text-gray-600">
+    <p class="mt-1 text-sm text-text-secondary">
       {% if view == 'category' %}
         Create, manage, and browse registered equipment categories.
       {% elif view == 'item' %}
@@ -24,19 +25,19 @@
     <div class="inline-flex rounded-lg bg-gray-100 p-1">
       <a
         href="{% url 'catalogs_view' 'category' %}"
-        class="cursor-pointer inline-flex items-center rounded-md px-3.5 py-1.5 text-sm font-semibold transition {% if view == 'category' %}bg-white text-gray-900 shadow-sm{% else %}text-gray-600 hover:text-gray-900{% endif %}"
+        class="cursor-pointer inline-flex items-center rounded-md px-3.5 py-1.5 text-sm font-semibold transition {% if view == 'category' %}bg-surface-card text-text-primary shadow-sm{% else %}text-text-secondary hover:text-text-primary{% endif %}"
       >
         Categories
       </a>
       <a
         href="{% url 'catalogs_view' 'item' %}"
-        class="cursor-pointer inline-flex items-center rounded-md px-3.5 py-1.5 text-sm font-semibold transition {% if view == 'item' %}bg-white text-gray-900 shadow-sm{% else %}text-gray-600 hover:text-gray-900{% endif %}"
+        class="cursor-pointer inline-flex items-center rounded-md px-3.5 py-1.5 text-sm font-semibold transition {% if view == 'item' %}bg-surface-card text-text-primary shadow-sm{% else %}text-text-secondary hover:text-text-primary{% endif %}"
       >
         Catalog Items
       </a>
       <a
         href="{% url 'catalogs_view' 'unit' %}"
-        class="cursor-pointer inline-flex items-center rounded-md px-3.5 py-1.5 text-sm font-semibold transition {% if view == 'unit' %}bg-white text-gray-900 shadow-sm{% else %}text-gray-600 hover:text-gray-900{% endif %}"
+        class="cursor-pointer inline-flex items-center rounded-md px-3.5 py-1.5 text-sm font-semibold transition {% if view == 'unit' %}bg-surface-card text-text-primary shadow-sm{% else %}text-text-secondary hover:text-text-primary{% endif %}"
       >
         Equipment Units
       </a>
@@ -46,7 +47,7 @@
     <button
       type="button"
       onclick="document.getElementById('form-modal').showModal()"
-      class="cursor-pointer inline-flex items-center justify-center gap-2 rounded-md bg-blue-700 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2"
+      class="cursor-pointer inline-flex items-center justify-center gap-2 rounded-md bg-brand-primary px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-brand-primary-hover focus:outline-none focus:ring-2 focus:ring-brand-primary focus:ring-offset-2"
     >
       <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
       <span>New {% if view == 'category' %}Category{% elif view == 'item' %}Catalog Item{% else %}Equipment Unit{% endif %}</span>
@@ -54,33 +55,39 @@
   </div>
 </div>
 
-<div class="flex flex-col gap-6 mt-6 rounded-xl border border-gray-200 bg-white p-6 shadow-sm">  
+<div class="flex flex-col gap-6 mt-6 rounded-xl border border-border-default bg-surface-card p-6 shadow-sm">  
   <form
     method="get"
-    class="flex gap-2 justify-between items-end">
-    <div class="flex-3">
+    class="flex flex-wrap gap-3 justify-between items-end">
+    <div class="flex-1 min-w-[200px]">
       {% include "components/form_field.html" with field=filter_form.q %} 
     </div>
     {% if view != 'unit' %}
-      <div class="flex-1">
+      <div class="w-48">
         {% include "components/form_field.html" with field=filter_form.status %}
       </div>
     {% endif %}
     {% if view != 'category' %}
-    {% include "components/form_field.html" with field=filter_form.category %}
-      {% include "components/form_field.html" with field=filter_form.catalog_item %}
-      {% include "components/form_field.html" with field=filter_form.inventory_status %}
+      <div class="w-48">
+        {% include "components/form_field.html" with field=filter_form.category %}
+      </div>
+      <div class="w-48">
+        {% include "components/form_field.html" with field=filter_form.catalog_item %}
+      </div>
+      <div class="w-48">
+        {% include "components/form_field.html" with field=filter_form.inventory_status %}
+      </div>
     {% endif %}
-    <div class="flex items-center gap-2">
+    <div class="flex items-center gap-2 pb-0.5">
       <button
         type="submit"
-        class="inline-flex items-center justify-center rounded-md bg-blue-700 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2"
+        class="cursor-pointer inline-flex items-center justify-center rounded-md bg-brand-primary px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-brand-primary-hover focus:outline-none focus:ring-2 focus:ring-brand-primary focus:ring-offset-2"
       >
         Filter
       </button>
       <a
         href="{% url 'catalogs_view' view %}"
-        class="inline-flex items-center justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm transition hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2"
+        class="cursor-pointer inline-flex items-center justify-center rounded-md border border-border-default bg-surface-card px-4 py-2 text-sm font-medium text-gray-700 shadow-sm transition hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-brand-primary focus:ring-offset-2"
       >
         Clear
       </a>
@@ -89,11 +96,11 @@
 </div>
 
 <div
-  class="mt-6 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
+  class="mt-6 overflow-hidden rounded-xl border border-border-default bg-surface-card shadow-sm">
   <div class="overflow-x-auto">
     <table class="w-full text-left text-sm">
       <thead
-        class="border-b border-gray-200 bg-gray-50 text-xs font-semibold uppercase tracking-wide text-gray-500"
+        class="border-b border-border-default bg-gray-50 text-xs font-semibold uppercase tracking-wide text-text-secondary"
       >
         <tr>
           <th class="px-6 py-3.5">{% if view == 'unit' %} Asset Code {% else %} Name {% endif %}</th>
@@ -111,15 +118,15 @@
       </thead>
       <tbody class="divide-y divide-gray-100">
         {% for q in queryset %}
-        <tr class="transition-colors hover:bg-gray-50">
+        <tr class="transition-colors hover:bg-gray-50/50">
           {% if view == 'unit' %}
-          <td class="px-6 py-4 font-mono text-xs font-semibold text-gray-900">
+          <td class="px-6 py-4 font-mono text-xs font-semibold text-text-primary">
             {{ q.asset_code }}
           </td>
           {% endif %} 
-          <td class="px-6 py-4 text-gray-700 {% if view != 'unit' %}font-semibold text-gray-900{% endif %}">{% if view == 'unit' %}{{ q.catalog_item.name }}{% else %}{{ q.name }}{% endif %}</td>
-          <td class="px-6 py-4 text-gray-600">{% if view == 'unit' %}{{ q.catalog_item.description }}{% else %}{{ q.description }}{% endif %}</td>
-          <td class="px-6 py-4 text-gray-600">
+          <td class="px-6 py-4 text-gray-700 {% if view != 'unit' %}font-semibold text-text-primary{% endif %}">{% if view == 'unit' %}{{ q.catalog_item.name }}{% else %}{{ q.name }}{% endif %}</td>
+          <td class="px-6 py-4 text-text-secondary">{% if view == 'unit' %}{{ q.catalog_item.description }}{% else %}{{ q.description }}{% endif %}</td>
+          <td class="px-6 py-4 text-text-secondary">
             {% if view == 'unit' %}{{ q.acquired_at|date:"Y-m-d" }}{% else %}{{ q.created_at|date:"Y-m-d" }}{% endif %}
           </td>
           <td class="px-6 py-4">
@@ -130,23 +137,24 @@
             {% include "components/catalog_status.html" with view=view req=q type="condition" %}
           </td>
           {% endif %}
-          <td class="flex gap-2 px-6 py-4 {% if q.status > 0 or q.inventory_status > 0 %}justify-center text-center{% else %}justify-end text-end mr-9{% endif %}">
-            <a href="{% url 'catalogs_edit' view=view pk=q.pk %}"
-              class="nline-flex items-center justify-center rounded-md border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2">
-              Edit
-            </button>
-            {% if q.status > 0 or q.inventory_status > 0 %}
-            <a href="{% url 'catalogs_archive' view=view pk=q.pk %}"
-              class="inline-flex items-center justify-center rounded-md border border-gray-300 bg-red-500 px-3 py-1.5 text-sm font-bold text-white shadow-sm hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-600"
-            >
-              {% if view == 'unit' %} Retire {% else %} Archive {% endif %}
-            </a>
-            {% endif %}
+          <td class="px-6 py-4 text-center">
+            <div class="flex items-center justify-center gap-2">
+              <a href="{% url 'catalogs_edit' view=view pk=q.pk %}"
+                class="cursor-pointer inline-flex items-center justify-center rounded-md border border-border-default bg-surface-card px-3 py-1.5 text-xs font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-brand-primary focus:ring-offset-2">
+                Edit
+              </a>
+              {% if q.status > 0 or q.inventory_status > 0 %}
+              <a href="{% url 'catalogs_archive' view=view pk=q.pk %}"
+                class="cursor-pointer inline-flex items-center justify-center rounded-md bg-rose-600 px-3 py-1.5 text-xs font-semibold text-white shadow-sm hover:bg-rose-700 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:ring-offset-2">
+                {% if view == 'unit' %} Retire {% else %} Archive {% endif %}
+              </a>
+              {% endif %}
+            </div>
           </td>
         </tr>
         {% empty %}
         <tr>
-          <td colspan="{% if view == 'unit' %} 7 {% else %} 5 {% endif %}" class="px-6 py-12 text-center text-sm text-gray-500">
+          <td colspan="{% if view == 'unit' %} 7 {% else %} 5 {% endif %}" class="px-6 py-12 text-center text-sm text-text-secondary">
             No {% if view == 'category' %} categories {% elif view == 'item' %} catalog items {% else %} equipment units {% endif %} match the selected filters.
           </td>
         </tr>
@@ -158,8 +166,8 @@
   {% include "components/pagination.html" with queryset=queryset querystring=querystring %}
 </div>
 
-<dialog id="form-modal" class="m-auto w-full max-w-lg rounded-xl border border-gray-200 p-6 shadow-xl backdrop:bg-black/60">
-  <h2 id="modal-title" class="text-xl font-bold tracking-tight text-gray-900 sm:text-2xl">
+<dialog id="form-modal" class="m-auto w-full max-w-lg rounded-xl border border-border-default bg-surface-card p-6 shadow-xl backdrop:bg-black/60">
+  <h2 id="modal-title" class="text-xl font-bold tracking-tight text-text-primary sm:text-2xl">
     {% if request.resolver_match.url_name == 'catalogs_archive' and view == 'unit' %}
       Retire
     {% elif request.resolver_match.url_name == 'catalogs_archive' and view != 'unit' %}
@@ -172,27 +180,36 @@
     {% if view == 'category' %} Category {% elif view == 'item' %} Catalog Item {% else %} Equipment Unit {% endif %}
   </h2>
   {% if request.resolver_match.url_name == 'catalogs_archive' %}
-  <p class="mt-4 text-gray-900">You are about to {% if view == 'unit' %}retire {{ target.asset_code}}{% else %}archive {{ target.name}}{% endif%}. Are you sure you want to do it?</p>
-  
+  <p class="mt-4 text-text-primary">You are about to {% if view == 'unit' %}retire <span class="font-bold">{{ target.asset_code }}</span>{% else %}archive <span class="font-bold">{{ target.name }}</span>{% endif %}. Are you sure you want to proceed?</p>
   {% endif %}
-  <form method="post" id="catalog-form">
+  <form method="post" id="catalog-form" class="mt-4">
     {% csrf_token %}
     {% if request.resolver_match.url_name != 'catalogs_archive' %}
-    {% for field in form %}
-      <div class="p-2">{{ field.label_tag }} {{ field }}{% if field.errors %}<p class="mt-1 text-xs text-rose-600">{{ field.errors.0 }}</p>{% endif %}</div>
-    {% endfor %}
+    <div class="space-y-4">
+      {% for field in form %}
+        <div>
+          <label for="{{ field.id_for_label }}" class="mb-1 block text-sm font-medium text-gray-700">
+            {{ field.label }}
+          </label>
+          {{ field }}
+          {% if field.errors %}
+          <p class="mt-1 text-xs text-rose-600">{{ field.errors.0 }}</p>
+          {% endif %}
+        </div>
+      {% endfor %}
+    </div>
     {% endif %}
-    <div class="flex justify-end gap-2 pt-4">
+    <div class="flex justify-end gap-2 pt-5 border-t border-border-default mt-5">
       <a href="{% url 'catalogs_view' view %}" type="button" onclick="this.closest('dialog').close()"
-        class="rounded-md px-4 py-2 text-sm text-slate-600 hover:bg-slate-100">Cancel</a>
+        class="cursor-pointer rounded-md border border-border-default bg-surface-card px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-brand-primary">Cancel</a>
       <button type="submit" id="modal-submit"
-        class="rounded-md {% if request.resolver_match.url_name != 'catalogs_archive' %}bg-blue-700 hover:bg-blue-800{% else %}bg-rose-500 hover:bg-rose-600{% endif %} px-4 py-2 text-sm font-semibold text-white ">
+        class="cursor-pointer rounded-md {% if request.resolver_match.url_name != 'catalogs_archive' %}bg-brand-primary hover:bg-brand-primary-hover focus:ring-brand-primary{% else %}bg-rose-600 hover:bg-rose-700 focus:ring-rose-500{% endif %} px-4 py-2 text-sm font-semibold text-white shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2">
           {% if request.resolver_match.url_name == 'catalogs_archive' and view == 'unit' %}
-            Retire
+            Retire Unit
           {% elif request.resolver_match.url_name == 'catalogs_archive' and view != 'unit' %}
-            Archive
+            Archive Category/Item
           {% elif request.resolver_match.url_name == 'catalogs_edit' %}
-            Edit
+            Save Changes
           {% else %}
             Create
           {% endif %}

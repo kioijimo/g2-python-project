@@ -1,6 +1,6 @@
 {% load tailwind_tags %}
 <!doctype html>
-<html lang="en" class="{% block html_class %}h-screen overflow-hidden bg-gray-50{% endblock %}">
+<html lang="en" class="{% block html_class %}h-screen overflow-hidden bg-background-default{% endblock %}">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -8,14 +8,14 @@
     {% tailwind_css %}
   </head>
 
-  <body class="{% block body_class %}relative flex h-screen w-full flex-col justify-center items-center overflow-hidden bg-gray-50 font-sans text-gray-900 antialiased p-4 sm:p-6{% endblock %}">
+  <body class="{% block body_class %}relative flex h-screen w-full flex-col justify-center items-center overflow-hidden bg-background-default font-sans text-text-primary antialiased p-4 sm:p-6{% endblock %}">
     {% include "components/toast.html" %}
 
     {% block layout %}
-    <!-- Background Decorations (Design System Harmonic Glows) -->
-    <div class="pointer-events-none absolute -top-20 -left-20 h-72 w-72 rounded-full bg-blue-200/40 blur-3xl" aria-hidden="true"></div>
-    <div class="pointer-events-none absolute -bottom-20 -right-20 h-80 w-80 rounded-full bg-indigo-200/30 blur-3xl" aria-hidden="true"></div>
-    <div class="pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-72 w-72 rounded-full bg-blue-50/50 blur-3xl" aria-hidden="true"></div>
+    <!-- Background Decorations (BulSU Crimson & Gold Harmonic Glows) -->
+    <div class="pointer-events-none absolute -top-20 -left-20 h-72 w-72 rounded-full bg-brand-primary-subtle/70 blur-3xl" aria-hidden="true"></div>
+    <div class="pointer-events-none absolute -bottom-20 -right-20 h-80 w-80 rounded-full bg-brand-accent-subtle/60 blur-3xl" aria-hidden="true"></div>
+    <div class="pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-72 w-72 rounded-full bg-brand-primary-subtle/40 blur-3xl" aria-hidden="true"></div>
 
     <main class="relative z-10 mx-auto w-full {% block container_class %}max-w-md{% endblock %} my-auto">
       {% block content %}{% endblock %}

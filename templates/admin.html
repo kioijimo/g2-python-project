@@ -4,18 +4,21 @@
 
 {% block content %}
 <div class="mx-auto max-w-xl">
-  <div class="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
-    <h1 class="text-xl font-bold text-gray-900">Admin Account Management</h1>
-    <form method="post" class="mt-4 space-y-4">
+  <div class="rounded-xl border border-border-default bg-surface-card p-6 shadow-sm sm:p-8">
+    <h1 class="text-xl font-bold tracking-tight text-text-primary">Admin Account Management</h1>
+    <p class="mt-1 text-sm text-text-secondary">Configure administrative credentials and profile information.</p>
+    <form method="post" class="mt-5 space-y-4">
       {% csrf_token %}
       {{ forms.user }}
       {{ forms.profile }}
-      <button
-        type="submit"
-        class="inline-flex items-center justify-center rounded-md bg-blue-700 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-800"
-      >
-        Submit
-      </button>
+      <div class="pt-2">
+        <button
+          type="submit"
+          class="cursor-pointer inline-flex items-center justify-center rounded-md bg-brand-primary px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-brand-primary-hover focus:outline-none focus:ring-2 focus:ring-brand-primary focus:ring-offset-2"
+        >
+          Submit
+        </button>
+      </div>
     </form>
   </div>
 </div>

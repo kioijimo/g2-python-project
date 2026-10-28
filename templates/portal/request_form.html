@@ -5,9 +5,9 @@
 {% block content %}
 <div class="mx-auto max-w-4xl">
   <div class="mb-6">
-    <h1 class="text-2xl font-bold tracking-tight text-gray-900 sm:text-3xl">New Request</h1>
-    <p class="mt-1 text-sm text-gray-600">
-      Choose up to three distinct catalog items. Quantity is limited by current availability.
+    <h1 class="text-2xl font-bold tracking-tight text-text-primary sm:text-3xl">New Request</h1>
+    <p class="mt-1 text-sm text-text-secondary">
+      Choose up to three distinct catalog items. Quantity is limited by current available inventory.
     </p>
   </div>
 
@@ -15,32 +15,33 @@
     {% csrf_token %}
 
     {% if form.non_field_errors %}
-    <div class="rounded-md border border-rose-200 bg-rose-50 p-3 text-sm text-rose-700" role="alert">
+    <div class="rounded-lg border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700" role="alert">
       {{ form.non_field_errors }}
     </div>
     {% endif %}
 
-    <div class="rounded-xl border border-gray-200 bg-white p-6 shadow-sm sm:p-8">
+    <!-- Purpose & Date Card -->
+    <div class="rounded-xl border border-border-default bg-surface-card p-6 shadow-xs sm:p-8">
       <div class="space-y-5">
         <div>
-          <label for="{{ form.purpose.id_for_label }}" class="mb-1.5 block text-sm font-medium text-gray-700">
-            {{ form.purpose.label }}
+          <label for="{{ form.purpose.id_for_label }}" class="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-text-secondary">
+            {{ form.purpose.label }} <span class="text-rose-500">*</span>
           </label>
           {{ form.purpose }}
           {% if form.purpose.errors %}
-          <p class="mt-1 text-xs text-rose-600">{{ form.purpose.errors.0 }}</p>
+          <p class="mt-1.5 text-xs font-medium text-rose-600">{{ form.purpose.errors.0 }}</p>
           {% endif %}
         </div>
 
         <div class="max-w-xs">
-          <label for="{{ form.desired_return_date.id_for_label }}" class="mb-1.5 block text-sm font-medium text-gray-700">
-            {{ form.desired_return_date.label }}
+          <label for="{{ form.desired_return_date.id_for_label }}" class="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-text-secondary">
+            {{ form.desired_return_date.label }} <span class="text-rose-500">*</span>
           </label>
           {{ form.desired_return_date }}
           {% if form.desired_return_date.errors %}
-          <p class="mt-1 text-xs text-rose-600">{{ form.desired_return_date.errors.0 }}</p>
+          <p class="mt-1.5 text-xs font-medium text-rose-600">{{ form.desired_return_date.errors.0 }}</p>
           {% else %}
-          <p class="mt-1 text-xs text-gray-500">
+          <p class="mt-1.5 text-xs text-text-secondary">
             Must be after today and within {{ max_borrow_days }} calendar day{{ max_borrow_days|pluralize }}.
           </p>
           {% endif %}
@@ -48,18 +49,19 @@
       </div>
     </div>
 
-    <div class="rounded-xl border border-gray-200 bg-white p-6 shadow-sm sm:p-8">
-      <div class="mb-5 border-b border-gray-100 pb-4">
-        <h2 class="text-lg font-semibold text-gray-900">Items</h2>
-        <p class="mt-1 text-sm text-gray-600">
-          Choose one to three distinct items. Each quantity is limited by current availability.
+    <!-- Items Formset Card -->
+    <div class="rounded-xl border border-border-default bg-surface-card p-6 shadow-xs sm:p-8">
+      <div class="mb-5 border-b border-border-default pb-4">
+        <h2 class="text-lg font-bold text-text-primary">Requested Items</h2>
+        <p class="mt-1 text-sm text-text-secondary">
+          Select one to three distinct items. Each item quantity is restricted by real-time available stock.
         </p>
       </div>
 
       {{ formset.management_form }}
 
       {% if formset.non_form_errors %}
-      <div class="mb-4 rounded-md border border-rose-200 bg-rose-50 p-3 text-sm text-rose-700" role="alert">
+      <div class="mb-4 rounded-lg border border-rose-200 bg-rose-50 p-3 text-sm text-rose-700" role="alert">
         {{ formset.non_form_errors }}
       </div>
       {% endif %}
@@ -69,45 +71,45 @@
         <div
           data-request-item-row
           data-show-row="{% if item_form.errors or item_form.catalog_item.value or item_form.quantity.value %}true{% else %}false{% endif %}"
-          class="rounded-lg border border-gray-200 bg-gray-50 p-4"
+          class="rounded-xl border border-border-default bg-background-default/70 p-4 sm:p-5 transition"
         >
           {{ item_form.id }}
 
           {% if item_form.non_field_errors %}
-          <div class="mb-3 rounded-md border border-rose-200 bg-rose-50 p-2 text-xs text-rose-700" role="alert">
+          <div class="mb-3 rounded-lg border border-rose-200 bg-rose-50 p-2.5 text-xs text-rose-700" role="alert">
             {{ item_form.non_field_errors }}
           </div>
           {% endif %}
 
           <div class="grid gap-4 sm:grid-cols-12 sm:items-start">
             <div class="sm:col-span-7">
-              <label for="{{ item_form.catalog_item.id_for_label }}" class="mb-1.5 block text-sm font-medium text-gray-700">
-                Catalog item
+              <label for="{{ item_form.catalog_item.id_for_label }}" class="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-text-secondary">
+                Catalog Item
               </label>
               {{ item_form.catalog_item }}
               {% if item_form.catalog_item.errors %}
-              <p class="mt-1 text-xs text-rose-600">{{ item_form.catalog_item.errors.0 }}</p>
+              <p class="mt-1.5 text-xs font-medium text-rose-600">{{ item_form.catalog_item.errors.0 }}</p>
               {% endif %}
             </div>
 
             <div class="sm:col-span-3">
-              <label for="{{ item_form.quantity.id_for_label }}" class="mb-1.5 block text-sm font-medium text-gray-700">
+              <label for="{{ item_form.quantity.id_for_label }}" class="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-text-secondary">
                 Quantity
               </label>
               {{ item_form.quantity }}
               {% if item_form.quantity.errors %}
-              <p class="mt-1 text-xs text-rose-600">{{ item_form.quantity.errors.0 }}</p>
+              <p class="mt-1.5 text-xs font-medium text-rose-600">{{ item_form.quantity.errors.0 }}</p>
               {% endif %}
-              <p class="mt-1 text-xs text-gray-500" data-quantity-availability></p>
-              <p class="mt-1 text-xs text-rose-600" data-quantity-guard-error role="alert" hidden></p>
+              <p class="mt-1 text-xs text-text-secondary" data-quantity-availability></p>
+              <p class="mt-1 text-xs font-semibold text-rose-600" data-quantity-guard-error role="alert" hidden></p>
             </div>
 
-            <div class="flex items-end sm:col-span-2">
+            <div class="flex items-end sm:col-span-2 sm:pt-6">
               {% if not forloop.first %}
               <button
                 type="button"
                 data-remove-request-item
-                class="inline-flex w-full items-center justify-center rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 shadow-sm transition hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 sm:w-auto"
+                class="inline-flex w-full items-center justify-center rounded-lg border border-rose-200 bg-surface-card px-3 py-2 text-xs font-semibold text-rose-600 shadow-xs transition hover:bg-rose-50 focus:outline-none focus:ring-2 focus:ring-rose-500 sm:w-auto"
               >
                 Remove
               </button>
@@ -122,21 +124,25 @@
         <button
           type="button"
           id="add-request-item"
-          class="inline-flex items-center justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm transition hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2"
+          class="inline-flex items-center gap-1.5 justify-center rounded-lg border border-border-default bg-surface-card px-4 py-2 text-sm font-semibold text-text-primary shadow-xs transition hover:bg-background-default hover:border-brand-primary/50 focus:outline-none focus:ring-2 focus:ring-focus-ring"
         >
+          <svg class="h-4 w-4 text-brand-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+          </svg>
           Add another item
         </button>
         <noscript>
-          <p class="mt-2 text-xs text-gray-500">All three item rows are shown. JavaScript is only used to hide unused rows.</p>
+          <p class="mt-2 text-xs text-text-secondary">All three item rows are shown. JavaScript is only used to hide unused rows.</p>
         </noscript>
       </div>
     </div>
 
+    <!-- Actions -->
     <div class="flex flex-wrap items-center gap-3">
       {% include "components/button.html" with text="Submit request" type="submit" variant="primary" %}
       <a
         href="{% url 'portal:request_list' %}"
-        class="inline-flex items-center justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm transition hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2"
+        class="inline-flex items-center justify-center rounded-lg border border-border-default bg-surface-card px-4 py-2.5 text-sm font-semibold text-text-secondary shadow-xs transition hover:bg-background-default hover:text-text-primary focus:outline-none focus:ring-2 focus:ring-focus-ring focus:ring-offset-2"
       >
         Cancel
       </a>
@@ -213,19 +219,6 @@
         if (!availabilityHint) {
           return;
         }
-
-        // if (available === null) {
-        //   availabilityHint.textContent = "";
-        //   return;
-        // }
-        //
-        // if (available === 0) {
-        //   availabilityHint.textContent = "No units are currently available.";
-        //   return;
-        // }
-        //
-        // availabilityHint.textContent =
-        //   available + (available === 1 ? " unit available." : " units available.");
       }
 
       function validateAvailability() {

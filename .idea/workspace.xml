@@ -5,14 +5,54 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="81d952a8-95d4-4479-88b5-4cff86c96015" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/dataSources/data_sources_history.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dataSources/data_sources_history.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/g2-python-project.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/g2-python-project.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/forms/styling.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/forms/styling.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/tests/test_login_ui.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/tests/test_login_ui.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/DESIGN_SYSTEM.md" beforeDir="false" afterPath="$PROJECT_DIR$/docs/DESIGN_SYSTEM.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/admin.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/admin.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/templates/auth/login.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/auth/login.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/auth/register.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/auth/register.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/templates/auth_base.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/auth_base.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/base.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/base.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/components/admin_navbar.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/components/admin_navbar.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/components/badge.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/components/badge.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/components/button.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/components/button.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/components/form_field.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/components/form_field.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/components/pagination.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/components/pagination.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/components/protected_header.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/components/protected_header.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/components/toast.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/components/toast.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/components/user_navbar.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/components/user_navbar.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/manage/account_list.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/manage/account_list.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/manage/audit.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/manage/audit.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/manage/borrow_request_review.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/manage/borrow_request_review.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/manage/borrow_request_slip.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/manage/borrow_request_slip.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/manage/borrow_requests.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/manage/borrow_requests.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/manage/catalogs.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/manage/catalogs.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/manage/dashboard.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/manage/dashboard.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/manage/inventory_reconciliation.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/manage/inventory_reconciliation.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/manage/loans.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/manage/loans.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/manage/maintenance.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/manage/maintenance.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/manage/returns.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/manage/returns.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/manage/sample.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/manage/sample.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/manage/settings.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/manage/settings.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/manage/user_borrowing_history.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/manage/user_borrowing_history.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/portal/catalog.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/portal/catalog.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/portal/home.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/portal/home.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/portal/profile.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/portal/profile.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/portal/request_detail.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/portal/request_detail.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/portal/request_form.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/portal/request_form.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/portal/request_list.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/portal/request_list.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/theme/static_src/src/styles.css" beforeDir="false" afterPath="$PROJECT_DIR$/theme/static_src/src/styles.css" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="EmbeddingIndexingInfo">
+    <option name="cachedIndexableFilesCount" value="107" />
   </component>
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
@@ -30,23 +70,23 @@
   </component>
   <component name="NextEditCompletionFeaturesState">
     <decayedCancelled>
-      <entry key="MS100" value="1.5590951989143877" />
-      <entry key="MS500" value="5.584307610669342" />
-      <entry key="S2" value="11.066222354007895" />
-      <entry key="S5" value="13.634531980381349" />
-      <entry key="S10" value="14.819560649274813" />
-      <entry key="S30" value="21.177922311764643" />
-      <entry key="S60" value="32.82834305911784" />
-      <entry key="M2" value="45.85961205954811" />
-      <entry key="M5" value="58.11852760112269" />
-      <entry key="M10" value="63.24411393709318" />
-      <entry key="M15" value="65.09227670725727" />
-      <entry key="M30" value="67.35850027462239" />
-      <entry key="H1" value="79.15813644659922" />
-      <entry key="H2" value="151.09989924551743" />
-      <entry key="H4" value="301.1985520219207" />
-      <entry key="D1" value="625.899745520658" />
-      <entry key="W1" value="716.5107001453465" />
+      <entry key="MS100" value="1.0308349223227076" />
+      <entry key="MS500" value="3.5480232014536917" />
+      <entry key="S2" value="10.09510890095847" />
+      <entry key="S5" value="13.605603407699627" />
+      <entry key="S10" value="15.249414857085258" />
+      <entry key="S30" value="21.902773674183962" />
+      <entry key="S60" value="33.614389004795186" />
+      <entry key="M2" value="46.70992602368639" />
+      <entry key="M5" value="59.042573487487225" />
+      <entry key="M10" value="64.20277409854458" />
+      <entry key="M15" value="66.06390834977822" />
+      <entry key="M30" value="68.3438206662833" />
+      <entry key="H1" value="80.14951041015232" />
+      <entry key="H2" value="152.09166617683448" />
+      <entry key="H4" value="302.1903461192076" />
+      <entry key="D1" value="626.8969034691886" />
+      <entry key="W1" value="717.5102353597625" />
     </decayedCancelled>
     <decayedSelected>
       <entry key="MS100" value="0.0" />
@@ -54,37 +94,37 @@
       <entry key="S2" value="0.0" />
       <entry key="S5" value="0.0" />
       <entry key="S10" value="0.0" />
-      <entry key="S30" value="2.942385440386567E-196" />
-      <entry key="S60" value="2.421795350308973E-98" />
-      <entry key="M2" value="2.2949346062516233E-49" />
-      <entry key="M5" value="1.284056245209801E-19" />
-      <entry key="M10" value="2.6261366817881675E-9" />
-      <entry key="M15" value="8.370696943684999E-6" />
-      <entry key="M30" value="0.028663697681538237" />
-      <entry key="H1" value="1.7207438294259279" />
-      <entry key="H2" value="13.414708547733689" />
-      <entry key="H4" value="37.511914095363906" />
-      <entry key="D1" value="88.4415007107661" />
-      <entry key="W1" value="102.45684319790271" />
+      <entry key="S30" value="2.904157264211331E-196" />
+      <entry key="S60" value="2.406011643741594E-98" />
+      <entry key="M2" value="2.2874439265806826E-49" />
+      <entry key="M5" value="1.2823781339776591E-19" />
+      <entry key="M10" value="2.6244200941142588E-9" />
+      <entry key="M15" value="8.367048846932826E-6" />
+      <entry key="M30" value="0.028657450929401546" />
+      <entry key="H1" value="1.7205563161814943" />
+      <entry key="H2" value="13.413977612654401" />
+      <entry key="H4" value="37.51089211462867" />
+      <entry key="D1" value="88.4410991204174" />
+      <entry key="W1" value="102.45677673628018" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="1.4920599389297486" />
-      <entry key="MS500" value="5.532231252394149" />
-      <entry key="S2" value="11.040082774568813" />
-      <entry key="S5" value="13.621646509237129" />
-      <entry key="S10" value="14.812551943402818" />
-      <entry key="S30" value="21.17412190564071" />
-      <entry key="S60" value="32.824827993484185" />
-      <entry key="M2" value="45.85687006614614" />
-      <entry key="M5" value="58.11704118741834" />
-      <entry key="M10" value="63.243287113751826" />
-      <entry key="M15" value="65.09171170843133" />
-      <entry key="M30" value="67.38676984769687" />
-      <entry key="H1" value="80.87716229028624" />
-      <entry key="H2" value="164.5089323481952" />
-      <entry key="H4" value="338.7027640022992" />
-      <entry key="D1" value="714.3382628013243" />
-      <entry key="W1" value="818.9670505071476" />
+      <entry key="MS100" value="0.04928658281671096" />
+      <entry key="MS500" value="2.980544402059935" />
+      <entry key="S2" value="9.895505485808119" />
+      <entry key="S5" value="13.518225438777677" />
+      <entry key="S10" value="15.204203277226195" />
+      <entry key="S30" value="21.886030404403325" />
+      <entry key="S60" value="33.60437949040439" />
+      <entry key="M2" value="46.7039289744513" />
+      <entry key="M5" value="59.039782133387256" />
+      <entry key="M10" value="64.20129416054584" />
+      <entry key="M15" value="66.06290777962455" />
+      <entry key="M30" value="68.37186614596887" />
+      <entry key="H1" value="81.86823995560543" />
+      <entry key="H2" value="165.49991416608873" />
+      <entry key="H4" value="339.69350908452463" />
+      <entry key="D1" value="715.3350146323077" />
+      <entry key="W1" value="819.9665186115816" />
     </decayedShown>
   </component>
   <component name="ProjectColorInfo">{
@@ -103,18 +143,23 @@
     "RunOnceActivity.MCP Project settings loaded": "true",
     "RunOnceActivity.OpenDjangoStructureViewOnStart": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
     "RunOnceActivity.git.unshallow": "true",
     "RunOnceActivity.typescript.service.memoryLimit.init": "true",
     "codeWithMe.voiceChat.enabledByDefault": "false",
+    "com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1": "true",
     "django.template.preview.state": "SHOW_EDITOR",
     "git-widget-placeholder": "feat/design-system",
     "ignore.virus.scanning.warn.message": "true",
+    "junie.onboarding.icon.badge.shown": "true",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.jshint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
     "node.js.selected.package.jshint": "",
     "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm"
+    "nodejs_package_manager_path": "npm",
+    "to.speed.mode.migration.done": "true",
+    "vue.rearranger.settings.migration": "true"
   }
 }]]></component>
   <component name="RunManager">
@@ -148,8 +193,7 @@
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-js-predefined-d6986cc7102b-4abd2a77f808-JavaScript-PY-262.8665.369" />
-        <option value="bundled-python-sdk-6fa658e1df1a-5bd6d13a2a75-com.jetbrains.pycharm.pro.sharedIndexes.bundled-PY-262.8665.369" />
+        <option value="bundled-python-sdk-50341a9f1f9c-c2ffad84badb-com.jetbrains.pycharm.pro.sharedIndexes.bundled-PY-261.26222.68" />
       </set>
     </attachedChunks>
   </component>
@@ -161,6 +205,7 @@
       <option name="presentableId" value="Default" />
       <updated>1792986377420</updated>
       <workItem from="1792986379757" duration="9431000" />
+      <workItem from="1793173177519" duration="2170000" />
     </task>
     <servers />
   </component>

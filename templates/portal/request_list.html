@@ -5,83 +5,86 @@
 {% block content %}
 <div class="flex flex-wrap items-end justify-between gap-4">
   <div>
-    <h1 class="text-2xl font-bold tracking-tight text-gray-900 sm:text-3xl">My Requests</h1>
-    <p class="mt-1 text-sm text-gray-600">Review the status and due dates of your borrowing requests.</p>
+    <h1 class="text-2xl font-bold tracking-tight text-text-primary sm:text-3xl">My Requests</h1>
+    <p class="mt-1 text-sm text-text-secondary">Review the real-time status and due dates of your equipment borrowing requests.</p>
   </div>
 
   <a
     href="{% url 'portal:request_create' %}"
-    class="inline-flex items-center justify-center rounded-md bg-blue-700 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2"
+    class="inline-flex items-center gap-1.5 justify-center rounded-lg bg-brand-primary px-4 py-2 text-sm font-semibold text-white shadow-xs transition hover:bg-brand-primary-hover focus:outline-none focus:ring-2 focus:ring-focus-ring focus:ring-offset-2"
   >
+    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+    </svg>
     New request
   </a>
 </div>
 
 {% if borrow_requests %}
-<div class="mt-6 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
+<div class="mt-6 overflow-hidden rounded-xl border border-border-default bg-surface-card shadow-xs">
   <div class="overflow-x-auto">
-    <table class="min-w-full divide-y divide-gray-200">
-      <thead class="bg-gray-50">
+    <table class="min-w-full divide-y divide-border-default">
+      <thead class="bg-background-default/60">
         <tr>
-          <th scope="col" class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
+          <th scope="col" class="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-text-secondary">
             Request
           </th>
-          <th scope="col" class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
+          <th scope="col" class="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-text-secondary">
             Purpose
           </th>
-          <th scope="col" class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
+          <th scope="col" class="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-text-secondary">
             Status
           </th>
-          <th scope="col" class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
+          <th scope="col" class="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-text-secondary">
             Return by
           </th>
-          <th scope="col" class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
+          <th scope="col" class="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-text-secondary">
             Submitted
           </th>
-          <th scope="col" class="px-6 py-3 text-right text-xs font-semibold uppercase tracking-wide text-gray-500">
+          <th scope="col" class="px-6 py-3.5 text-right text-xs font-semibold uppercase tracking-wider text-text-secondary">
             Actions
           </th>
         </tr>
       </thead>
-      <tbody class="divide-y divide-gray-100">
+      <tbody class="divide-y divide-border-default/60">
         {% for borrow_request in borrow_requests %}
-        <tr class="hover:bg-gray-50">
+        <tr class="transition hover:bg-background-default/40">
           <td class="whitespace-nowrap px-6 py-4">
             <a
               href="{% url 'portal:request_detail' borrow_request.pk %}"
-              class="font-medium text-blue-700 hover:text-blue-800 hover:underline focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2"
+              class="font-semibold text-brand-primary hover:text-brand-primary-hover hover:underline focus:outline-none focus:ring-2 focus:ring-focus-ring focus:ring-offset-2"
             >
               #{{ borrow_request.pk }}
             </a>
-            <p class="mt-1 text-xs text-gray-500">
+            <p class="mt-1 text-xs text-text-secondary">
               {{ borrow_request.items.all|length }} item{{ borrow_request.items.all|length|pluralize }}
             </p>
           </td>
-          <td class="max-w-xs px-6 py-4 text-sm text-gray-700">
+          <td class="max-w-xs px-6 py-4 text-sm text-text-primary">
             {{ borrow_request.purpose|truncatechars:48 }}
           </td>
           <td class="whitespace-nowrap px-6 py-4">
             {% include "components/borrow_request_status.html" with req=borrow_request %}
           </td>
-          <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-700">
-            {{ borrow_request.due_at|date:"M j, Y" }}
+          <td class="whitespace-nowrap px-6 py-4 text-sm text-text-primary">
+            <span class="font-medium">{{ borrow_request.due_at|date:"M j, Y" }}</span>
             {% with overdue=borrow_request.overdue_days %}
             {% if overdue > 0 %}
-            <p class="mt-1 text-xs font-medium text-rose-600">
+            <p class="mt-1 text-xs font-semibold text-rose-600">
               Overdue by {{ overdue }} day{{ overdue|pluralize }}
             </p>
             {% endif %}
             {% endwith %}
           </td>
-          <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-700">
+          <td class="whitespace-nowrap px-6 py-4 text-sm text-text-secondary">
             {{ borrow_request.created_at|date:"M j, Y" }}
           </td>
           <td class="whitespace-nowrap px-6 py-4 text-right">
             <a
               href="{% url 'portal:request_detail' borrow_request.pk %}"
-              class="text-sm font-medium text-blue-700 hover:text-blue-800 hover:underline focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2"
+              class="inline-flex items-center text-xs font-semibold text-brand-primary hover:text-brand-primary-hover hover:underline focus:outline-none focus:ring-2 focus:ring-focus-ring focus:ring-offset-2"
             >
-              View
+              View details &rarr;
             </a>
           </td>
         </tr>
@@ -91,12 +94,17 @@
   </div>
 </div>
 {% else %}
-<div class="mt-6 rounded-xl border border-gray-200 bg-white p-6 text-center shadow-sm sm:p-8">
-  <h2 class="text-lg font-semibold text-gray-900">No requests yet</h2>
-  <p class="mt-1 text-sm text-gray-600">Start by browsing the catalog or submitting a new request.</p>
+<div class="mt-6 rounded-xl border border-border-default bg-surface-card p-8 text-center shadow-xs">
+  <div class="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-brand-primary-subtle text-brand-primary">
+    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+    </svg>
+  </div>
+  <h2 class="text-lg font-bold text-text-primary">No requests yet</h2>
+  <p class="mt-1 text-sm text-text-secondary">Start by browsing the catalog or submitting a new request.</p>
   <a
     href="{% url 'portal:request_create' %}"
-    class="mt-4 inline-flex items-center justify-center rounded-md bg-blue-700 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2"
+    class="mt-4 inline-flex items-center justify-center rounded-lg bg-brand-primary px-4 py-2 text-sm font-semibold text-white shadow-xs transition hover:bg-brand-primary-hover focus:outline-none focus:ring-2 focus:ring-focus-ring focus:ring-offset-2"
   >
     New request
   </a>

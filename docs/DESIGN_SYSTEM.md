@@ -1,261 +1,234 @@
-# Campus Equipment System — Design System
+# BulSU Campus Equipment System — Design System Specification
 
-A simple, practical, and maintainable design system tailored for **g2-python-project** (Django 6.1 + Tailwind CSS v4 Standalone).
-
----
-
-## 1. Design Principles
-
-1. **Utility & Productivity First**
-   - The application manages inventory, equipment borrowing, and administrative tracking. Interfaces must prioritize fast scanning, clear form completion, and unambiguous system status over visual ornament.
-
-2. **Zero-Overhead Architecture**
-   - Built entirely on Django standard templating (`{% include %}`, template inheritance) and Tailwind CSS v4 Standalone.
-   - **No npm or Node.js runtime required.** Never introduce unnecessary JavaScript libraries or build tools for basic styling.
-
-3. **Accessibility by Default**
-   - High visual contrast (WCAG AA compliant) across all text, borders, and interactive elements.
-   - Visible, distinct focus rings on every interactable element (`focus:ring-2 focus:ring-blue-600 focus:ring-offset-2`).
-   - Accessible error states communicating status with both color and descriptive text.
-
-4. **Predictable Component Consistency**
-   - Standard semantic tokens for actions (Primary Blue), surfaces (Neutral Slate/Gray), and statuses (Emerald for active/available, Amber for maintenance/pending, Rose for danger/error).
+A modern, institutional, accessible, and high-performance design system for the **Bulacan State University (BulSU)** Campus Equipment System, built on **Django 6.1** and **Tailwind CSS v4 Standalone**.
 
 ---
 
-## 2. Design Tokens
+## 1. Brand Identity & Visual Direction
 
-### 2.1 Color Palette
+The visual system is derived from the official **Bulacan State University (BulSU)** visual identity:
 
-| Token Name | Tailwind Class | Hex / Variable | Purpose |
+* **Dominant Brand Color**: **Deep Crimson Red** (`#AE0014`) represents university pride, institutional credibility, authority, and academic legacy.
+* **Primary Accent Color**: **Golden Yellow** (`#FBB526`) brings high-energy vibrancy, emphasis on key metrics, badges, and selected primary highlights.
+* **Secondary Depth**: **Dark Maroon** (`#800000`) provides depth for rich ambient gradients, dark chrome surfaces, and elevated brand layers.
+* **Neutral Backgrounds**: Warm neutral canvas (`#F7F5F2`) and pure white cards (`#FFFFFF`) framed by restrained borders (`#E5E7EB`).
+* **Operational Purpose**: The application manages daily equipment inventory, lab loans, and administrative workflows. Legibility, scannability, clear status differentiation, and operational efficiency always take priority over decorative clutter.
+
+---
+
+## 2. Design Principles
+
+1. **Institutional Dignity & Operational Clarity**
+   - High information density with crisp hierarchy. The crimson-and-gold identity communicates university authenticity without turning functional tools into promotional posters.
+2. **Strict Semantic Separation of Status and Brand**
+   - Brand crimson and gold must **never** displace functional status colors:
+     - **Emerald (`#059669` / emerald-700)**: Available units, Active catalogs, Successful actions.
+     - **Amber (`#D97706` / amber-700)**: Maintenance units, Pending loan reviews, Reserved equipment.
+     - **Rose (`#E11D48` / rose-700)**: Overdue requests, Damaged units, Retired assets, Destructive actions.
+     - **Purple (`#7E22CE` / purple-700)**: Staff / Administrator role pill.
+3. **WCAG 2.2 AA Accessibility by Design**
+   - **White text on Crimson (`#AE0014`)**: Contrast ratio is **7.47:1** (exceeds WCAG AAA 7:1 for normal text).
+   - **Golden Yellow (`#FBB526`) Contrast Rule**: White text on `#FBB526` yields only 1.4:1 contrast (complete failure). Therefore:
+     - Golden yellow buttons (`variant="accent"`) MUST use **dark text** (`text-gray-950 font-bold`), delivering **9.09:1** contrast.
+     - Golden accent badges (`variant="accent"`) on soft gold backgrounds (`#FFF4D6`) MUST use deep golden amber text (`text-[#8F5B00]`), delivering **5.5:1** contrast.
+     - Never use yellow background with white text. Never use yellow text on white surfaces.
+4. **Zero-Dependency Tailwind v4 Standalone**
+   - Built exclusively on Django standard templating (`{% extends %}`, `{% include %}`) and **Tailwind CSS v4 Standalone** via `pytailwindcss`.
+   - **No npm, Node.js, bundlers, or external CSS CDNs.** Compiles natively in milliseconds.
+
+---
+
+## 3. Centralized Design Tokens
+
+All tokens are centrally declared in `theme/static_src/src/styles.css` using Tailwind CSS v4's native `@theme` directive:
+
+### 3.1 Brand Palette Tokens
+
+| Token Name | CSS Variable | Hex Value | Semantic Role & Usage |
 | :--- | :--- | :--- | :--- |
-| **Brand Primary** | `bg-blue-700` / `text-blue-700` | `#1d4ed8` | Main action buttons, active navigation links, brand identity |
-| **Brand Primary Hover** | `hover:bg-blue-800` | `#1e40af` | Hover/focus state for primary actions |
-| **Brand Surface / Tint** | `bg-blue-50` / `border-blue-200` | `#eff6ff` / `#bfdbfe` | Informational callouts, active link highlights |
-| **Neutral Surface** | `bg-gray-50` | `#f9fafb` | Full-page background behind cards |
-| **Card Surface** | `bg-white` | `#ffffff` | Content containers, modals, table bodies |
-| **Border Neutral** | `border-gray-200` / `border-gray-300` | `#e5e7eb` / `#d1d5db` | Card borders, table dividers, input borders |
-| **Text Primary** | `text-gray-900` | `#111827` | Headings, primary labels, table values |
-| **Text Muted** | `text-gray-600` / `text-gray-500` | `#4b5563` / `#6b7280` | Subtitles, helper text, timestamps, captions |
-| **Status: Success / Available** | `bg-emerald-50 text-emerald-700 border-emerald-200` | `#047857` | Active user, available item, successful action flash |
-| **Status: Warning / In-Use** | `bg-amber-50 text-amber-700 border-amber-200` | `#b45309` | Under maintenance, pending approval |
-| **Status: Danger / Inactive** | `bg-rose-50 text-rose-700 border-rose-200` | `#be123c` | Inactive user, destructive action, form errors |
-| **Status: Admin Role** | `bg-purple-50 text-purple-700 border-purple-200` | `#7e22ce` | Staff/Administrator badge indicator |
+| `brand-primary` | `--color-brand-primary` | `#AE0014` | BulSU Deep Crimson. Primary buttons, institutional headers, active nav items. |
+| `brand-primary-hover` | `--color-brand-primary-hover` | `#8F0010` | Darker Crimson. Hover and active states for primary buttons and links. |
+| `brand-primary-dark` | `--color-brand-primary-dark` | `#800000` | Dark Maroon. Radial gradient depth, dark tooltips, deep structural chrome. |
+| `brand-primary-subtle` | `--color-brand-primary-subtle` | `#FCEBED` | Light Crimson Tint. Card header pills, avatar backgrounds, active row tints. |
+| `brand-accent` | `--color-brand-accent` | `#FBB526` | Golden Yellow. High-contrast accent buttons, active indicator dots, metrics. |
+| `brand-accent-hover` | `--color-brand-accent-hover` | `#E5A016` | Darker Gold. Interactive hover state for accent buttons. |
+| `brand-accent-subtle` | `--color-brand-accent-subtle` | `#FFF4D6` | Soft Gold Tint. Accent notice containers and badge backgrounds. |
+| `background-default` | `--color-background-default` | `#F7F5F2` | Warm Neutral Canvas. Page body background behind cards. |
+| `background-muted` | `--color-background-muted` | `#F3F4F6` | Secondary cool neutral for table headers and subtle container fills. |
+| `surface-card` | `--color-surface-card` | `#FFFFFF` | Pure white cards, modal dialogs, data table bodies, dropdowns. |
+| `border-default` | `--color-border-default` | `#E5E7EB` | Restrained card borders, table row dividers, input borders. |
+| `border-strong` | `--color-border-strong` | `#D1D5DB` | High-contrast input outlines and active state borders. |
+| `text-primary` | `--color-text-primary` | `#222222` | Charcoal text for maximum readability on white and warm neutral backgrounds. |
+| `text-secondary` | `--color-text-secondary` | `#6B7280` | Muted secondary text, column headers, timestamps, helper descriptions. |
+| `focus-ring` | `--color-focus-ring` | `#AE0014` | Universal crimson keyboard focus outline color. |
 
-### 2.2 Typography
+### 3.2 Semantic Status Tokens
 
-* **Font Family**: Standard system UI font stack (`font-sans`: `-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`).
-* **Scale**:
-  * **Page Title**: `text-2xl sm:text-3xl font-bold tracking-tight text-gray-900`
-  * **Section / Card Header**: `text-lg font-semibold text-gray-900`
-  * **Card Subtitle / Metadata**: `text-sm text-gray-600`
-  * **Body / Form Labels**: `text-sm font-medium text-gray-700`
-  * **Input Text & Button Text**: `text-sm`
-  * **Badges & Microcopy**: `text-xs font-semibold`
-
-### 2.3 Spacing & Sizing Scale
-
-* **Component Padding**:
-  * Buttons: `px-4 py-2` (standard), `px-3 py-1.5` (compact/navbar)
-  * Form inputs: `px-3 py-2`
-  * Card containers: `p-6 sm:p-8`
-* **Grid & Stack Gaps**:
-  * Form fields stack: `space-y-4` or `space-y-5`
-  * Grid gap between form columns: `gap-4 sm:grid-cols-2`
-  * Grid gap between dashboard cards: `gap-6 sm:grid-cols-2 lg:grid-cols-3`
-* **Radii**:
-  * Buttons & Form Inputs: `rounded-md` (`0.375rem`)
-  * Cards & Containers: `rounded-xl` (`0.75rem`)
-  * Badges & Status Pills: `rounded-full` (`9999px`)
-* **Shadows**:
-  * Subtle elevation: `shadow-sm`
-  * Never use heavy, dark drop-shadows.
+| Semantic Role | Classes | Contrast & Meaning |
+| :--- | :--- | :--- |
+| **Available / Active / Success** | `border-emerald-200 bg-emerald-50 text-emerald-700` | Available equipment units, Active catalog items, Success flash alerts. |
+| **Maintenance / Pending / Reserved** | `border-amber-200 bg-amber-50 text-amber-700` | Units under repair, Requests pending review, Reserved units. |
+| **Overdue / Damaged / Danger** | `border-rose-200 bg-rose-50 text-rose-700` | Overdue borrowing loans, Damaged equipment, Rejected requests, Error toasts. |
+| **Reserved / Information** | `border-sky-200 bg-sky-50 text-sky-700` | Allocated loan units, Informational status banners. |
+| **Role: Administrator** | `border-purple-200 bg-purple-50 text-purple-700` | Staff and System Administrator role badge. |
+| **Role: Student / User** | `border-brand-primary/20 bg-brand-primary-subtle text-brand-primary` | Student and Basic Borrower role badge. |
 
 ---
 
-## 3. Component Guidelines
+## 4. Typography, Spacing, and Elevation
 
-### 3.1 Buttons
+### 4.1 Typography
+* **Primary System Stack**: `-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif`
+* **Display Font (Accent)**: `Bebas Neue` (used in authentication branding and display headings).
+* **Hierarchy**:
+  * **Page Title**: `text-2xl sm:text-3xl font-bold tracking-tight text-text-primary`
+  * **Section Heading**: `text-lg font-bold text-text-primary`
+  * **Card / Modal Heading**: `text-base sm:text-lg font-bold text-text-primary`
+  * **Table Column Header**: `text-xs font-semibold uppercase tracking-wider text-text-secondary`
+  * **Form Labels**: `text-xs font-semibold uppercase tracking-wider text-text-secondary`
+  * **Body Text & Cells**: `text-sm text-text-primary`
+  * **Microcopy & Status**: `text-xs font-semibold`
 
-| Variant | Classes | When to Use |
-| :--- | :--- | :--- |
-| **Primary** | `inline-flex items-center justify-center rounded-md bg-blue-700 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed` | Main form submission ("Create Account", "Save Item", "Sign in") |
-| **Secondary / Outline** | `inline-flex items-center justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2` | Secondary actions ("Cancel", "Back to Users", "Log out") |
-| **Danger** | `inline-flex items-center justify-center rounded-md bg-rose-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-rose-700 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:ring-offset-2` | Irreversible actions ("Delete User", "Retire Item") |
+### 4.2 Elevation & Radii
+* **Inputs & Standard Buttons**: `rounded-md` (`0.375rem`) or `rounded-lg` (`0.5rem`)
+* **Cards & Containers**: `rounded-xl` (`0.75rem`)
+* **Pill Badges & Avatars**: `rounded-full` (`9999px`)
+* **Shadows**: Subtle `shadow-xs` or `shadow-sm`. Never use heavy, dark drop-shadows on content containers.
 
-**Template partial available**:
+---
+
+## 5. Component Standards & Usage
+
+### 5.1 Buttons (`templates/components/button.html`)
+
 ```django
-{% include "components/button.html" with text="Save Changes" type="submit" variant="primary" %}
+{% include "components/button.html" with text="Submit Request" type="submit" variant="primary" %}
+{% include "components/button.html" with text="Special Action" variant="accent" %}
+{% include "components/button.html" with text="Cancel" variant="secondary" %}
+{% include "components/button.html" with text="Delete Item" variant="danger" %}
 ```
 
----
+* **Primary (`variant="primary"`)**: `bg-brand-primary text-white hover:bg-brand-primary-hover focus:ring-brand-primary`
+* **Accent (`variant="accent"`)**: `bg-brand-accent text-gray-950 font-bold hover:bg-brand-accent-hover focus:ring-brand-accent` (Dark text guarantees WCAG AA).
+* **Secondary (`variant="secondary"`)**: `border border-border-default bg-surface-card text-text-primary hover:bg-background-muted focus:ring-brand-primary`
+* **Danger (`variant="danger"`)**: `bg-rose-600 text-white hover:bg-rose-700 focus:ring-rose-500`
 
-### 3.2 Form Controls & Field Groups
+### 5.2 Forms & Widgets (`app/forms/styling.py`)
 
-All form inputs in `app/forms/` must use the unified widget class constants from `app/forms/styling.py`:
+All Django form widgets inherit from centralized constants in `app/forms/styling.py` using `apply_widget_styling(self)`:
 
 ```python
-# In app/forms/styling.py:
+# app/forms/styling.py
 FORM_INPUT_CLASS = (
-    "w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 "
-    "placeholder-gray-400 shadow-sm transition-colors duration-150 "
-    "focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600/20"
+    "w-full rounded-md border border-border-default bg-surface-card px-3 py-2 text-sm text-text-primary "
+    "placeholder-text-secondary/60 shadow-sm transition-colors duration-150 "
+    "focus:border-brand-primary focus:outline-none focus:ring-2 focus:ring-brand-primary/20"
 )
 ```
 
-**Standard Template Markup for Form Fields**:
-```html
-<div>
-  <label for="{{ form.email.id_for_label }}" class="mb-1.5 block text-sm font-medium text-gray-700">
-    Email Address
-  </label>
-  {{ form.email }}
-  {% if form.email.errors %}
-  <p class="mt-1 text-xs text-rose-600">{{ form.email.errors.0 }}</p>
-  {% elif form.email.help_text %}
-  <p class="mt-1 text-xs text-gray-500">{{ form.email.help_text }}</p>
-  {% endif %}
-</div>
+In any Django form:
+```python
+from app.forms.styling import apply_widget_styling
+
+class BorrowRequestForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        apply_widget_styling(self)
 ```
 
----
+### 5.3 Status Badges (`templates/components/badge.html`)
 
-### 3.3 Status Badges & Roles
-
-**Template partial available**:
+Standardized pill tags for status, categories, and roles:
 ```django
-{% include "components/badge.html" with label="Admin" variant="admin" %}
-{% include "components/badge.html" with label="Active" variant="success" %}
+{% include "components/badge.html" with label="Available" variant="success" %}
 {% include "components/badge.html" with label="Maintenance" variant="warning" %}
-{% include "components/badge.html" with label="Inactive" variant="danger" %}
+{% include "components/badge.html" with label="Overdue" variant="danger" %}
+{% include "components/badge.html" with label="BulSU Gold" variant="accent" %}
+{% include "components/badge.html" with label="Admin" variant="admin" %}
+{% include "components/badge.html" with label="Student" variant="user" %}
 ```
 
----
+### 5.4 Toast Notifications (`templates/components/toast.html`)
 
-### 3.4 Cards & Surfaces
+Accessible, auto-dismissing notifications positioned fixed at `bottom-5 right-5 z-50`:
+* Automatically handles Django messages: `success`, `error`, `warning`, `info`.
+* Fades out after 5 seconds with pause-on-hover.
+* Accessible close button with keyboard focus indicator.
 
-Standard container for dashboards, forms, and item lists:
-```html
-<div class="rounded-xl border border-gray-200 bg-white p-6 shadow-sm sm:p-8">
-  <div class="mb-5 border-b border-gray-100 pb-4">
-    <h2 class="text-lg font-semibold text-gray-900">Card Title</h2>
-    <p class="mt-1 text-sm text-gray-600">Card description or context.</p>
-  </div>
-  <!-- Card Content -->
-</div>
-```
+### 5.5 Navigation & Layout Shells
 
----
-
-### 3.5 Feedback Alerts & Toast Notifications (Django Messages)
-
-Floating Toast notifications are rendered at the bottom-right via `templates/components/toast.html` and integrated directly into `templates/base.html` and `templates/auth_base.html`:
-* **Position**: Fixed bottom-right (`fixed bottom-5 right-5 z-50`), non-blocking container with interactive cards.
-* **Auto-Dismiss**: Automatically fades and slides out after 5 seconds; timer pauses on hover.
-* **Manual Close**: Accessible button with `aria-label="Dismiss notification"`.
-* **Variants**:
-  * **Success**: `border-emerald-200 bg-emerald-50 text-emerald-600`
-  * **Error**: `border-rose-200 bg-rose-50 text-rose-600`
-  * **Warning**: `border-amber-200 bg-amber-50 text-amber-600`
-  * **Info**: `border-blue-200 bg-blue-50 text-blue-600`
+* **`templates/base.html`**: Standard authenticated application shell containing top navbar (`templates/components/navbar.html`), responsive container (`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8`), and toast container.
+* **`templates/auth_base.html`**: Authentication shell for login and registration with BulSU Crimson and Gold ambient backdrops.
+* **`templates/components/admin_navbar.html`**: Institutional administrator sidebar and mobile drawer with active route indicators, quick action buttons, and CSRF POST logout.
+* **`templates/components/user_navbar.html`**: User portal navigation bar with catalog links, active requests counter, profile menu, and sign-in CTA.
 
 ---
 
-### 3.6 Navigation & Header
+## 6. Accessibility & Usability Standards (WCAG 2.2 AA)
 
-The top navigation bar is provided in `templates/components/navbar.html` and loaded automatically by `templates/base.html`:
-* Brand logo + name linking to the role-appropriate dashboard (`/manage/` for Admin, `/portal/` for User).
-* Navigation tabs based on user permissions.
-* Current user email display.
-* Role badge pill (`Admin` or `User`).
-* Secure POST logout button with CSRF token.
-
----
-
-## 4. Layout & Responsive Rules
-
-1. **Dashboard Shell (`templates/base.html`)**:
-   - Outer container: `mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 py-8`
-   - Use for: Administrative management, user portal, inventory catalogs, category lists, data tables.
-
-2. **Authentication Shell (`templates/auth_base.html`)**:
-   - Outer container: `sm:mx-auto sm:w-full sm:max-w-md` (centered card)
-   - Use for: `/login/`, `/portal/register/`, password resets.
-
-3. **Breakpoints**:
-   - `sm` (640px): 2-column form grids, visible email address in navbar.
-   - `md` (768px): Tablet views.
-   - `lg` (1024px): 3-column dashboard layouts (e.g. 2-column main form + 1-column sidebar card).
+1. **Color Contrast Verification**:
+   - BulSU Crimson (`#AE0014`) on pure white (`#FFFFFF`): Contrast ratio = **7.47:1** (Passes WCAG AAA).
+   - BulSU Crimson (`#AE0014`) on light crimson tint (`#FCEBED`): Contrast ratio = **6.54:1** (Passes WCAG AA).
+   - Golden Yellow (`#FBB526`) with dark text (`#222222` / `text-gray-950`): Contrast ratio = **9.09:1** (Passes WCAG AAA).
+   - Deep Golden Brown (`#8F5B00`) on soft gold tint (`#FFF4D6`): Contrast ratio = **5.5:1** (Passes WCAG AA).
+2. **Keyboard Navigation & Visible Focus**:
+   - Every interactive element includes explicit focus styling: `focus:outline-none focus:ring-2 focus:ring-brand-primary focus:ring-offset-2`.
+3. **Descriptive Error Messaging**:
+   - Field errors are paired with descriptive error text (`text-xs font-medium text-rose-600`) directly underneath the input, with `aria-invalid="true"`.
+4. **Accessible Tables**:
+   - All inventory, loan, and request data tables are wrapped in responsive horizontal scrolling containers (`overflow-x-auto`) to ensure seamless navigation on mobile devices.
 
 ---
 
-## 5. Interaction & Accessibility Standards
+## 7. Tailwind CSS v4 Standalone Workflow
 
-* **Focus States**: Never remove outlines without providing a visible focus ring. Always pair `focus:outline-none` with `focus:ring-2 focus:ring-blue-600 focus:ring-offset-2`.
-* **Keyboard Navigation**: All interactive actions must be native `<button>`, `<a>`, or `<input>` elements. Forms must support submission via `Enter`.
-* **Logout Safety**: Always use a `<form method="post" action="{% url 'logout' %}">` with `{% csrf_token %}` to satisfy Django's `@require_POST` security requirement.
-* **Form Errors**: Place field error messages directly below the corresponding input using `text-xs text-rose-600` so screen readers and users can immediately associate them.
+This project uses **Tailwind CSS v4 Standalone** via `pytailwindcss`. No Node.js runtime is installed or required.
 
----
+### 7.1 File Architecture
+* **Source CSS**: `theme/static_src/src/styles.css`
+  * Contains `@import "tailwindcss";`
+  * Central `@theme` token definitions
+  * Content scanning directive: `@source "../../../**/*.{html,py,js}";`
+* **Compiled CSS Output**: `theme/static/css/dist/styles.css`
+  * Automatically generated by the standalone compiler. **Never edit this file manually.**
 
-## 6. Implementation Guidelines
-
-### 6.1 Creating a New Page
-1. Determine whether the page is a **dashboard view** or an **auth/minimal view**:
-   * Dashboard: `{% extends "base.html" %}`
-   * Auth/Minimal: `{% extends "auth_base.html" %}`
-2. Use `{% block title %}Page Title | Campus Equipment System{% endblock %}`
-3. Use the standardized card wrapper (`rounded-xl border border-gray-200 bg-white p-6 shadow-sm`).
-
-### 6.2 Adding a New Django Form
-1. In the appropriate module under `app/forms/`, define your `ModelForm` or `Form`.
-2. In `__init__`, call `apply_widget_styling(self)`:
-   ```python
-   def __init__(self, *args, **kwargs):
-       super().__init__(*args, **kwargs)
-       apply_widget_styling(self)
-   ```
-   This automatically applies the design system classes to all inputs, textareas, selects, and checkboxes without manual boilerplate.
-
-### 6.3 Rebuilding Tailwind
-After adding new template markup, run:
+### 7.2 Build Commands
+To compile CSS after modifying templates or forms:
 ```powershell
 python manage.py tailwind build
 ```
-*(Or keep `python manage.py tailwind start` running in a second terminal during development).*
+To run the continuous watcher during active development:
+```powershell
+python manage.py tailwind start
+```
 
 ---
 
-## 7. Rules for AI Coding Agents
+## 8. Rules for Future AI Coding Agents
 
-When generating, modifying, or refactoring UI in this project, **all AI coding agents MUST adhere to these rules**:
+When adding new features or modifying existing pages in this repository, **all AI agents must strictly follow these rules**:
 
-1. **Reuse Existing Tokens & Classes**:
-   - **DO NOT** invent arbitrary hex codes (e.g., `bg-[#2a4d8f]`). Always use the project's color palette (`blue-700`, `gray-900`, `gray-600`, `emerald-700`, `rose-700`, `amber-700`).
-   - **DO NOT** create custom CSS classes when standard Tailwind utility classes exist.
-
-2. **Template Inheritance**:
-   - **DO NOT** create standalone HTML documents with custom `<html>` or `<body>` tags.
-   - For all authenticated screens, extend `{% extends "base.html" %}`.
-   - For authentication / onboarding screens, extend `{% extends "auth_base.html" %}`.
-
-3. **Form Styling**:
-   - **DO NOT** hardcode repetitive widget CSS strings across multiple forms.
-   - Always call `apply_widget_styling(self)` in form `__init__` or reference `FORM_INPUT_CLASS` / `FORM_SELECT_CLASS` from `app/forms/styling.py`.
-
-4. **Component Partials**:
-   - Place reusable markup components into `templates/components/` (e.g., `button.html`, `badge.html`, `navbar.html`).
-   - Use `{% include "components/<name>.html" with ... %}` rather than copying raw markup.
-
-5. **No External Dependencies**:
-   - **DO NOT** install npm packages, external icon CDNs, or JavaScript UI frameworks.
-   - Use inline SVG icons or Tailwind classes exclusively.
-
-6. **Logout Method**:
-   - Never generate `<a href="/logout/">Log out</a>`. Logout in this project requires a POST request with CSRF protection:
+1. **Strictly Reuse Brand Tokens**:
+   - Use `brand-primary`, `brand-primary-hover`, `brand-primary-dark`, `brand-primary-subtle`, `brand-accent`, `brand-accent-hover`, `brand-accent-subtle`, `background-default`, `surface-card`, `border-default`, `text-primary`, and `text-secondary`.
+   - **Never hardcode arbitrary hex values** (e.g., `bg-[#AE0014]`) in HTML templates or Python code.
+2. **Never Confuse Brand and Status Colors**:
+   - Do **not** use `brand-accent` (golden yellow) for error states or warnings.
+   - Do **not** use `brand-primary` (crimson) to indicate that an item is available or successful.
+3. **Never Use White Text on Golden Yellow**:
+   - Any button or badge utilizing `bg-brand-accent` MUST use dark text (`text-gray-950 font-bold`).
+4. **Preserve Standalone Architecture**:
+   - **DO NOT** install npm, Node.js packages, webpack, Vite, or external icon CDN links (e.g., FontAwesome).
+   - Use inline SVG icons and existing components.
+5. **Maintain Component Hierarchy**:
+   - Always extend `templates/base.html` for application views and `templates/auth_base.html` for authentication.
+   - Reuse partials from `templates/components/` (`button.html`, `badge.html`, `toast.html`, `form_field.html`, `pagination.html`).
+6. **Always Use POST with CSRF for Logout**:
+   - Never generate `<a href="/logout/">Logout</a>`. Django requires a POST request with `{% csrf_token %}`:
      ```html
      <form method="post" action="{% url 'logout' %}">
        {% csrf_token %}
-       <button type="submit" class="...">Log out</button>
+       <button type="submit">Log out</button>
      </form>
      ```
+7. **Rebuild Tailwind After Changes**:
+   - Always execute `python manage.py tailwind build` after adding new utility classes to templates.

@@ -5,14 +5,15 @@
     class="mb-1.5 block text-sm font-medium text-gray-700"
   >
     {{ field.label }}{% if field.field.required %}<span
-      class="ml-0.5 text-rose-600"
+      class="ml-0.5 text-rose-600 font-bold"
       aria-hidden="true"
       >*</span
     >{% endif %}
   </label>
-  {{ field }} {% if field.errors %}
-  <p class="mt-1 text-xs text-rose-600">{{ field.errors.0 }}</p>
+  {{ field }}
+  {% if field.errors %}
+  <p class="mt-1 text-xs text-rose-600 font-medium">{{ field.errors.0 }}</p>
   {% elif field.help_text %}
-  <p class="mt-1 text-xs text-gray-500">{{ field.help_text }}</p>
+  <p class="mt-1 text-xs text-text-secondary">{{ field.help_text }}</p>
   {% endif %}
 </div>

@@ -1,20 +1,23 @@
-{% extends "base.html" %} {% block title %} Review #{{ borrow_request.pk }} |
-Campus Equipment System {% endblock %} {% block content %}
+{% extends "base.html" %}
+
+{% block title %}Review #{{ borrow_request.pk }} | Campus Equipment System{% endblock %}
+
+{% block content %}
 <div class="flex flex-wrap items-start justify-between gap-4">
   <div>
     <a
       href="{% url 'borrow_requests' %}"
-      class="text-sm font-medium text-blue-700 hover:text-blue-800 hover:underline"
+      class="text-sm font-medium text-brand-primary hover:text-brand-primary-hover hover:underline"
     >
       &larr; Back to requests
     </a>
     <div class="mt-2 flex flex-wrap items-center gap-3">
-      <h1 class="text-2xl font-bold tracking-tight text-gray-900 sm:text-3xl">
+      <h1 class="text-2xl font-bold tracking-tight text-text-primary sm:text-3xl">
         Review #{{ borrow_request.pk }}
       </h1>
-      {% include "components/borrow_request_status.html" with req=borrow_request%}
+      {% include "components/borrow_request_status.html" with req=borrow_request %}
     </div>
-    <p class="mt-1 text-sm text-gray-600">
+    <p class="mt-1 text-sm text-text-secondary">
       Submitted at {{ borrow_request.created_at|date:"Y-m-d H:i" }}
     </p>
   </div>
@@ -22,7 +25,7 @@ Campus Equipment System {% endblock %} {% block content %}
   <div class="flex items-center gap-2">
     <a
       href="{% url 'borrow_request_slip' borrow_request.pk %}"
-      class="inline-flex items-center justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2"
+      class="cursor-pointer inline-flex items-center justify-center rounded-md border border-border-default bg-surface-card px-4 py-2 text-sm font-medium text-gray-700 shadow-sm transition hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-brand-primary focus:ring-offset-2"
     >
       View borrowing slip
     </a>
@@ -32,46 +35,38 @@ Campus Equipment System {% endblock %} {% block content %}
 
 <div class="mt-6 grid gap-6 lg:grid-cols-3">
   <div class="space-y-6 lg:col-span-2">
-    <div class="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
-      <h2 class="text-lg font-semibold text-gray-900">Request details</h2>
+    <div class="rounded-xl border border-border-default bg-surface-card p-6 shadow-sm">
+      <h2 class="text-lg font-semibold text-text-primary">Request details</h2>
       <dl class="mt-4 grid gap-4 sm:grid-cols-2">
         <div>
-          <dt
-            class="text-xs font-semibold uppercase tracking-wide text-gray-500"
-          >
+          <dt class="text-xs font-semibold uppercase tracking-wide text-text-secondary">
             Purpose
           </dt>
-          <dd class="mt-1 text-sm text-gray-900">
+          <dd class="mt-1 text-sm text-text-primary">
             {{ borrow_request.purpose }}
           </dd>
         </div>
         <div>
-          <dt
-            class="text-xs font-semibold uppercase tracking-wide text-gray-500"
-          >
+          <dt class="text-xs font-semibold uppercase tracking-wide text-text-secondary">
             Requested return date
           </dt>
-          <dd class="mt-1 text-sm text-gray-900">
+          <dd class="mt-1 text-sm text-text-primary">
             {{ borrow_request.due_at|date:"Y-m-d" }}
           </dd>
         </div>
       </dl>
     </div>
 
-    <div
-      class="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm"
-    >
-      <div class="border-b border-gray-100 px-6 py-4">
-        <h2 class="text-lg font-semibold text-gray-900">Requested equipment</h2>
-        <p class="mt-1 text-sm text-gray-600">
+    <div class="overflow-hidden rounded-xl border border-border-default bg-surface-card shadow-sm">
+      <div class="border-b border-border-default px-6 py-4">
+        <h2 class="text-lg font-semibold text-text-primary">Requested equipment</h2>
+        <p class="mt-1 text-sm text-text-secondary">
           Review quantities and current availability before deciding.
         </p>
       </div>
       <div class="overflow-x-auto">
         <table class="w-full text-left text-sm">
-          <thead
-            class="border-b border-gray-200 bg-gray-50 text-xs font-semibold uppercase tracking-wide text-gray-500"
-          >
+          <thead class="border-b border-border-default bg-gray-50 text-xs font-semibold uppercase tracking-wide text-text-secondary">
             <tr>
               <th class="px-6 py-3.5">Catalog item</th>
               <th class="px-6 py-3.5">Category</th>
@@ -82,30 +77,30 @@ Campus Equipment System {% endblock %} {% block content %}
           </thead>
           <tbody class="divide-y divide-gray-100">
             {% for row in item_rows %}
-            <tr>
-              <td class="px-6 py-4 font-medium text-gray-900">
+            <tr class="hover:bg-gray-50/50">
+              <td class="px-6 py-4 font-medium text-text-primary">
                 {{ row.request_item.catalog_item.name }}
               </td>
-              <td class="px-6 py-4 text-gray-600">
+              <td class="px-6 py-4 text-text-secondary">
                 {{ row.request_item.catalog_item.category.name }}
               </td>
-              <td class="px-6 py-4 text-gray-700">
+              <td class="px-6 py-4 text-text-primary font-medium">
                 {{ row.request_item.quantity }}
               </td>
-              <td class="px-6 py-4 text-gray-700">{{ row.available_count }}</td>
+              <td class="px-6 py-4 text-text-secondary">{{ row.available_count }}</td>
               <td class="px-6 py-4">
                 {% if row.allocations %}
                 <div class="flex flex-wrap gap-1.5">
                   {% for allocation in row.allocations %}
                   <span
-                    class="inline-flex items-center rounded-full border border-blue-200 bg-blue-50 px-2.5 py-0.5 font-mono text-xs font-semibold text-blue-700"
+                    class="inline-flex items-center rounded-full border border-brand-primary-subtle bg-brand-primary-subtle px-2.5 py-0.5 font-mono text-xs font-semibold text-brand-primary"
                   >
                     {{ allocation.equipment_unit.asset_code }}
                   </span>
                   {% endfor %}
                 </div>
                 {% else %}
-                <span class="text-gray-500">Not assigned yet</span>
+                <span class="text-text-secondary">Not assigned yet</span>
                 {% endif %}
               </td>
             </tr>
@@ -116,11 +111,10 @@ Campus Equipment System {% endblock %} {% block content %}
     </div>
 
     {% if borrow_request.is_pending %}
-    <div class="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
-      <h2 class="text-lg font-semibold text-gray-900">Manage request</h2>
-      <p class="mt-1 text-sm text-gray-600">
-        Approve this request by selecting the units to reserve, or reject it
-        below.
+    <div class="rounded-xl border border-border-default bg-surface-card p-6 shadow-sm">
+      <h2 class="text-lg font-semibold text-text-primary">Manage request</h2>
+      <p class="mt-1 text-sm text-text-secondary">
+        Approve this request by selecting the units to reserve, or reject it below.
       </p>
 
       <form
@@ -128,15 +122,15 @@ Campus Equipment System {% endblock %} {% block content %}
         action="{% url 'borrow_request_approve' borrow_request.pk %}"
         class="mt-5 space-y-5"
       >
-        {% csrf_token %} {% for row in item_rows %}
-        <div class="rounded-md border border-gray-200 p-4">
+        {% csrf_token %}
+        {% for row in item_rows %}
+        <div class="rounded-md border border-border-default p-4 bg-gray-50/50">
           <div class="flex flex-wrap items-center justify-between gap-2">
-            <h3 class="text-sm font-semibold text-gray-900">
+            <h3 class="text-sm font-semibold text-text-primary">
               {{ row.request_item.catalog_item.name }}
             </h3>
-            <span class="text-xs font-medium text-gray-500">
-              Select {{ row.request_item.quantity }} of {{ row.available_count
-              }} available
+            <span class="text-xs font-medium text-text-secondary">
+              Select {{ row.request_item.quantity }} of {{ row.available_count }} available
             </span>
           </div>
 
@@ -144,22 +138,22 @@ Campus Equipment System {% endblock %} {% block content %}
           <div class="mt-3 grid gap-2 sm:grid-cols-2">
             {% for unit in row.available_units %}
             <label
-              class="flex items-center gap-2 rounded-md border border-gray-200 px-3 py-2 text-sm hover:bg-gray-50"
+              class="flex items-center gap-2 rounded-md border border-border-default bg-surface-card px-3 py-2 text-sm hover:bg-gray-50 cursor-pointer"
             >
               <input
                 type="checkbox"
                 name="units_{{ row.request_item.pk }}"
                 value="{{ unit.pk }}"
-                class="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-2 focus:ring-blue-500"
+                class="h-4 w-4 rounded border-gray-300 text-brand-primary focus:ring-2 focus:ring-brand-primary"
               />
-              <span class="font-mono text-xs font-semibold text-gray-900">
+              <span class="font-mono text-xs font-semibold text-text-primary">
                 {{ unit.asset_code }}
               </span>
             </label>
             {% endfor %}
           </div>
           {% else %}
-          <p class="mt-3 text-sm text-rose-600">
+          <p class="mt-3 text-sm text-rose-600 font-medium">
             No available units are currently in fine condition.
           </p>
           {% endif %}
@@ -168,17 +162,16 @@ Campus Equipment System {% endblock %} {% block content %}
 
         <button
           type="submit"
-          class="inline-flex items-center justify-center rounded-md bg-blue-700 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2"
+          class="cursor-pointer inline-flex items-center justify-center rounded-md bg-brand-primary px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-brand-primary-hover focus:outline-none focus:ring-2 focus:ring-brand-primary focus:ring-offset-2"
         >
           Approve and reserve units
         </button>
       </form>
 
-      <div class="mt-6 border-t border-gray-200 pt-6">
-        <h3 class="text-base font-semibold text-gray-900">Reject request</h3>
-        <p class="mt-1 text-sm text-gray-600">
-          Reject this request without reserving any units. The request will be
-          marked as rejected.
+      <div class="mt-6 border-t border-border-default pt-6">
+        <h3 class="text-base font-semibold text-text-primary">Reject request</h3>
+        <p class="mt-1 text-sm text-text-secondary">
+          Reject this request without reserving any units. The request will be marked as rejected.
         </p>
         <form
           method="post"
@@ -188,7 +181,7 @@ Campus Equipment System {% endblock %} {% block content %}
           {% csrf_token %}
           <button
             type="submit"
-            class="inline-flex items-center justify-center rounded-md bg-rose-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-rose-700 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:ring-offset-2"
+            class="cursor-pointer inline-flex items-center justify-center rounded-md bg-rose-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-rose-700 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:ring-offset-2"
           >
             Reject request
           </button>
@@ -196,24 +189,25 @@ Campus Equipment System {% endblock %} {% block content %}
       </div>
     </div>
     {% elif borrow_request.is_approved %}
-    <div class="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
-      <h2 class="text-lg font-semibold text-gray-900">Release equipment</h2>
-      <p class="mt-1 text-sm text-gray-600">
-        Confirm that the borrower is receiving the reserved units. This converts
-        the approved request into an issued loan.
+    <div class="rounded-xl border border-border-default bg-surface-card p-6 shadow-sm">
+      <h2 class="text-lg font-semibold text-text-primary">Release equipment</h2>
+      <p class="mt-1 text-sm text-text-secondary">
+        Confirm that the borrower is receiving the reserved units. This converts the approved request into an issued loan.
       </p>
-      <div class="mt-4 rounded-md border border-gray-200 bg-gray-50 p-4">
-        <p class="text-xs font-semibold uppercase tracking-wide text-gray-500">
+      <div class="mt-4 rounded-md border border-border-default bg-gray-50 p-4">
+        <p class="text-xs font-semibold uppercase tracking-wide text-text-secondary">
           Assigned units
         </p>
         <div class="mt-2 flex flex-wrap gap-1.5">
-          {% for row in item_rows %} {% for allocation in row.allocations %}
-          <span
-            class="inline-flex items-center rounded-full border border-gray-200 bg-white px-2.5 py-0.5 font-mono text-xs font-semibold text-gray-700"
-          >
-            {{ allocation.equipment_unit.asset_code }}
-          </span>
-          {% endfor %} {% endfor %}
+          {% for row in item_rows %}
+            {% for allocation in row.allocations %}
+            <span
+              class="inline-flex items-center rounded-full border border-border-default bg-surface-card px-2.5 py-0.5 font-mono text-xs font-semibold text-text-primary"
+            >
+              {{ allocation.equipment_unit.asset_code }}
+            </span>
+            {% endfor %}
+          {% endfor %}
         </div>
       </div>
       <form
@@ -224,7 +218,7 @@ Campus Equipment System {% endblock %} {% block content %}
         {% csrf_token %}
         <button
           type="submit"
-          class="inline-flex items-center justify-center rounded-md bg-blue-700 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2"
+          class="cursor-pointer inline-flex items-center justify-center rounded-md bg-brand-primary px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-brand-primary-hover focus:outline-none focus:ring-2 focus:ring-brand-primary focus:ring-offset-2"
         >
           Release equipment and print slip
         </button>
@@ -234,104 +228,89 @@ Campus Equipment System {% endblock %} {% block content %}
   </div>
 
   <aside class="space-y-6">
-    <div class="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
-      <h2 class="text-lg font-semibold text-gray-900">Borrower</h2>
+    <div class="rounded-xl border border-border-default bg-surface-card p-6 shadow-sm">
+      <h2 class="text-lg font-semibold text-text-primary">Borrower</h2>
       <dl class="mt-4 flex flex-col gap-4">
         <div>
-          <dt
-            class="text-xs font-semibold uppercase tracking-wide text-gray-500"
-          >
+          <dt class="text-xs font-semibold uppercase tracking-wide text-text-secondary">
             Name
           </dt>
-          <dd class="mt-1 text-sm text-gray-900">
+          <dd class="mt-1 text-sm text-text-primary font-medium">
             {{ borrower_profile.first_name|default:"" }} {{ borrower_profile.last_name|default:"" }}
           </dd>
         </div>
         <div>
-          <dt
-            class="text-xs font-semibold uppercase tracking-wide text-gray-500"
-          >
+          <dt class="text-xs font-semibold uppercase tracking-wide text-text-secondary">
             Email
           </dt>
-          <dd class="mt-1 text-sm text-gray-900">
+          <dd class="mt-1 text-sm text-text-primary">
             {{ borrow_request.user.email }}
           </dd>
         </div>
         {% if borrower_profile.contact_number %}
         <div>
-          <dt
-            class="text-xs font-semibold uppercase tracking-wide text-gray-500"
-          >
+          <dt class="text-xs font-semibold uppercase tracking-wide text-text-secondary">
             Contact number
           </dt>
-          <dd class="mt-1 text-sm text-gray-900">
+          <dd class="mt-1 text-sm text-text-primary">
             {{ borrower_profile.contact_number }}
           </dd>
         </div>
         {% endif %}
       </dl>
     </div>
-    <div class="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
-      <h2 class="text-lg font-semibold text-gray-900">Decision</h2>
+
+    <div class="rounded-xl border border-border-default bg-surface-card p-6 shadow-sm">
+      <h2 class="text-lg font-semibold text-text-primary">Decision</h2>
       {% if borrow_request.reviewed_by %}
       <dl class="mt-3 space-y-3 text-sm">
         <div>
-          <dt
-            class="text-xs font-semibold uppercase tracking-wide text-gray-500"
-          >
+          <dt class="text-xs font-semibold uppercase tracking-wide text-text-secondary">
             Reviewed by
           </dt>
-          <dd class="mt-1 text-gray-700">
+          <dd class="mt-1 text-text-primary font-medium">
             {{ borrow_request.reviewed_by.email }}
           </dd>
         </div>
         <div>
-          <dt
-            class="text-xs font-semibold uppercase tracking-wide text-gray-500"
-          >
+          <dt class="text-xs font-semibold uppercase tracking-wide text-text-secondary">
             Reviewed at
           </dt>
-          <dd class="mt-1 text-gray-700">
+          <dd class="mt-1 text-text-secondary">
             {{ borrow_request.reviewed_at|date:"Y-m-d H:i" }}
           </dd>
         </div>
       </dl>
       {% else %}
-      <p class="mt-3 text-sm text-gray-600">
+      <p class="mt-3 text-sm text-text-secondary">
         This request has not been reviewed yet.
       </p>
       {% endif %}
     </div>
 
     {% if loan.released_at %}
-    <div class="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
-      <h2 class="text-lg font-semibold text-gray-900">Loan</h2>
+    <div class="rounded-xl border border-border-default bg-surface-card p-6 shadow-sm">
+      <h2 class="text-lg font-semibold text-text-primary">Loan</h2>
       <dl class="mt-3 space-y-3 text-sm">
         <div>
-          <dt
-            class="text-xs font-semibold uppercase tracking-wide text-gray-500"
-          >
+          <dt class="text-xs font-semibold uppercase tracking-wide text-text-secondary">
             Approved by
           </dt>
-          <dd class="mt-1 text-gray-700">{{ loan.user.email }}</dd>
+          <dd class="mt-1 text-text-primary font-medium">{{ loan.user.email }}</dd>
         </div>
         <div>
-          <dt
-            class="text-xs font-semibold uppercase tracking-wide text-gray-500"
-          >
+          <dt class="text-xs font-semibold uppercase tracking-wide text-text-secondary">
             Released at
           </dt>
-          <dd class="mt-1 text-gray-700">
+          <dd class="mt-1 text-text-secondary">
             {{ loan.released_at|date:"Y-m-d H:i" }}
           </dd>
         </div>
         <div>
-          <dt
-            class="text-xs font-semibold uppercase tracking-wide text-gray-500"
-          >
+          <dt class="text-xs font-semibold uppercase tracking-wide text-text-secondary">
             Due date
           </dt>
-          <dd class="mt-1 text-gray-700">
+          <dd class="mt-1 text-text-secondary">
             {{ borrow_request.due_at|date:"Y-m-d" }}
           </dd>
         </div>

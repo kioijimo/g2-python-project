@@ -27,13 +27,11 @@ class LoginUIRedesignTest(TestCase):
         self.assertIn("BORROWING & INVENTORY SYSTEM", content)
         self.assertIn("typewriter-target", content)
 
-        # 2. Check Design System Colors & Gradients
+        # 2. Check BulSU Crimson & Gold Design System Colors & Gradients
         self.assertIn("radial-gradient", content)
-        self.assertIn("#60A5FA", content)
-        self.assertIn("#3B82F6", content)
-        self.assertIn("text-blue-950", content)
-        self.assertIn("text-blue-700", content)
-        self.assertIn("bg-blue-700", content)
+        self.assertIn("#AE0014", content)
+        self.assertIn("#800000", content)
+        self.assertIn("bg-brand-primary", content)
 
         # 3. Check Form Side & Elements
         self.assertIn("Sign in", content)

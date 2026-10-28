@@ -6,11 +6,12 @@
 
 {% block content %}
 <div class="mb-4 text-center">
-  <h1 class="text-2xl font-bold tracking-tight text-gray-900">Create an account</h1>
-  <p class="mt-1 text-sm text-gray-600">Register as a basic user to borrow campus equipment</p>
+
+  <h1 class="text-2xl font-bold tracking-tight text-text-primary">Create an account</h1>
+  <p class="mt-1 text-sm text-text-secondary">Register as a student or staff borrower to access equipment</p>
 </div>
 
-<div class="rounded-xl border border-gray-200 bg-white/95 p-6 shadow-sm backdrop-blur-sm sm:px-8 sm:py-6">
+<div class="rounded-xl border border-border-default bg-surface-card p-6 shadow-sm sm:px-8 sm:py-6">
   <form method="post" class="space-y-3.5">
     {% csrf_token %}
 
@@ -87,17 +88,17 @@
     <div class="pt-2">
       <button
         type="submit"
-        class="cursor-pointer inline-flex w-full items-center justify-center rounded-md bg-blue-700 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2"
+        class="cursor-pointer inline-flex w-full items-center justify-center rounded-md bg-brand-primary px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-brand-primary-hover focus:outline-none focus:ring-2 focus:ring-brand-primary focus:ring-offset-2"
       >
         Register Account
       </button>
     </div>
   </form>
 
-  <div class="mt-4 border-t border-gray-100 pt-3 text-center">
-    <p class="text-sm text-gray-600">
+  <div class="mt-4 border-t border-border-default pt-3 text-center">
+    <p class="text-sm text-text-secondary">
       Already have an account?
-      <a href="{% url 'login' %}" class="cursor-pointer font-medium text-blue-700 hover:text-blue-800 hover:underline">
+      <a href="{% url 'login' %}" class="cursor-pointer font-medium text-brand-primary hover:text-brand-primary-hover hover:underline">
         Sign in
       </a>
     </p>

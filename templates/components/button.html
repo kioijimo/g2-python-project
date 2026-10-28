@@ -1,21 +1,25 @@
 {% comment %}
 Usage:
   {% include "components/button.html" with text="Save" type="submit" variant="primary" %}
-Variants: primary (default), secondary, danger, ghost
+Variants: primary (default), secondary, accent, danger, success, ghost
 {% endcomment %}
 <button
   type="{{ type|default:'button' }}"
   {% if name %}name="{{ name }}"{% endif %}
   {% if value %}value="{{ value }}"{% endif %}
-  class="inline-flex items-center justify-center rounded-md px-4 py-2 text-sm font-medium transition duration-150 shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50
+  class="cursor-pointer inline-flex items-center justify-center rounded-md px-4 py-2 text-sm font-semibold transition duration-150 shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50
   {% if variant == 'danger' %}
     bg-rose-600 text-white hover:bg-rose-700 focus:ring-rose-500
+  {% elif variant == 'accent' %}
+    bg-brand-accent text-gray-950 font-bold hover:bg-brand-accent-hover focus:ring-brand-accent
   {% elif variant == 'secondary' %}
-    border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 focus:ring-blue-600
+    border border-border-default bg-surface-card text-text-primary hover:bg-background-muted focus:ring-brand-primary
   {% elif variant == 'ghost' %}
-    bg-transparent text-gray-700 shadow-none hover:bg-gray-100 focus:ring-gray-400
+    bg-transparent text-text-secondary shadow-none hover:bg-background-muted hover:text-text-primary focus:ring-brand-primary
+  {% elif variant == 'success' %}
+    bg-emerald-600 text-white hover:bg-emerald-700 focus:ring-emerald-500
   {% else %}
-    bg-blue-700 text-white hover:bg-blue-800 focus:ring-blue-600
+    bg-brand-primary text-white hover:bg-brand-primary-hover focus:ring-brand-primary
   {% endif %}
   {{ extra_class }}">
   {{ text }}
