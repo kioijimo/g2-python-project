@@ -174,10 +174,30 @@ def request_detail(request, pk):
         models.BorrowRequest.objects.select_related("user").prefetch_related(
             "items__catalog_item__category",
             "items__allocations__equipment_unit",
+            "returnrecord_set__equipment_unit",
         ),
         pk=pk,
         user=request.user,
     )
+    returns_by_unit_id = {
+        ret.equipment_unit_id: ret for ret in borrow_request.returnrecord_set.all()
+    }
+    show_return_status = borrow_request.status in (
+        models.BorrowRequest.BorrowRequestStatus.ISSUED,
+        models.BorrowRequest.BorrowRequestStatus.PARTIALLY_RETURNED,
+        models.BorrowRequest.BorrowRequestStatus.RETURNED,
+    )
+    for item in borrow_request.items.all():
+        for allocation in item.allocations.all():
+            return_rec = returns_by_unit_id.get(allocation.equipment_unit_id)
+            allocation.show_return_status = show_return_status
+            allocation.is_returned = return_rec is not None
+            allocation.return_condition = return_rec.condition if return_rec else None
+            allocation.is_damaged_return = (
+                return_rec is not None
+                and return_rec.condition
+                == models.EquipmentUnit.EquipmentCondition.DAMAGED
+            )
 
     return render(
         request,

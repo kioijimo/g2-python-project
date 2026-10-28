@@ -7,6 +7,7 @@ from django.utils import timezone
 from app.models import (
     BorrowRequest,
     EquipmentUnit,
+    ReturnRecord,
     UnitAllocation,
 )
 from app.tests.helpers import (
@@ -279,3 +280,55 @@ class RequestHistoryTests(TestCase):
         response = self.client.get(reverse("portal:request_list"))
 
         self.assertRedirects(response, reverse("manage"))
+
+    def test_detail_shows_returned_fine_damaged_and_not_returned_unit_indicators(self):
+        borrow_request = self.make_request(
+            status=BorrowRequest.BorrowRequestStatus.PARTIALLY_RETURNED
+        )
+        request_item = create_request_item(borrow_request, self.item, quantity=3)
+        u_fine = EquipmentUnit.objects.create(
+            catalog_item=self.item,
+            asset_code="LAP-FINE-01",
+            inventory_status=EquipmentUnit.EquipmentStatus.AVAILABLE,
+            condition=EquipmentUnit.EquipmentCondition.FINE,
+        )
+        u_damaged = EquipmentUnit.objects.create(
+            catalog_item=self.item,
+            asset_code="LAP-DMG-02",
+            inventory_status=EquipmentUnit.EquipmentStatus.MAINTENANCE,
+            condition=EquipmentUnit.EquipmentCondition.DAMAGED,
+        )
+        u_issued = EquipmentUnit.objects.create(
+            catalog_item=self.item,
+            asset_code="LAP-OUT-03",
+            inventory_status=EquipmentUnit.EquipmentStatus.ISSUED,
+            condition=EquipmentUnit.EquipmentCondition.FINE,
+        )
+        for u in (u_fine, u_damaged, u_issued):
+            UnitAllocation.objects.create(
+                request_item=request_item,
+                equipment_unit=u,
+                status=UnitAllocation.UnitAllocationStatus.RELEASED,
+                allocated_at=timezone.now(),
+            )
+        ReturnRecord.objects.create(
+            borrow_request=borrow_request,
+            equipment_unit=u_fine,
+            condition=EquipmentUnit.EquipmentCondition.FINE,
+        )
+        ReturnRecord.objects.create(
+            borrow_request=borrow_request,
+            equipment_unit=u_damaged,
+            condition=EquipmentUnit.EquipmentCondition.DAMAGED,
+        )
+
+        response = self.client.get(
+            reverse("portal:request_detail", args=[borrow_request.pk])
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "LAP-FINE-01")
+        self.assertContains(response, "Returned (Fine)")
+        self.assertContains(response, "LAP-DMG-02")
+        self.assertContains(response, "Returned (Damaged)")
+        self.assertContains(response, "LAP-OUT-03")
+        self.assertContains(response, "Not Returned")

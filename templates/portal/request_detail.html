@@ -103,14 +103,46 @@
               <td class="px-4 py-4 text-sm text-text-secondary">{{ item.catalog_item.category.name }}</td>
               <td class="px-4 py-4 text-sm font-semibold text-text-primary">{{ item.quantity }}</td>
               <td class="px-4 py-4 text-sm text-text-secondary">
-                {% for allocation in item.allocations.all %}
-                <span class="mr-2 inline-flex items-center rounded-md border border-brand-primary/20 bg-brand-primary-subtle px-2 py-0.5 text-xs font-mono font-semibold text-brand-primary">
-                  {{ allocation.equipment_unit.asset_code }}
-                </span>
-                <span class="mr-2 text-xs text-text-secondary">({{ allocation.get_status_display }})</span>
-                {% empty %}
-                <span class="text-xs text-text-secondary italic">Not assigned yet</span>
-                {% endfor %}
+                <div class="flex flex-wrap items-center gap-1.5">
+                  {% for allocation in item.allocations.all %}
+                    {% if allocation.show_return_status %}
+                      {% if allocation.is_returned %}
+                        {% if allocation.is_damaged_return %}
+                        <span
+                          class="inline-flex items-center gap-1.5 rounded-full border border-rose-200 bg-rose-50 px-2.5 py-0.5 text-xs font-semibold text-rose-700 whitespace-nowrap"
+                          title="Returned in Damaged condition"
+                        >
+                          <span class="font-mono">{{ allocation.equipment_unit.asset_code }}</span>
+                          <span class="text-[11px] font-medium">&bull; Returned (Damaged)</span>
+                        </span>
+                        {% else %}
+                        <span
+                          class="inline-flex items-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-0.5 text-xs font-semibold text-emerald-700 whitespace-nowrap"
+                          title="Returned in Fine condition"
+                        >
+                          <span class="font-mono">{{ allocation.equipment_unit.asset_code }}</span>
+                          <span class="text-[11px] font-medium">&bull; Returned (Fine)</span>
+                        </span>
+                        {% endif %}
+                      {% else %}
+                        <span
+                          class="inline-flex items-center gap-1.5 rounded-full border border-amber-200 bg-amber-50 px-2.5 py-0.5 text-xs font-semibold text-amber-800 whitespace-nowrap"
+                          title="Currently issued and not yet returned"
+                        >
+                          <span class="font-mono">{{ allocation.equipment_unit.asset_code }}</span>
+                          <span class="text-[11px] font-medium">&bull; Not Returned</span>
+                        </span>
+                      {% endif %}
+                    {% else %}
+                      <span class="mr-1 inline-flex items-center rounded-md border border-brand-primary/20 bg-brand-primary-subtle px-2 py-0.5 text-xs font-mono font-semibold text-brand-primary whitespace-nowrap">
+                        {{ allocation.equipment_unit.asset_code }}
+                      </span>
+                      <span class="mr-2 text-xs text-text-secondary">({{ allocation.get_status_display }})</span>
+                    {% endif %}
+                  {% empty %}
+                  <span class="text-xs text-text-secondary italic">Not assigned yet</span>
+                  {% endfor %}
+                </div>
               </td>
             </tr>
             {% endfor %}
