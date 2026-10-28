@@ -257,13 +257,9 @@
           return true;
         }
 
-        let message = "Only " + available + " units are available.";
-
-        if (available === 0) {
-          message = "No units are currently available for this item.";
-        } else if (available === 1) {
-          message = "Only 1 unit is available.";
-        }
+        let message = available < 0 ? 
+          "No units are currently available for this item." : 
+          `Only ${available} ${(available > 1 ? "units are" : "unit is")} available.`;
 
         quantity.setCustomValidity(message);
         quantity.setAttribute("aria-invalid", "true");
@@ -276,8 +272,24 @@
         return false;
       }
 
+      function applyMinimumQuantity() {
+        const available = selectedAvailability();
+
+        if (available < 1) {
+          return
+        }
+
+        quantity.value = String(1)
+      }
+
+      function onItemSelect() {
+        if (validateAvailability()) {
+          applyMinimumQuantity()
+        } 
+      }
+      
       validators.push(validateAvailability);
-      select.addEventListener("change", validateAvailability);
+      select.addEventListener("change", onItemSelect);
       quantity.addEventListener("input", validateAvailability);
       validateAvailability();
     });

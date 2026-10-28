@@ -64,9 +64,7 @@ def create_borrow_request(user, purpose, due_at, items):
                     f"Maximum {settings.max_borrow_quantity} unit(s) per item."
                 )
             if catalog_item.pk in selected_ids:
-                raise ValidationError(
-                    "Each catalog item can only be requested once."
-                )
+                raise ValidationError("Each catalog item can only be requested once.")
 
             available = requestable_units_count(catalog_item)
             if quantity > available:
@@ -108,18 +106,14 @@ def cancel_borrow_request(borrow_request):
                 request_item__borrow_request=request,
                 status=UnitAllocation.UnitAllocationStatus.PENDING,
             )
-            unit_ids = list(
-                allocations.values_list("equipment_unit_id", flat=True)
-            )
+            unit_ids = list(allocations.values_list("equipment_unit_id", flat=True))
 
             if unit_ids:
                 EquipmentUnit.objects.filter(
                     pk__in=unit_ids,
                     inventory_status=EquipmentUnit.EquipmentStatus.RESERVED,
                 ).update(inventory_status=EquipmentUnit.EquipmentStatus.AVAILABLE)
-                allocations.update(
-                    status=UnitAllocation.UnitAllocationStatus.CANCELLED
-                )
+                allocations.update(status=UnitAllocation.UnitAllocationStatus.CANCELLED)
 
         request.status = BorrowRequest.BorrowRequestStatus.CANCELLED
         request.save(update_fields=["status"])

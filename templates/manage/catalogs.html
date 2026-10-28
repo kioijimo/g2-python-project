@@ -271,18 +271,19 @@
         }
       });
     });
-
-    const modal = document.querySelector("#form-modal");
-    if (modal) {
-      const observer = new MutationObserver(function () {
-        if (modal.open) {
-          if (document.activeElement && (document.activeElement.tagName === "BUTTON" || document.activeElement.tagName === "A")) {
-            document.activeElement.blur();
-          }
-        }
-      });
-      observer.observe(modal, { attributes: true, attributeFilter: ["open"] });
-    }
+    
+// Doesnt do anything
+//     const modal = document.querySelector("#form-modal");
+//     if (modal) {
+//       const observer = new MutationObserver(function () {
+//         if (modal.open) {
+//           if (document.activeElement && (document.activeElement.tagName === "BUTTON" || document.activeElement.tagName === "A")) {
+//             document.activeElement.blur();
+//           }
+//         }
+//       });
+//       observer.observe(modal, { attributes: true, attributeFilter: ["open"] });
+//     }
   });
 </script>
 
