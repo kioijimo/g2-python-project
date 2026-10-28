@@ -57,6 +57,7 @@ def _get_borrow_request(pk):
             "review_records__user",
             "items__catalog_item__category",
             "items__allocations__equipment_unit",
+            "returnrecord_set__equipment_unit",
         ),
         pk=pk,
     )
@@ -983,14 +984,28 @@ def borrow_requests(request):
 @admin_required
 def borrow_request_review(request, pk):
     borrow_request = _get_borrow_request(pk)
+    returns_by_unit_id = {
+        ret.equipment_unit_id: ret for ret in borrow_request.returnrecord_set.all()
+    }
+    show_return_status = borrow_request.status in (
+        BorrowRequest.BorrowRequestStatus.ISSUED,
+        BorrowRequest.BorrowRequestStatus.PARTIALLY_RETURNED,
+        BorrowRequest.BorrowRequestStatus.RETURNED,
+    )
     item_rows = []
 
     for request_item in borrow_request.items.all():
-        allocations = [
-            allocation
-            for allocation in request_item.allocations.all()
-            if allocation.status != UnitAllocation.UnitAllocationStatus.CANCELLED
-        ]
+        allocations = []
+        for allocation in request_item.allocations.all():
+            if allocation.status != UnitAllocation.UnitAllocationStatus.CANCELLED:
+                return_rec = returns_by_unit_id.get(allocation.equipment_unit_id)
+                allocation.is_returned = return_rec is not None
+                allocation.return_condition = (
+                    return_rec.condition if return_rec else None
+                )
+                allocation.show_return_status = show_return_status
+                allocations.append(allocation)
+
         available_units = EquipmentUnit.objects.none()
 
         if borrow_request.status == BorrowRequest.BorrowRequestStatus.PENDING:
@@ -1020,6 +1035,7 @@ def borrow_request_review(request, pk):
             "item_rows": item_rows,
             "loan": loan,
             "borrower_profile": borrower_profile,
+            "EquipmentCondition": EquipmentUnit.EquipmentCondition,
         },
     )
 

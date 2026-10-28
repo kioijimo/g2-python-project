@@ -22,7 +22,15 @@
     </p>
   </div>
   {% if loan.released_at %}
-  <div class="flex items-center gap-2">
+  <div class="flex flex-wrap items-center gap-2">
+    {% if borrow_request.is_issued %}
+    <a
+      href="{% url 'manage_returns' %}?request_id={{ borrow_request.pk }}"
+      class="cursor-pointer inline-flex items-center justify-center rounded-md bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2"
+    >
+      Process returns
+    </a>
+    {% endif %}
     <a
       href="{% url 'borrow_request_slip' borrow_request.pk %}"
       class="cursor-pointer inline-flex items-center justify-center rounded-md border border-border-default bg-surface-card px-4 py-2 text-sm font-medium text-gray-700 shadow-sm transition hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-brand-primary focus:ring-offset-2"
@@ -92,11 +100,41 @@
                 {% if row.allocations %}
                 <div class="flex flex-wrap gap-1.5">
                   {% for allocation in row.allocations %}
-                  <span
-                    class="inline-flex items-center rounded-full border border-brand-primary-subtle bg-brand-primary-subtle px-2.5 py-0.5 font-mono text-xs font-semibold text-brand-primary"
-                  >
-                    {{ allocation.equipment_unit.asset_code }}
-                  </span>
+                    {% if allocation.show_return_status %}
+                      {% if allocation.is_returned %}
+                        {% if allocation.return_condition == EquipmentCondition.DAMAGED %}
+                        <span
+                          class="inline-flex items-center gap-1.5 rounded-full border border-rose-200 bg-rose-50 px-2.5 py-0.5 text-xs font-semibold text-rose-700 whitespace-nowrap"
+                          title="Returned in Damaged condition"
+                        >
+                          <span class="font-mono">{{ allocation.equipment_unit.asset_code }}</span>
+                          <span class="text-[11px] font-medium">&bull; Returned (Damaged)</span>
+                        </span>
+                        {% else %}
+                        <span
+                          class="inline-flex items-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-0.5 text-xs font-semibold text-emerald-700 whitespace-nowrap"
+                          title="Returned in Fine condition"
+                        >
+                          <span class="font-mono">{{ allocation.equipment_unit.asset_code }}</span>
+                          <span class="text-[11px] font-medium">&bull; Returned</span>
+                        </span>
+                        {% endif %}
+                      {% else %}
+                        <span
+                          class="inline-flex items-center gap-1.5 rounded-full border border-amber-200 bg-amber-50 px-2.5 py-0.5 text-xs font-semibold text-amber-800 whitespace-nowrap"
+                          title="Currently issued and not yet returned"
+                        >
+                          <span class="font-mono">{{ allocation.equipment_unit.asset_code }}</span>
+                          <span class="text-[11px] font-medium">&bull; Not Returned</span>
+                        </span>
+                      {% endif %}
+                    {% else %}
+                    <span
+                      class="inline-flex items-center rounded-full border border-brand-primary-subtle bg-brand-primary-subtle px-2.5 py-0.5 font-mono text-xs font-semibold text-brand-primary whitespace-nowrap"
+                    >
+                      {{ allocation.equipment_unit.asset_code }}
+                    </span>
+                    {% endif %}
                   {% endfor %}
                 </div>
                 {% else %}

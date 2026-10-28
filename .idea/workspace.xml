@@ -6,48 +6,9 @@
   <component name="ChangeListManager">
     <list default="true" id="81d952a8-95d4-4479-88b5-4cff86c96015" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/forms/auth.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/forms/auth.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/forms/manage.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/forms/manage.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/forms/portal.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/forms/portal.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/forms/styling.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/forms/styling.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/management/commands/seed_demo_data.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/management/commands/seed_demo_data.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/models.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/services/approvals.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/services/approvals.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/services/borrowing.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/services/borrowing.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/tests/helpers.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/tests/helpers.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/tests/test_auth.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/tests/test_auth.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/tests/test_catalog.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/tests/test_catalog.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/tests/test_dashboard_reports.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/tests/test_dashboard_reports.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/tests/test_manage_accounts.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/tests/test_manage_accounts.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/tests/test_request_history.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/tests/test_request_history.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/tests/test_request_submission.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/tests/test_request_submission.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/tests/test_seed_demo_data.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/tests/test_seed_demo_data.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/tests/test_returns.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/tests/test_returns.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/views/manage.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/views/manage.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/views/portal.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/views/portal.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/seed_demo_data.sql" beforeDir="false" afterPath="$PROJECT_DIR$/seed_demo_data.sql" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/auth/login.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/auth/login.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/auth/register.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/auth/register.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/base.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/base.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/components/admin_navbar.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/components/admin_navbar.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/components/badge.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/components/badge.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/components/borrow_request_status.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/components/borrow_request_status.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/components/pagination.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/components/pagination.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/components/user_navbar.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/components/user_navbar.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/manage/account_list.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/manage/account_list.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/manage/audit.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/manage/audit.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/templates/manage/borrow_request_review.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/manage/borrow_request_review.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/manage/borrow_request_slip.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/manage/borrow_request_slip.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/manage/catalogs.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/manage/catalogs.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/manage/dashboard.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/manage/dashboard.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/manage/loans.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/manage/loans.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/manage/maintenance.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/manage/maintenance.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/manage/returns.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/manage/returns.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/manage/user_borrowing_history.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/manage/user_borrowing_history.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/portal/request_detail.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/portal/request_detail.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/portal/request_form.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/portal/request_form.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/portal/request_list.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/portal/request_list.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/theme/static_src/src/styles.css" beforeDir="false" afterPath="$PROJECT_DIR$/theme/static_src/src/styles.css" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -73,23 +34,23 @@
   </component>
   <component name="NextEditCompletionFeaturesState">
     <decayedCancelled>
-      <entry key="MS100" value="1.0005766565729637" />
-      <entry key="MS500" value="1.2250004824491663" />
-      <entry key="S2" value="1.6902318136294259" />
-      <entry key="S5" value="1.9736131231364875" />
-      <entry key="S10" value="2.4081634604657953" />
-      <entry key="S30" value="3.605170888468308" />
-      <entry key="S60" value="4.646005138314093" />
-      <entry key="M2" value="5.571993574524068" />
-      <entry key="M5" value="6.351748890382026" />
-      <entry key="M10" value="6.661294560312327" />
-      <entry key="M15" value="6.770838812205513" />
-      <entry key="M30" value="6.926262794219561" />
-      <entry key="H1" value="8.942091746009924" />
-      <entry key="H2" value="31.00011093191303" />
-      <entry key="H4" value="127.10115095261023" />
-      <entry key="D1" value="544.5441176890846" />
-      <entry key="W1" value="708.920424729766" />
+      <entry key="MS100" value="1.0000800912681487" />
+      <entry key="MS500" value="1.2611524762680522" />
+      <entry key="S2" value="2.201634367761608" />
+      <entry key="S5" value="2.6312067821518763" />
+      <entry key="S10" value="2.806202840597585" />
+      <entry key="S30" value="2.9331913382723993" />
+      <entry key="S60" value="2.966361976485784" />
+      <entry key="M2" value="3.0014370566466906" />
+      <entry key="M5" value="3.63882745851472" />
+      <entry key="M10" value="5.120326309216713" />
+      <entry key="M15" value="6.1575999831593995" />
+      <entry key="M30" value="7.7305101021335325" />
+      <entry key="H1" value="10.390304301316593" />
+      <entry key="H2" value="31.182993499857453" />
+      <entry key="H4" value="124.18896978408513" />
+      <entry key="D1" value="543.2383434289798" />
+      <entry key="W1" value="711.116910590968" />
     </decayedCancelled>
     <decayedSelected>
       <entry key="MS100" value="0.0" />
@@ -98,36 +59,36 @@
       <entry key="S5" value="0.0" />
       <entry key="S10" value="0.0" />
       <entry key="S30" value="0.0" />
-      <entry key="S60" value="1.6522027450288384E-194" />
-      <entry key="M2" value="1.8955413559276947E-97" />
-      <entry key="M5" value="7.505320231181403E-39" />
-      <entry key="M10" value="6.349067083111114E-19" />
-      <entry key="M15" value="3.248553414372745E-12" />
-      <entry key="M30" value="1.7856503007295335E-5" />
-      <entry key="H1" value="0.042948531516996576" />
-      <entry key="H2" value="2.1193236797634123" />
-      <entry key="H4" value="14.909986483462417" />
-      <entry key="D1" value="75.83577115343765" />
-      <entry key="W1" value="100.23068202594449" />
+      <entry key="S60" value="1.7924686351137226E-199" />
+      <entry key="M2" value="6.24348937399234E-100" />
+      <entry key="M5" value="7.628635634646134E-40" />
+      <entry key="M10" value="2.0241781769892236E-19" />
+      <entry key="M15" value="1.5160582698325885E-12" />
+      <entry key="M30" value="1.2198582061835382E-5" />
+      <entry key="H1" value="0.035498073932518685" />
+      <entry key="H2" value="1.9267507018455763" />
+      <entry key="H4" value="14.216456724037094" />
+      <entry key="D1" value="75.23613209474485" />
+      <entry key="W1" value="100.11707769250822" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="0.6510620751221335" />
-      <entry key="MS500" value="1.125833825032226" />
-      <entry key="S2" value="1.6557009672746315" />
-      <entry key="S5" value="1.9573385630393465" />
-      <entry key="S10" value="2.3979808508742715" />
-      <entry key="S30" value="3.5994347404528217" />
-      <entry key="S60" value="4.641904009051804" />
-      <entry key="M2" value="5.569362940985366" />
-      <entry key="M5" value="6.350496491454354" />
-      <entry key="M10" value="6.660628220852342" />
-      <entry key="M15" value="6.770385086757393" />
-      <entry key="M30" value="6.9260485045625195" />
-      <entry key="H1" value="8.984877540188966" />
-      <entry key="H2" value="33.11847048112871" />
-      <entry key="H4" value="142.00803569844902" />
-      <entry key="D1" value="620.377321821003" />
-      <entry key="W1" value="809.1506232884735" />
+      <entry key="MS100" value="0.6783345098389684" />
+      <entry key="MS500" value="1.0905468652975134" />
+      <entry key="S2" value="2.020992946769132" />
+      <entry key="S5" value="2.5280860571753663" />
+      <entry key="S10" value="2.7479736290321917" />
+      <entry key="S30" value="2.912126256938871" />
+      <entry key="S60" value="2.955610708065069" />
+      <entry key="M2" value="2.9959971895546533" />
+      <entry key="M5" value="3.636514218913888" />
+      <entry key="M10" value="5.1190186456671745" />
+      <entry key="M15" value="6.1566575841144475" />
+      <entry key="M30" value="7.729998134666419" />
+      <entry key="H1" value="10.425485017579486" />
+      <entry key="H2" value="33.10877623594558" />
+      <entry key="H4" value="138.4024233215709" />
+      <entry key="D1" value="618.4719211785335" />
+      <entry key="W1" value="811.2335042754444" />
     </decayedShown>
   </component>
   <component name="ProjectColorInfo">{

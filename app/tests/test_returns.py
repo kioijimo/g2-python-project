@@ -285,3 +285,28 @@ class ReturnsManagementTests(TestCase):
                 status=MaintenanceRecord.MaintenanceStatus.ACTIVE,
             ).exists()
         )
+
+    def test_partially_returned_request_review_shows_returned_and_not_returned_unit_indicators(self):
+        # Return LAP-003 (FINE) and DMM-002 (DAMAGED), leaving CAM-001 and DMM-003 unreturned
+        self.client.post(
+            reverse("process_unit_return"),
+            {
+                "borrow_request_id": self.borrow_request.id,
+                "return_mode": "selected",
+                "asset_codes": ["LAP-003", "DMM-002"],
+                "condition_LAP-003": EquipmentUnit.EquipmentCondition.FINE,
+                "condition_DMM-002": EquipmentUnit.EquipmentCondition.DAMAGED,
+            },
+        )
+
+        review_response = self.client.get(
+            reverse("borrow_request_review", args=[self.borrow_request.id])
+        )
+        self.assertEqual(review_response.status_code, 200)
+        self.assertContains(review_response, "Partially Returned")
+        self.assertContains(review_response, "Returned")
+        self.assertContains(review_response, "Returned (Damaged)")
+        self.assertContains(review_response, "Not Returned")
+        self.assertContains(review_response, "border-emerald-200 bg-emerald-50")
+        self.assertContains(review_response, "border-rose-200 bg-rose-50")
+        self.assertContains(review_response, "border-amber-200 bg-amber-50")
