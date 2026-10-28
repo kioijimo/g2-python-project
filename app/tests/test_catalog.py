@@ -191,3 +191,82 @@ class CatalogTests(TestCase):
         response = self.client.get(reverse("portal:catalog"))
 
         self.assertRedirects(response, reverse("manage"))
+
+
+class ManageCatalogTests(TestCase):
+    def setUp(self):
+        self.admin = create_admin()
+        self.client.force_login(self.admin)
+        self.category = create_category("Electronics")
+
+    def test_admin_create_category_success(self):
+        response = self.client.post(
+            reverse("catalogs_view", kwargs={"view": "category"}),
+            {
+                "name": "Robotics",
+                "description": "Robotics equipment",
+                "status": Category.CategoryStatus.ACTIVE,
+            },
+        )
+        self.assertRedirects(response, reverse("catalogs_view", kwargs={"view": "category"}))
+        self.assertTrue(Category.objects.filter(name="Robotics").exists())
+
+    def test_admin_create_category_invalid(self):
+        response = self.client.post(
+            reverse("catalogs_view", kwargs={"view": "category"}),
+            {
+                "name": "",
+                "description": "Invalid",
+                "status": Category.CategoryStatus.ACTIVE,
+            },
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(Category.objects.filter(description="Invalid").exists())
+
+    def test_admin_edit_category(self):
+        response = self.client.post(
+            reverse("catalogs_edit", kwargs={"view": "category", "pk": self.category.pk}),
+            {
+                "name": "Consumer Electronics",
+                "description": "Updated description",
+                "status": Category.CategoryStatus.ACTIVE,
+            },
+        )
+        self.assertRedirects(response, reverse("catalogs_view", kwargs={"view": "category"}))
+        self.category.refresh_from_db()
+        self.assertEqual(self.category.name, "Consumer Electronics")
+
+    def test_admin_archive_category_get_and_post(self):
+        response = self.client.get(
+            reverse("catalogs_archive", kwargs={"view": "category", "pk": self.category.pk}),
+        )
+        self.assertEqual(response.status_code, 200)
+        self.category.refresh_from_db()
+        self.assertEqual(self.category.status, Category.CategoryStatus.ACTIVE)
+
+        response = self.client.post(
+            reverse("catalogs_archive", kwargs={"view": "category", "pk": self.category.pk}),
+        )
+        self.assertRedirects(response, reverse("catalogs_view", kwargs={"view": "category"}))
+        self.category.refresh_from_db()
+        self.assertEqual(self.category.status, Category.CategoryStatus.ARCHIVED)
+
+    def test_admin_item_catalog_filters_rendered(self):
+        response = self.client.get(reverse("catalogs_view", kwargs={"view": "item"}))
+        self.assertEqual(response.status_code, 200)
+        # Category and status filters must be present
+        self.assertContains(response, 'name="category"')
+        self.assertContains(response, 'name="status"')
+        # Unit-only filters must not be present
+        self.assertNotContains(response, 'name="catalog_item"')
+        self.assertNotContains(response, 'name="inventory_status"')
+        # Filter and Clear buttons must be present
+        self.assertContains(response, "Filter")
+        self.assertContains(response, "Clear")
+
+    def test_admin_unit_catalog_filters_rendered(self):
+        response = self.client.get(reverse("catalogs_view", kwargs={"view": "unit"}))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'name="catalog_item"')
+        self.assertContains(response, 'name="inventory_status"')
+        self.assertContains(response, 'name="category"')

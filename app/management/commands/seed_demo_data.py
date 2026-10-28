@@ -223,14 +223,14 @@ class Command(BaseCommand):
             add_unit("CLK-003", item_clicker, EquipmentUnit.EquipmentStatus.RESERVED, EquipmentUnit.EquipmentCondition.FINE)
 
             # Camcorders (3)
-            add_unit("CAM-001", item_cam, EquipmentUnit.EquipmentStatus.AVAILABLE, EquipmentUnit.EquipmentCondition.FINE)
+            add_unit("CAM-001", item_cam, EquipmentUnit.EquipmentStatus.ISSUED, EquipmentUnit.EquipmentCondition.FINE)
             add_unit("CAM-002", item_cam, EquipmentUnit.EquipmentStatus.AVAILABLE, EquipmentUnit.EquipmentCondition.FINE)
             add_unit("CAM-003", item_cam, EquipmentUnit.EquipmentStatus.AVAILABLE, EquipmentUnit.EquipmentCondition.FINE)
 
             # Multimeters (3)
             add_unit("DMM-001", item_dmm, EquipmentUnit.EquipmentStatus.AVAILABLE, EquipmentUnit.EquipmentCondition.FINE)
-            add_unit("DMM-002", item_dmm, EquipmentUnit.EquipmentStatus.AVAILABLE, EquipmentUnit.EquipmentCondition.FINE)
-            add_unit("DMM-003", item_dmm, EquipmentUnit.EquipmentStatus.AVAILABLE, EquipmentUnit.EquipmentCondition.FINE)
+            add_unit("DMM-002", item_dmm, EquipmentUnit.EquipmentStatus.ISSUED, EquipmentUnit.EquipmentCondition.FINE)
+            add_unit("DMM-003", item_dmm, EquipmentUnit.EquipmentStatus.ISSUED, EquipmentUnit.EquipmentCondition.FINE)
 
             # Soldering Stations (3)
             add_unit("SLD-001", item_solder, EquipmentUnit.EquipmentStatus.MAINTENANCE, EquipmentUnit.EquipmentCondition.FINE)
@@ -354,6 +354,7 @@ class Command(BaseCommand):
                 purpose="Movie night with friends at private dormitory",
                 status=BorrowRequest.BorrowRequestStatus.REJECTED,
                 due_at=now + timedelta(days=3),
+                rejection_reason="Off-campus personal entertainment use is strictly prohibited by university borrowing regulations.",
             )
             BorrowRequest.objects.filter(pk=r8.pk).update(created_at=now - timedelta(days=2))
             RequestItem.objects.create(borrow_request=r8, catalog_item=item_proj, quantity=1)
@@ -366,6 +367,7 @@ class Command(BaseCommand):
                 purpose="Personal vlog filming off-campus over long weekend",
                 status=BorrowRequest.BorrowRequestStatus.REJECTED,
                 due_at=now + timedelta(days=4),
+                rejection_reason="Equipment cannot be borrowed for non-academic personal vlog production off-campus.",
             )
             BorrowRequest.objects.filter(pk=r9.pk).update(created_at=now - timedelta(days=3))
             RequestItem.objects.create(borrow_request=r9, catalog_item=item_cam, quantity=1)
@@ -378,6 +380,7 @@ class Command(BaseCommand):
                 purpose="Unmonitored high voltage line test outside engineering building",
                 status=BorrowRequest.BorrowRequestStatus.REJECTED,
                 due_at=now + timedelta(days=2),
+                rejection_reason="Hazardous electrical testing requires certified laboratory faculty supervision and an approved safety risk assessment.",
             )
             BorrowRequest.objects.filter(pk=r10.pk).update(created_at=now - timedelta(days=2))
             RequestItem.objects.create(borrow_request=r10, catalog_item=item_dmm, quantity=1)
@@ -470,7 +473,7 @@ class Command(BaseCommand):
             )
             LoanRecord.objects.filter(pk=lr15.pk).update(created_at=now - timedelta(days=1))
 
-            # Req 16: ISSUED LOAN #4 (OVERDUE by 3 days)
+            # Req 16: ISSUED LOAN #4 (OVERDUE by 3 days, Multiple Items & Units for Beatrice)
             r16 = BorrowRequest.objects.create(
                 user=users["beatrice.mendoza@example.com"],
                 purpose="Capstone project remote data acquisition demonstration",
@@ -482,6 +485,26 @@ class Command(BaseCommand):
             UnitAllocation.objects.create(
                 request_item=ri16,
                 equipment_unit=units["LAP-003"],
+                status=UnitAllocation.UnitAllocationStatus.RELEASED,
+                allocated_at=now - timedelta(days=10),
+            )
+            ri16_cam = RequestItem.objects.create(borrow_request=r16, catalog_item=item_cam, quantity=1)
+            UnitAllocation.objects.create(
+                request_item=ri16_cam,
+                equipment_unit=units["CAM-001"],
+                status=UnitAllocation.UnitAllocationStatus.RELEASED,
+                allocated_at=now - timedelta(days=10),
+            )
+            ri16_dmm = RequestItem.objects.create(borrow_request=r16, catalog_item=item_dmm, quantity=2)
+            UnitAllocation.objects.create(
+                request_item=ri16_dmm,
+                equipment_unit=units["DMM-002"],
+                status=UnitAllocation.UnitAllocationStatus.RELEASED,
+                allocated_at=now - timedelta(days=10),
+            )
+            UnitAllocation.objects.create(
+                request_item=ri16_dmm,
+                equipment_unit=units["DMM-003"],
                 status=UnitAllocation.UnitAllocationStatus.RELEASED,
                 allocated_at=now - timedelta(days=10),
             )

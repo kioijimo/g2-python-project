@@ -110,22 +110,40 @@
                   Current
                 </span>
               {% elif u.is_active %}
-                <form method="post" action="{% url 'deactivate_user' u.pk %}" class="inline">
+                <form
+                  method="post"
+                  action="{% url 'deactivate_user' u.pk %}"
+                  class="inline"
+                  data-confirm="true"
+                  data-confirm-title="Deactivate User Account"
+                  data-confirm-message="Are you sure you want to deactivate this account? The user will immediately lose access to log in and request equipment."
+                  data-confirm-detail="{{ u.email }}"
+                  data-confirm-button="Deactivate Account"
+                  data-confirm-variant="danger"
+                >
                   {% csrf_token %}
                   <button
                     type="submit"
-                    onclick="return confirm('Are you sure you want to deactivate account {{ u.email }}?');"
                     class="cursor-pointer inline-flex items-center rounded-md border border-rose-200 bg-rose-50 px-2.5 py-1.5 text-xs font-semibold text-rose-700 transition hover:bg-rose-100 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:ring-offset-2"
                   >
                     Deactivate
                   </button>
                 </form>
               {% else %}
-                <form method="post" action="{% url 'activate_user' u.pk %}" class="inline">
+                <form
+                  method="post"
+                  action="{% url 'activate_user' u.pk %}"
+                  class="inline"
+                  data-confirm="true"
+                  data-confirm-title="Activate User Account"
+                  data-confirm-message="Are you sure you want to activate this account? The user will regain access to log in and submit equipment requests."
+                  data-confirm-detail="{{ u.email }}"
+                  data-confirm-button="Activate Account"
+                  data-confirm-variant="success"
+                >
                   {% csrf_token %}
                   <button
                     type="submit"
-                    onclick="return confirm('Are you sure you want to activate account {{ u.email }}?');"
                     class="cursor-pointer inline-flex items-center rounded-md border border-emerald-200 bg-emerald-50 px-2.5 py-1.5 text-xs font-semibold text-emerald-700 transition hover:bg-emerald-100 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2"
                   >
                     Activate
@@ -149,5 +167,7 @@
       </tbody>
     </table>
   </div>
+
+  {% include "components/pagination.html" with queryset=users querystring=querystring %}
 </div>
 {% endblock %}

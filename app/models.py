@@ -339,6 +339,7 @@ class BorrowRequest(models.Model):
     )
     created_at = models.DateTimeField(auto_now_add=True)
     due_at = models.DateTimeField()
+    rejection_reason = models.TextField(blank=True, default="")
 
     @property
     def is_cancellable(self):

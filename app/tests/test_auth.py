@@ -107,6 +107,20 @@ class LoginLogoutTests(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertNotIn(SESSION_KEY, self.client.session)
+        self.assertContains(response, "Account Deactivated")
+        self.assertContains(response, "This account has been deactivated")
+        self.assertNotContains(response, "Please enter a correct email and password")
+
+    def test_invalid_credentials_shows_standard_error(self):
+        response = self.client.post(
+            reverse("login"),
+            {"username": "nonexistent@example.com", "password": "WrongPassword123!"},
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertNotIn(SESSION_KEY, self.client.session)
+        self.assertContains(response, "Please enter a correct email and password")
+        self.assertNotContains(response, "Account Deactivated")
 
     def test_authenticated_login_redirects_by_role(self):
         self.client.force_login(self.user)
@@ -228,6 +242,22 @@ class RegistrationTests(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertFalse(User.objects.filter(email="new@example.com").exists())
+
+    def test_registration_renders_password_toggle_buttons(self):
+        response = self.client.get(reverse("portal:register"))
+        self.assertEqual(response.status_code, 200)
+
+        content = response.content.decode("utf-8")
+        self.assertIn('id="password1-toggle-btn"', content)
+        self.assertIn('id="password2-toggle-btn"', content)
+        self.assertIn('id="password1-eye-icon"', content)
+        self.assertIn('id="password2-eye-icon"', content)
+        self.assertIn('id="password1-eye-off-icon"', content)
+        self.assertIn('id="password2-eye-off-icon"', content)
+        self.assertIn('name="password1"', content)
+        self.assertIn('name="password2"', content)
+        self.assertIn('type="password"', content)
+        self.assertIn('setupPasswordToggle', content)
 
 
 class AccessControlTests(TestCase):

@@ -41,7 +41,7 @@ from ..services.approvals import (
     release_borrow_request,
 )
 
-PAGE_ITEMS = 20
+PAGE_ITEMS = 5
 
 
 def _table_paginate(request, queryset):
@@ -84,25 +84,77 @@ def _structure_allocations_from_post(request, items):
 @admin_required
 def returns_manage_view(request):
     # Active loans eligible for returns (ISSUED or PARTIALLY_RETURNED)
-    active_requests = (
+    active_requests = list(
         BorrowRequest.objects.filter(
             status__in=[
                 BorrowRequest.BorrowRequestStatus.ISSUED,
                 BorrowRequest.BorrowRequestStatus.PARTIALLY_RETURNED,
             ]
         )
-        .select_related("user")
+        .select_related("user", "user__profile")
+        .prefetch_related(
+            "items__catalog_item__category",
+            "items__allocations__equipment_unit",
+            "returnrecord_set__equipment_unit",
+        )
         .order_by("-created_at")
     )
 
+    today = timezone.localdate()
+    for req in active_requests:
+        returns_by_unit_id = {
+            ret.equipment_unit_id: ret for ret in req.returnrecord_set.all()
+        }
+        allocated_units = []
+        returned_cnt = 0
+        remaining_cnt = 0
+        for item in req.items.all():
+            for alloc in item.allocations.all():
+                if alloc.status == UnitAllocation.UnitAllocationStatus.RELEASED:
+                    unit = alloc.equipment_unit
+                    return_rec = returns_by_unit_id.get(unit.id)
+                    is_ret = return_rec is not None
+                    if is_ret:
+                        returned_cnt += 1
+                    else:
+                        remaining_cnt += 1
+                    allocated_units.append(
+                        {
+                            "id": unit.id,
+                            "asset_code": unit.asset_code,
+                            "catalog_item": item.catalog_item.name,
+                            "category": item.catalog_item.category.name,
+                            "is_returned": is_ret,
+                            "return_condition": (
+                                return_rec.condition if return_rec else None
+                            ),
+                        }
+                    )
+        req.allocated_units = allocated_units
+        req.total_units_count = len(allocated_units)
+        req.returned_units_count = returned_cnt
+        req.remaining_units_count = remaining_cnt
+        req.overdue_days_count = req.overdue_days(today)
+        req.is_overdue = req.overdue_days_count > 0
+
+    selected_request_id = request.GET.get("request_id", "").strip()
+    active_ids = {str(req.id) for req in active_requests}
+    if selected_request_id not in active_ids:
+        selected_request_id = ""
+
     # Recent return audit records
-    recent_returns = ReturnRecord.objects.select_related(
+    recent_returns_qs = ReturnRecord.objects.select_related(
         "borrow_request", "equipment_unit"
-    ).order_by("-created_at")[:20]
+    ).order_by("-created_at")
+    recent_returns, querystring = _table_paginate(request, recent_returns_qs)
 
     context = {
         "active_requests": active_requests,
+        "selected_request_id": selected_request_id,
         "recent_returns": recent_returns,
+        "page_obj": recent_returns,
+        "queryset": recent_returns,
+        "querystring": querystring,
         "EquipmentCondition": EquipmentUnit.EquipmentCondition,
     }
     return render(request, "manage/returns.html", context)
@@ -113,103 +165,203 @@ def returns_manage_view(request):
 def process_unit_return(request):
     if request.method == "POST":
         borrow_request_id = request.POST.get("borrow_request_id")
-        asset_code = request.POST.get("asset_code", "").strip()
-        condition_val = int(
+        borrow_request = get_object_or_404(BorrowRequest, id=borrow_request_id)
+
+        default_condition = int(
             request.POST.get("condition", EquipmentUnit.EquipmentCondition.FINE)
         )
+        return_mode = request.POST.get("return_mode", "").strip()
 
-        borrow_request = get_object_or_404(BorrowRequest, id=borrow_request_id)
-        unit = get_object_or_404(EquipmentUnit, asset_code=asset_code)
-
-        # Verify unit was allocated to this request
-        allocation_exists = UnitAllocation.objects.filter(
-            request_item__borrow_request=borrow_request,
-            equipment_unit=unit,
-            status=UnitAllocation.UnitAllocationStatus.RELEASED,
-        ).exists()
-
-        if not allocation_exists:
-            messages.error(
-                request,
-                f"Asset unit '{asset_code}' was not issued under Request #{borrow_request.id}.",
+        # Fetch all RELEASED allocations for this borrow request
+        released_allocations = list(
+            UnitAllocation.objects.filter(
+                request_item__borrow_request=borrow_request,
+                status=UnitAllocation.UnitAllocationStatus.RELEASED,
+            ).select_related("equipment_unit")
+        )
+        allocated_by_code = {
+            alloc.equipment_unit.asset_code.upper(): alloc.equipment_unit
+            for alloc in released_allocations
+        }
+        already_returned_ids = set(
+            ReturnRecord.objects.filter(borrow_request=borrow_request).values_list(
+                "equipment_unit_id", flat=True
             )
-            return redirect("manage_returns")
-
-        # Check for duplicate return
-        if ReturnRecord.objects.filter(
-            borrow_request=borrow_request, equipment_unit=unit
-        ).exists():
-            messages.warning(
-                request,
-                f"Unit '{asset_code}' has already been returned for Request #{borrow_request.id}.",
-            )
-            return redirect("manage_returns")
-
-        # Create Return Record
-        ReturnRecord.objects.create(
-            borrow_request=borrow_request,
-            equipment_unit=unit,
-            condition=condition_val,
         )
 
-        # Route Unit Inventory Status based on condition
-        unit.condition = condition_val
-        if condition_val == EquipmentUnit.EquipmentCondition.FINE:
-            unit.inventory_status = EquipmentUnit.EquipmentStatus.AVAILABLE
-            unit.save()
-            messages.success(
-                request,
-                f"Unit {unit.asset_code} returned in FINE condition and restored to AVAILABLE stock.",
-            )
+        # Determine target asset codes from return_mode, checkboxes, or text input
+        raw_codes = []
+        if return_mode == "all":
+            raw_codes = [
+                alloc.equipment_unit.asset_code
+                for alloc in released_allocations
+                if alloc.equipment_unit_id not in already_returned_ids
+            ]
+        elif return_mode.startswith("single:"):
+            single_code = return_mode.split(":", 1)[1].strip()
+            if single_code:
+                raw_codes = [single_code]
         else:
-            # DAMAGED -> Route directly to MAINTENANCE
-            unit.inventory_status = EquipmentUnit.EquipmentStatus.MAINTENANCE
-            unit.save()
+            checked_codes = [
+                c.strip() for c in request.POST.getlist("asset_codes") if c.strip()
+            ]
+            if checked_codes:
+                raw_codes = checked_codes
+            else:
+                asset_code_input = request.POST.get("asset_code", "").strip()
+                if asset_code_input.upper() == "ALL":
+                    raw_codes = [
+                        alloc.equipment_unit.asset_code
+                        for alloc in released_allocations
+                        if alloc.equipment_unit_id not in already_returned_ids
+                    ]
+                elif asset_code_input:
+                    raw_codes = [
+                        c.strip()
+                        for c in asset_code_input.replace(";", ",").split(",")
+                        if c.strip()
+                    ]
 
-            # Automatically open a MaintenanceRecord
-            MaintenanceRecord.objects.create(
-                maintainer=request.user,
-                unit=unit,
-                issue=f"Returned DAMAGED from BorrowRequest #{borrow_request.id}.",
-                action="Pending inspection and repair.",
-                status=MaintenanceRecord.MaintenanceStatus.ACTIVE,
-                resolved_at=timezone.now(),  # Placeholder until finished
+        # Deduplicate while preserving order
+        seen_upper = set()
+        target_codes = []
+        for code in raw_codes:
+            upper = code.upper()
+            if upper not in seen_upper:
+                seen_upper.add(upper)
+                target_codes.append(code)
+
+        if not target_codes:
+            messages.error(
+                request,
+                "Please select or enter at least one unit to return.",
             )
+            return redirect(f"/manage/returns/?request_id={borrow_request.id}")
+
+        # Validate all target codes belong to this borrow request
+        units_to_process = []
+        for code in target_codes:
+            unit = allocated_by_code.get(code.upper())
+            if unit is None:
+                # Check if the asset code exists at all in EquipmentUnit
+                if not EquipmentUnit.objects.filter(asset_code__iexact=code).exists():
+                    messages.error(
+                        request,
+                        f"Asset unit '{code}' does not exist or was not issued under Request #{borrow_request.id}.",
+                    )
+                else:
+                    messages.error(
+                        request,
+                        f"Asset unit '{code}' was not issued under Request #{borrow_request.id}.",
+                    )
+                return redirect(f"/manage/returns/?request_id={borrow_request.id}")
+
+            if unit.id in already_returned_ids:
+                if len(target_codes) == 1:
+                    messages.warning(
+                        request,
+                        f"Unit '{unit.asset_code}' has already been returned for Request #{borrow_request.id}.",
+                    )
+                    return redirect(f"/manage/returns/?request_id={borrow_request.id}")
+                continue
+
+            units_to_process.append(unit)
+
+        if not units_to_process:
             messages.warning(
                 request,
-                f"Unit {unit.asset_code} returned DAMAGED and placed into MAINTENANCE.",
+                f"All selected units have already been returned for Request #{borrow_request.id}.",
+            )
+            return redirect(f"/manage/returns/?request_id={borrow_request.id}")
+
+        fine_codes = []
+        damaged_codes = []
+
+        for unit in units_to_process:
+            cond_raw = request.POST.get(
+                f"condition_{unit.asset_code}",
+                request.POST.get(f"condition_{unit.id}", default_condition),
+            )
+            condition_val = int(cond_raw)
+
+            # Create Return Record
+            ReturnRecord.objects.create(
+                borrow_request=borrow_request,
+                equipment_unit=unit,
+                condition=condition_val,
+            )
+
+            # Route Unit Inventory Status based on condition
+            unit.condition = condition_val
+            if condition_val == EquipmentUnit.EquipmentCondition.FINE:
+                unit.inventory_status = EquipmentUnit.EquipmentStatus.AVAILABLE
+                unit.save()
+                fine_codes.append(unit.asset_code)
+            else:
+                # DAMAGED -> Route directly to MAINTENANCE
+                unit.inventory_status = EquipmentUnit.EquipmentStatus.MAINTENANCE
+                unit.save()
+                MaintenanceRecord.objects.create(
+                    maintainer=request.user,
+                    unit=unit,
+                    issue=f"Returned DAMAGED from BorrowRequest #{borrow_request.id}.",
+                    action="Pending inspection and repair.",
+                    status=MaintenanceRecord.MaintenanceStatus.ACTIVE,
+                    resolved_at=timezone.now(),
+                )
+                damaged_codes.append(unit.asset_code)
+
+            AuditLog.objects.create(
+                user=request.user,
+                action=f"Processed return of unit '{unit.asset_code}' for BorrowRequest #{borrow_request.id}.",
+            )
+
+        if len(fine_codes) == 1:
+            messages.success(
+                request,
+                f"Unit {fine_codes[0]} returned in FINE condition and restored to AVAILABLE stock.",
+            )
+        elif len(fine_codes) > 1:
+            messages.success(
+                request,
+                f"{len(fine_codes)} units ({', '.join(fine_codes)}) returned in FINE condition and restored to AVAILABLE stock.",
+            )
+
+        if len(damaged_codes) == 1:
+            messages.warning(
+                request,
+                f"Unit {damaged_codes[0]} returned DAMAGED and placed into MAINTENANCE.",
+            )
+        elif len(damaged_codes) > 1:
+            messages.warning(
+                request,
+                f"{len(damaged_codes)} units ({', '.join(damaged_codes)}) returned DAMAGED and placed into MAINTENANCE.",
             )
 
         # Evaluate overall BorrowRequest status (Partial vs Fully Returned)
-        total_allocated = UnitAllocation.objects.filter(
-            request_item__borrow_request=borrow_request,
-            status=UnitAllocation.UnitAllocationStatus.RELEASED,
-        ).count()
-
+        total_allocated = len(released_allocations)
         total_returned = ReturnRecord.objects.filter(
             borrow_request=borrow_request
         ).count()
 
         if total_returned >= total_allocated:
             borrow_request.status = BorrowRequest.BorrowRequestStatus.RETURNED
+            borrow_request.save()
+            return redirect("manage_returns")
         else:
             borrow_request.status = BorrowRequest.BorrowRequestStatus.PARTIALLY_RETURNED
-        borrow_request.save()
-
-        # Audit Logging
-        AuditLog.objects.create(
-            user=request.user,
-            action=f"Processed return of unit '{unit.asset_code}' for BorrowRequest #{borrow_request.id}.",
-        )
+            borrow_request.save()
+            return redirect(f"/manage/returns/?request_id={borrow_request.id}")
 
     return redirect("manage_returns")
 
 
 @admin_required
 def maintenance_manage_view(request):
-    tickets = MaintenanceRecord.objects.select_related("unit", "maintainer").order_by(
-        "-created_at"
-    )
+    tickets = MaintenanceRecord.objects.select_related(
+        "unit", "unit__catalog_item", "maintainer"
+    ).order_by("-created_at")
+    tickets, querystring = _table_paginate(request, tickets)
 
     # Inventory Reconciliation Totals
     total_units = EquipmentUnit.objects.count()
@@ -238,6 +390,9 @@ def maintenance_manage_view(request):
 
     context = {
         "tickets": tickets,
+        "page_obj": tickets,
+        "queryset": tickets,
+        "querystring": querystring,
         "eligible_units": eligible_units,
         "MaintenanceStatus": MaintenanceRecord.MaintenanceStatus,
         "audit": {
@@ -471,8 +626,8 @@ def manage(request):
     # Hardcoded statistics for the 4 dashboard cards
     context["stats"] = {
         "available_units": EquipmentUnit.objects.filter(
-            Q(inventory_status=EquipmentUnit.EquipmentStatus.AVAILABLE)
-            | Q(condition=EquipmentUnit.EquipmentCondition.FINE)
+            inventory_status=EquipmentUnit.EquipmentStatus.AVAILABLE,
+            condition=EquipmentUnit.EquipmentCondition.FINE,
         ).count(),
         "pending_requests": BorrowRequest.objects.filter(
             status=BorrowRequest.BorrowRequestStatus.PENDING
@@ -535,9 +690,20 @@ def manage(request):
 
         category_stats.append({"category": c.name, "usage": total})
 
+    total_category_usage = 0
+    for s in category_stats:
+        total_category_usage += s["usage"]
+
     context["category_usage"] = {
         "labels": [s["category"] for s in category_stats],
         "data": [s["usage"] for s in category_stats],
+        "counts": [s["usage"] for s in category_stats],
+        "percentages": [
+            round((s["usage"] / total_category_usage) * 100, 1)
+            if total_category_usage > 0
+            else 0
+            for s in category_stats
+        ],
     }
 
     context["settings"] = SystemSetting.objects.first()
@@ -646,6 +812,7 @@ def loans_list(request):
         )
         .select_related("user")
         .prefetch_related("items__catalog_item")
+        .order_by("-created_at")
     )
 
     today = timezone.localdate()
@@ -662,11 +829,16 @@ def loans_list(request):
             ]
         )
 
+    loans, querystring = _table_paginate(request, loans)
+
     return render(
         request,
         "manage/loans.html",
         {
             "loans": loans,
+            "page_obj": loans,
+            "queryset": loans,
+            "querystring": querystring,
             "filter_type": filter_type,
             "today": today,
         },
@@ -728,6 +900,7 @@ def process_returns(request, request_id):
                             issue=f"Damaged upon return from Request #{borrow_request.id}",
                             action="Awaiting inspection",
                             status=MaintenanceRecord.MaintenanceStatus.ACTIVE.value,
+                            resolved_at=timezone.now(),
                         )
                     else:
                         unit.inventory_status = (
@@ -877,16 +1050,22 @@ def borrow_request_approve(request, pk):
 @require_POST
 def borrow_request_reject(request, pk):
     borrow_request = _get_borrow_request(pk)
+    reason = request.POST.get("rejection_reason", "").strip()
+
+    if not reason:
+        messages.error(request, "Please provide a reason for rejecting the request.")
+        return redirect("borrow_request_review", pk=pk)
 
     try:
         reject_borrow_request(
             borrow_request,
             request.user,
+            reason=reason,
         )
     except ValidationError as error:
         messages.error(request, " ".join(error.messages))
     else:
-        messages.success(request, "Borrow request rejected.")
+        messages.success(request, "Borrow request rejected with reason provided.")
 
     return redirect("borrow_request_review", pk=pk)
 
@@ -943,14 +1122,20 @@ def audit(request):
 
     if search_form.is_valid():
         query = search_form.cleaned_data["q"].strip()
-        print(query)
-
         logs = logs.filter(Q(action__icontains=query) | Q(user__email__icontains=query))
+
+    logs, querystring = _table_paginate(request, logs)
 
     return render(
         request,
         "manage/audit.html",
-        {"logs": logs, "search_form": search_form},
+        {
+            "logs": logs,
+            "page_obj": logs,
+            "queryset": logs,
+            "querystring": querystring,
+            "search_form": search_form,
+        },
     )
 
 
@@ -1009,67 +1194,65 @@ def catalogs(request, view="category", pk=0):
         action: str
 
     def _apply_valid_filter(request, config):
-        if request.method != "GET":
-            return
+        config.filter_form = config.filter_form(
+            request.GET if request.method == "GET" else None
+        )
 
-        config.filter_form = config.filter_form(request.GET)
+        if request.method == "GET" and config.filter_form.is_valid():
 
-        if not config.filter_form.is_valid():
-            return
+            match view.lower():
+                case "category":
+                    query = config.filter_form.cleaned_data["q"].strip()
+                    status = config.filter_form.cleaned_data["status"]
 
-        match view.lower():
-            case "category":
-                query = config.filter_form.cleaned_data["q"].strip()
-                status = config.filter_form.cleaned_data["status"]
+                    if query:
+                        config.queryset = config.queryset.filter(
+                            Q(name__icontains=query) | Q(description__icontains=query)
+                        )
+                    if status is not None:
+                        config.queryset = config.queryset.filter(status=status)
+                case "item":
+                    query = config.filter_form.cleaned_data["q"].strip()
+                    category = config.filter_form.cleaned_data["category"]
+                    status = config.filter_form.cleaned_data["status"]
 
-                if query:
-                    config.queryset = config.queryset.filter(
-                        Q(name__icontains=query) | Q(description__icontains=query)
-                    )
-                if status is not None:
-                    config.queryset = config.queryset.filter(status=status)
-            case "item":
-                query = config.filter_form.cleaned_data["q"].strip()
-                category = config.filter_form.cleaned_data["category"]
-                status = config.filter_form.cleaned_data["status"]
+                    if query:
+                        config.queryset = config.queryset.filter(
+                            Q(name__icontains=query)
+                            | Q(description__icontains=query)
+                            | Q(category__name__icontains=query)
+                        )
+                    if category:
+                        config.queryset = config.queryset.filter(category=category)
+                    if status is not None:
+                        config.queryset = config.queryset.filter(status=status)
+                case "unit":
+                    query = config.filter_form.cleaned_data["q"].strip()
+                    category = config.filter_form.cleaned_data["category"]
+                    catalog_item = config.filter_form.cleaned_data["catalog_item"]
+                    inventory_status = config.filter_form.cleaned_data["inventory_status"]
 
-                if query:
-                    config.queryset = config.queryset.filter(
-                        Q(name__icontains=query)
-                        | Q(description__icontains=query)
-                        | Q(category__name__icontains=query)
-                    )
-                if category:
-                    config.queryset = config.queryset.filter(category=category)
-                if status is not None:
-                    config.queryset = config.queryset.filter(status=status)
-            case "unit":
-                query = config.filter_form.cleaned_data["q"].strip()
-                category = config.filter_form.cleaned_data["category"]
-                catalog_item = config.filter_form.cleaned_data["catalog_item"]
-                inventory_status = config.filter_form.cleaned_data["inventory_status"]
-
-                if query:
-                    config.queryset = config.queryset.filter(
-                        Q(asset_code__icontains=query)
-                        | Q(catalog_item__name__icontains=query)
-                        | Q(catalog_item__category__name__icontains=query)
-                    )
-                if category:
-                    config.queryset = config.queryset.filter(
-                        catalog_item__category=category
-                    )
-                if catalog_item:
-                    config.queryset = config.queryset.filter(catalog_item=catalog_item)
-                if inventory_status is not None:
-                    config.queryset = config.queryset.filter(
-                        inventory_status=inventory_status
-                    )
+                    if query:
+                        config.queryset = config.queryset.filter(
+                            Q(asset_code__icontains=query)
+                            | Q(catalog_item__name__icontains=query)
+                            | Q(catalog_item__category__name__icontains=query)
+                        )
+                    if category:
+                        config.queryset = config.queryset.filter(
+                            catalog_item__category=category
+                        )
+                    if catalog_item:
+                        config.queryset = config.queryset.filter(catalog_item=catalog_item)
+                    if inventory_status is not None:
+                        config.queryset = config.queryset.filter(
+                            inventory_status=inventory_status
+                        )
 
         config.queryset, config.querystring = _table_paginate(request, config.queryset)
 
     def _audit(request, config, target):
-        name = getattr(target, config.identifier)
+        name = getattr(target, config.identifier, "") if target else ""
         record_audit(request.user, f"{config.action} '{name}' {config.label}")
         messages.success(
             request, f"Successfully {config.action.lower()} '{name}' {config.label}!"
@@ -1139,16 +1322,26 @@ def catalogs(request, view="category", pk=0):
 
     form = target = None
 
-    if request.method == "GET":
-        _apply_valid_filter(request, config)
+    _apply_valid_filter(request, config)
 
     if url_name == "catalogs_archive":
         target = get_object_or_404(config.model, pk=pk)
-        target.status = config.status
-        target.save(update_fields=[config.status_field])
+        if request.method == "POST":
+            setattr(target, config.status_field, config.status)
+            target.save(update_fields=[config.status_field])
 
-        _audit(request, config, target)
-        return redirect("catalogs_view", view=view)
+            _audit(request, config, target)
+            return redirect("catalogs_view", view=view)
+
+        context = {
+            "view": view.lower(),
+            "queryset": config.queryset,
+            "querystring": config.querystring,
+            "form": form,
+            "filter_form": config.filter_form,
+            "target": target,
+        }
+        return render(request, "manage/catalogs.html", context)
 
     if url_name == "catalogs_edit":
         target = get_object_or_404(config.model, pk=pk)
@@ -1159,6 +1352,7 @@ def catalogs(request, view="category", pk=0):
     form = config.form(request.POST or None, instance=target)
 
     if form.is_valid():
+        target = form.save()
         _audit(request, config, target)
         return redirect("catalogs_view", view=view)
     elif (
@@ -1190,7 +1384,7 @@ def account_list(request):
     search_form = forms.AccountSearchForm(request.GET or None)
     search_query = (request.GET.get("q") or request.GET.get("search") or "").strip()
 
-    users = User.objects.all().select_related("profile").order_by("email")
+    users = User.objects.all().select_related("profile").order_by("-role", "-profile__created_at", "-id")
     if search_query:
         users = users.filter(
             Q(email__icontains=search_query)
@@ -1199,11 +1393,17 @@ def account_list(request):
             | Q(profile__contact_number__icontains=search_query)
         )
 
+    total_count = users.count()
+    users, querystring = _table_paginate(request, users)
+
     context = {
         "users": users,
+        "page_obj": users,
+        "queryset": users,
+        "querystring": querystring,
         "search_form": search_form,
         "search_query": search_query,
-        "total_count": users.count(),
+        "total_count": total_count,
     }
     return render(request, "manage/account_list.html", context)
 
@@ -1271,11 +1471,17 @@ def user_borrowing_history(request, pk):
         due_at__lt=timezone.now(),
     ).count()
 
+    total_history_count = borrow_requests.count()
+    borrow_requests, querystring = _table_paginate(request, borrow_requests)
+
     context = {
         "target_user": target_user,
         "borrow_requests": borrow_requests,
+        "page_obj": borrow_requests,
+        "queryset": borrow_requests,
+        "querystring": querystring,
         "stats": {
-            "total": borrow_requests.count(),
+            "total": total_history_count,
             "active": active_count,
             "returned": returned_count,
             "overdue": overdue_count,

@@ -1,0 +1,418 @@
+<!-- Unified Confirmation Modal Component -->
+<div
+  id="unified-confirm-modal"
+  class="fixed inset-0 z-50 hidden overflow-y-auto"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="confirm-modal-title"
+  aria-describedby="confirm-modal-message"
+>
+  <!-- Backdrop -->
+  <div
+    id="confirm-modal-backdrop"
+    class="fixed inset-0 bg-gray-900/60 backdrop-blur-xs transition-opacity duration-200 opacity-0"
+    aria-hidden="true"
+  ></div>
+
+  <!-- Center Container -->
+  <div class="flex min-h-full items-center justify-center p-4 text-center sm:p-0">
+    <div
+      id="confirm-modal-card"
+      class="relative transform overflow-hidden rounded-2xl border border-border-default bg-surface-card text-left shadow-2xl transition-all duration-200 opacity-0 scale-95 sm:my-8 sm:w-full sm:max-w-lg p-6 sm:p-7"
+    >
+      <!-- Close Button (X) -->
+      <button
+        type="button"
+        id="confirm-modal-close-btn"
+        class="cursor-pointer absolute top-4 right-4 rounded-lg p-1.5 text-text-secondary transition hover:bg-background-muted hover:text-text-primary focus:outline-none focus:ring-2 focus:ring-brand-primary"
+        aria-label="Close confirmation dialog"
+      >
+        <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+
+      <div class="sm:flex sm:items-start gap-4">
+        <!-- Icon Badge -->
+        <div
+          id="confirm-modal-icon-wrapper"
+          class="mx-auto flex h-12 w-12 shrink-0 items-center justify-center rounded-xl sm:mx-0"
+        >
+          <!-- Danger Icon -->
+          <svg id="confirm-modal-icon-danger" class="h-6 w-6 hidden text-rose-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+          </svg>
+
+          <!-- Warning Icon -->
+          <svg id="confirm-modal-icon-warning" class="h-6 w-6 hidden text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+          </svg>
+
+          <!-- Success Icon -->
+          <svg id="confirm-modal-icon-success" class="h-6 w-6 hidden text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+
+          <!-- Info / Primary Icon -->
+          <svg id="confirm-modal-icon-info" class="h-6 w-6 hidden text-brand-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+        </div>
+
+        <!-- Content Area -->
+        <div class="mt-3 text-center sm:mt-0 sm:text-left flex-1 min-w-0">
+          <h3
+            id="confirm-modal-title"
+            class="text-lg font-bold tracking-tight text-text-primary sm:text-xl pr-6"
+          >
+            Confirm Action
+          </h3>
+
+          <p
+            id="confirm-modal-message"
+            class="mt-2 text-sm text-text-secondary leading-relaxed"
+          >
+            Are you sure you want to proceed with this action?
+          </p>
+
+          <!-- Optional Context Badge/Detail -->
+          <div
+            id="confirm-modal-detail"
+            class="mt-3 hidden rounded-lg border border-border-default bg-background-default/80 px-3.5 py-2.5 font-mono text-xs text-text-primary break-all"
+          ></div>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="mt-6 flex flex-col-reverse sm:flex-row sm:justify-end gap-2.5 border-t border-border-default/60 pt-5">
+        <button
+          type="button"
+          id="confirm-modal-cancel-btn"
+          class="cursor-pointer inline-flex w-full sm:w-auto items-center justify-center rounded-lg border border-border-default bg-surface-card px-4 py-2.5 text-sm font-semibold text-text-secondary shadow-xs transition hover:bg-background-muted hover:text-text-primary focus:outline-none focus:ring-2 focus:ring-brand-primary focus:ring-offset-2"
+        >
+          Cancel
+        </button>
+        <button
+          type="button"
+          id="confirm-modal-confirm-btn"
+          class="cursor-pointer inline-flex w-full sm:w-auto items-center justify-center rounded-lg px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition focus:outline-none focus:ring-2 focus:ring-offset-2"
+        >
+          Confirm
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  (function () {
+    var modal = document.getElementById("unified-confirm-modal");
+    var backdrop = document.getElementById("confirm-modal-backdrop");
+    var card = document.getElementById("confirm-modal-card");
+    var titleEl = document.getElementById("confirm-modal-title");
+    var messageEl = document.getElementById("confirm-modal-message");
+    var detailEl = document.getElementById("confirm-modal-detail");
+    var confirmBtn = document.getElementById("confirm-modal-confirm-btn");
+    var cancelBtn = document.getElementById("confirm-modal-cancel-btn");
+    var closeBtn = document.getElementById("confirm-modal-close-btn");
+    var iconWrapper = document.getElementById("confirm-modal-icon-wrapper");
+
+    var iconDanger = document.getElementById("confirm-modal-icon-danger");
+    var iconWarning = document.getElementById("confirm-modal-icon-warning");
+    var iconSuccess = document.getElementById("confirm-modal-icon-success");
+    var iconInfo = document.getElementById("confirm-modal-icon-info");
+
+    var activeConfirmCallback = null;
+    var activeCancelCallback = null;
+    var lastFocusedElement = null;
+
+    var VARIANT_CONFIGS = {
+      danger: {
+        wrapperBg: "bg-rose-50 border border-rose-100",
+        btnClass: "bg-rose-600 hover:bg-rose-700 text-white focus:ring-rose-500",
+        icon: iconDanger,
+      },
+      warning: {
+        wrapperBg: "bg-amber-50 border border-amber-100",
+        btnClass: "bg-amber-600 hover:bg-amber-700 text-white focus:ring-amber-500",
+        icon: iconWarning,
+      },
+      success: {
+        wrapperBg: "bg-emerald-50 border border-emerald-100",
+        btnClass: "bg-emerald-600 hover:bg-emerald-700 text-white focus:ring-emerald-500",
+        icon: iconSuccess,
+      },
+      info: {
+        wrapperBg: "bg-brand-primary-subtle border border-brand-100",
+        btnClass: "bg-brand-primary hover:bg-brand-primary-hover text-white focus:ring-brand-primary",
+        icon: iconInfo,
+      },
+      primary: {
+        wrapperBg: "bg-brand-primary-subtle border border-brand-100",
+        btnClass: "bg-brand-primary hover:bg-brand-primary-hover text-white focus:ring-brand-primary",
+        icon: iconInfo,
+      },
+    };
+
+    function resetIcons() {
+      [iconDanger, iconWarning, iconSuccess, iconInfo].forEach(function (ic) {
+        if (ic) ic.classList.add("hidden");
+      });
+      if (iconWrapper) {
+        iconWrapper.className = "mx-auto flex h-12 w-12 shrink-0 items-center justify-center rounded-xl sm:mx-0";
+      }
+    }
+
+    function openModal(options) {
+      options = options || {};
+      lastFocusedElement = document.activeElement;
+
+      activeConfirmCallback = options.onConfirm || null;
+      activeCancelCallback = options.onCancel || null;
+
+      // Title & Message
+      titleEl.textContent = options.title || "Confirm Action";
+      messageEl.textContent = options.message || "Are you sure you want to proceed?";
+
+      // Detail section
+      if (options.detail && options.detail.trim().length > 0) {
+        detailEl.textContent = options.detail.trim();
+        detailEl.classList.remove("hidden");
+      } else {
+        detailEl.textContent = "";
+        detailEl.classList.add("hidden");
+      }
+
+      // Buttons
+      confirmBtn.textContent = options.confirmText || "Confirm";
+      cancelBtn.textContent = options.cancelText || "Cancel";
+
+      // Variant styling
+      var variantKey = options.variant && VARIANT_CONFIGS[options.variant] ? options.variant : "danger";
+      var config = VARIANT_CONFIGS[variantKey];
+
+      resetIcons();
+      if (config.icon) {
+        config.icon.classList.remove("hidden");
+      }
+      if (iconWrapper) {
+        iconWrapper.className = "mx-auto flex h-12 w-12 shrink-0 items-center justify-center rounded-xl sm:mx-0 " + config.wrapperBg;
+      }
+
+      confirmBtn.className = "cursor-pointer inline-flex w-full sm:w-auto items-center justify-center rounded-lg px-4 py-2.5 text-sm font-semibold shadow-sm transition focus:outline-none focus:ring-2 focus:ring-offset-2 " + config.btnClass;
+
+      // Show modal & prevent background scrolling
+      modal.classList.remove("hidden");
+      document.body.classList.add("overflow-hidden");
+
+      // Trigger animations
+      requestAnimationFrame(function () {
+        backdrop.classList.remove("opacity-0");
+        backdrop.classList.add("opacity-100");
+        card.classList.remove("opacity-0", "scale-95");
+        card.classList.add("opacity-100", "scale-100");
+
+        // Remove focus on any button so the user can choose freely
+        if (document.activeElement) {
+          document.activeElement.blur();
+        }
+      });
+    }
+
+    function closeModal() {
+      if (modal.classList.contains("hidden")) return;
+
+      backdrop.classList.remove("opacity-100");
+      backdrop.classList.add("opacity-0");
+      card.classList.remove("opacity-100", "scale-100");
+      card.classList.add("opacity-0", "scale-95");
+
+      setTimeout(function () {
+        modal.classList.add("hidden");
+        document.body.classList.remove("overflow-hidden");
+        resetIcons();
+
+        if (lastFocusedElement && typeof lastFocusedElement.focus === "function") {
+          lastFocusedElement.focus();
+        }
+      }, 200);
+    }
+
+    function handleConfirm() {
+      var callback = activeConfirmCallback;
+      activeConfirmCallback = null;
+      closeModal();
+      if (typeof callback === "function") {
+        callback();
+      }
+    }
+
+    function handleCancel() {
+      var callback = activeCancelCallback;
+      activeCancelCallback = null;
+      closeModal();
+      if (typeof callback === "function") {
+        callback();
+      }
+    }
+
+    // Modal action listeners
+    if (confirmBtn) confirmBtn.addEventListener("click", handleConfirm);
+    if (cancelBtn) cancelBtn.addEventListener("click", handleCancel);
+    if (closeBtn) closeBtn.addEventListener("click", handleCancel);
+    if (backdrop) backdrop.addEventListener("click", handleCancel);
+
+    document.addEventListener("keydown", function (event) {
+      if (modal && !modal.classList.contains("hidden")) {
+        if (event.key === "Escape") {
+          event.preventDefault();
+          handleCancel();
+        } else if (event.key === "Tab") {
+          // Focus trap within modal
+          var focusableElements = modal.querySelectorAll(
+            'button:not([disabled]), [tabindex]:not([tabindex="-1"])'
+          );
+          if (focusableElements.length === 0) return;
+          var firstEl = focusableElements[0];
+          var lastEl = focusableElements[focusableElements.length - 1];
+
+          if (event.shiftKey) {
+            if (document.activeElement === firstEl) {
+              lastEl.focus();
+              event.preventDefault();
+            }
+          } else {
+            if (document.activeElement === lastEl) {
+              firstEl.focus();
+              event.preventDefault();
+            }
+          }
+        }
+      }
+    });
+
+    // Expose programmatic API globally
+    window.showConfirmModal = openModal;
+    window.closeConfirmModal = closeModal;
+
+    // Track clicked submit button for form submits to retain button name/value
+    var lastClickedSubmitBtn = null;
+    document.addEventListener(
+      "click",
+      function (e) {
+        var btn = e.target.closest('button[type="submit"], input[type="submit"]');
+        if (btn) {
+          lastClickedSubmitBtn = btn;
+        }
+      },
+      true
+    );
+
+    // Global Event Delegation for declarative confirmations
+    document.addEventListener(
+      "submit",
+      function (e) {
+        var form = e.target;
+        if (form._isConfirmedSubmission) {
+          return;
+        }
+
+        var submitter = e.submitter || lastClickedSubmitBtn;
+        var triggerEl = (submitter && (submitter.dataset.confirm === "true" || submitter.dataset.confirmMessage))
+          ? submitter
+          : (form.dataset.confirm === "true" || form.dataset.confirmMessage ? form : null);
+
+        if (!triggerEl) {
+          return;
+        }
+
+        // Validate HTML5 input constraints before opening confirm dialog
+        if (form.checkValidity && !form.checkValidity()) {
+          form.reportValidity();
+          return;
+        }
+
+        e.preventDefault();
+        e.stopPropagation();
+
+        var title = triggerEl.dataset.confirmTitle || (form ? form.dataset.confirmTitle : null) || "Confirm Action";
+        var message = triggerEl.dataset.confirmMessage || (form ? form.dataset.confirmMessage : null) || "Are you sure you want to proceed?";
+        var confirmText = triggerEl.dataset.confirmButton || (form ? form.dataset.confirmButton : null) || "Confirm";
+        var cancelText = triggerEl.dataset.confirmCancel || (form ? form.dataset.confirmCancel : null) || "Cancel";
+        var variant = triggerEl.dataset.confirmVariant || (form ? form.dataset.confirmVariant : null) || "danger";
+        var detail = triggerEl.dataset.confirmDetail || (form ? form.dataset.confirmDetail : null) || "";
+
+        var reasonField = form.querySelector('[name="rejection_reason"]');
+        if (reasonField && reasonField.value && reasonField.value.trim().length > 0) {
+          var stated = reasonField.value.trim();
+          detail = (detail ? detail + "\n\nReason: \"" : "Reason: \"") + stated + "\"";
+        }
+
+        openModal({
+          title: title,
+          message: message,
+          confirmText: confirmText,
+          cancelText: cancelText,
+          variant: variant,
+          detail: detail,
+          onConfirm: function () {
+            form._isConfirmedSubmission = true;
+
+            // Preserve submitter button name and value if present
+            if (submitter && submitter.name && submitter.value) {
+              var hiddenInput = document.createElement("input");
+              hiddenInput.type = "hidden";
+              hiddenInput.name = submitter.name;
+              hiddenInput.value = submitter.value;
+              form.appendChild(hiddenInput);
+            }
+
+            if (typeof form.requestSubmit === "function" && submitter) {
+              try {
+                form.requestSubmit(submitter);
+                return;
+              } catch (err) {
+                // Fall back to form.submit()
+              }
+            }
+            form.submit();
+          },
+        });
+      },
+      true
+    );
+
+    // Also support anchor links with data-confirm="true"
+    document.addEventListener(
+      "click",
+      function (e) {
+        var link = e.target.closest("a[data-confirm='true']");
+        if (!link || link._isConfirmedNavigation) return;
+
+        e.preventDefault();
+        e.stopPropagation();
+
+        var title = link.dataset.confirmTitle || "Confirm Action";
+        var message = link.dataset.confirmMessage || "Are you sure you want to proceed?";
+        var confirmText = link.dataset.confirmButton || "Confirm";
+        var cancelText = link.dataset.confirmCancel || "Cancel";
+        var variant = link.dataset.confirmVariant || "danger";
+        var detail = link.dataset.confirmDetail || "";
+
+        openModal({
+          title: title,
+          message: message,
+          confirmText: confirmText,
+          cancelText: cancelText,
+          variant: variant,
+          detail: detail,
+          onConfirm: function () {
+            link._isConfirmedNavigation = true;
+            link.click();
+          },
+        });
+      },
+      true
+    );
+  })();
+</script>

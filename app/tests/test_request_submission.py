@@ -164,7 +164,21 @@ class RequestSubmissionTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertFalse(BorrowRequest.objects.exists())
 
-    def test_allows_quantity_above_old_per_item_limit(self):
+    def test_rejects_quantity_above_configured_maximum(self):
+        item = self.make_item("Laptop", units=5)
+
+        response = self.client.post(
+            reverse("portal:request_create"),
+            self.request_data([(item, 4)]),
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(BorrowRequest.objects.exists())
+        self.assertContains(response, f"Maximum {self.settings.max_borrow_quantity} unit")
+
+    def test_respects_configured_max_borrow_quantity(self):
+        self.settings.max_borrow_quantity = 5
+        self.settings.save(update_fields=["max_borrow_quantity"])
         item = self.make_item("Laptop", units=5)
 
         response = self.client.post(
@@ -176,10 +190,13 @@ class RequestSubmissionTests(TestCase):
         borrow_request = BorrowRequest.objects.get(user=self.user)
         self.assertEqual(borrow_request.items.get().quantity, 5)
 
-    def test_quantity_widget_has_no_maximum(self):
+    def test_quantity_widget_has_configured_maximum(self):
         form = BorrowRequestItemForm()
 
-        self.assertNotIn("max", form.fields["quantity"].widget.attrs)
+        self.assertEqual(
+            form.fields["quantity"].widget.attrs.get("max"),
+            self.settings.max_borrow_quantity,
+        )
 
     def test_rejects_quantity_above_available_units(self):
         item = self.make_item("Laptop", units=1)

@@ -128,7 +128,13 @@ class BorrowRequestItemForm(forms.ModelForm):
             f"{item.requestable_count} available"
         )
 
-        self.fields["quantity"].widget.attrs.update({"min": 1})
+        settings = models.SystemSetting.load()
+        self.fields["quantity"].widget.attrs.update(
+            {
+                "min": 1,
+                "max": settings.max_borrow_quantity,
+            }
+        )
         apply_widget_styling(self)
 
 
@@ -169,6 +175,13 @@ class BaseBorrowRequestItemFormSet(BaseInlineFormSet):
 
             if quantity is None:
                 continue
+
+            settings = models.SystemSetting.load()
+            if quantity > settings.max_borrow_quantity:
+                form.add_error(
+                    "quantity",
+                    f"Maximum {settings.max_borrow_quantity} unit(s) per item.",
+                )
 
             available = requestable_units_count(catalog_item)
             if quantity > available:

@@ -102,7 +102,15 @@ class AuditLogSearchForm(forms.Form):
 class SystemSettingForm(forms.ModelForm):
     class Meta:
         model = models.SystemSetting
-        exclude = ("max_borrow_quantity",)
+        fields = ("max_borrow_days", "max_borrow_quantity")
+        labels = {
+            "max_borrow_days": "Max borrow days",
+            "max_borrow_quantity": "Max quantity",
+        }
+        help_texts = {
+            "max_borrow_days": "Maximum allowed days a borrower can keep equipment.",
+            "max_borrow_quantity": "Maximum allowed units a borrower can request per item.",
+        }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

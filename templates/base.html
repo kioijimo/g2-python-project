@@ -10,6 +10,7 @@
 
   <body class="h-full bg-background-default font-sans text-text-primary antialiased">
     {% include "components/toast.html" %}
+    {% include "components/confirm_modal.html" %}
 
     <div class="flex min-h-full flex-col bg-background-default {% if request.user.is_authenticated and request.user.role == 1 %}lg:h-full lg:flex-row lg:overflow-hidden{% endif %}">
       <!-- Navbar (Sidebar for admin, Top navbar for user portal / guest) -->

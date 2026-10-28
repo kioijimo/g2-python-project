@@ -111,7 +111,12 @@
           </div>
 
           <div class="border-t border-border-default pt-1">
-            <form method="post" action="{% url 'logout' %}">
+            <form method="post" action="{% url 'logout' %}"
+            data-confirm="true"
+            data-confirm-title="Sign Out"
+            data-confirm-message="Are you sure you want to sign out of your account?"
+            data-confirm-button="Sign Out"
+            data-confirm-variant="warning">
               {% csrf_token %}
               <button
                 type="submit"
@@ -232,7 +237,12 @@
       </div>
     </div>
     <div class="mt-3">
-      <form method="post" action="{% url 'logout' %}">
+      <form method="post" action="{% url 'logout' %}"
+            data-confirm="true"
+            data-confirm-title="Sign Out"
+            data-confirm-message="Are you sure you want to sign out of your account?"
+            data-confirm-button="Sign Out"
+            data-confirm-variant="warning">
         {% csrf_token %}
         <button
           type="submit"

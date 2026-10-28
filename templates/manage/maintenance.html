@@ -119,27 +119,59 @@
       <tbody class="divide-y divide-gray-100">
         {% for ticket in tickets %}
         <tr class="transition-colors hover:bg-gray-50/50">
-          <td class="px-6 py-4 font-mono text-xs font-semibold text-text-primary">#MNT-{{ ticket.id }}</td>
-          <td class="px-6 py-4 font-mono font-semibold text-text-primary">{{ ticket.unit.asset_code }}</td>
+          <td class="px-6 py-4 font-mono text-xs font-semibold text-text-primary whitespace-nowrap">#MNT-{{ ticket.id }}</td>
+          <td class="px-6 py-4 font-mono font-semibold text-text-primary whitespace-nowrap">{{ ticket.unit.asset_code }}</td>
           <td class="px-6 py-4 text-gray-700">{{ ticket.issue }}</td>
           <td class="px-6 py-4 text-text-secondary">{{ ticket.action|default:"---" }}</td>
           <td class="px-6 py-4">
             {% if ticket.status == MaintenanceStatus.ACTIVE %}
-              <span class="inline-flex items-center rounded-full bg-amber-50 px-2.5 py-0.5 text-xs font-semibold text-amber-800 ring-1 ring-inset ring-amber-600/20">In Maintenance</span>
+              {% include "components/badge.html" with label="In Maintenance" variant="warning" %}
             {% elif ticket.status == MaintenanceStatus.FINISHED %}
-              <span class="inline-flex items-center rounded-full bg-emerald-50 px-2.5 py-0.5 text-xs font-semibold text-emerald-800 ring-1 ring-inset ring-emerald-600/20">Finished</span>
+              {% include "components/badge.html" with label="Finished" variant="success" %}
             {% else %}
-              <span class="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-semibold text-gray-700 ring-1 ring-inset ring-gray-600/20">Cancelled</span>
+              {% include "components/badge.html" with label="Cancelled" variant="danger" %}
             {% endif %}
           </td>
           <td class="px-6 py-4 text-right">
             {% if ticket.status == MaintenanceStatus.ACTIVE %}
-              <form action="{% url 'resolve_maintenance_ticket' ticket.id %}" method="POST" class="inline-flex items-center gap-2">
-                {% csrf_token %}
-                <input type="text" name="action" placeholder="Describe repair action..." required class="block rounded-md border border-border-default bg-surface-card px-2.5 py-1.5 text-xs text-text-primary shadow-sm transition focus:border-brand-primary focus:outline-none focus:ring-1 focus:ring-brand-primary">
-                <button type="submit" name="outcome" value="REPAIR" class="cursor-pointer inline-flex items-center rounded-md bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white shadow-sm transition hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2">Repair & Restock</button>
-                <button type="submit" name="outcome" value="RETIRE" class="cursor-pointer inline-flex items-center rounded-md bg-gray-600 px-3 py-1.5 text-xs font-semibold text-white shadow-sm transition hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2">Retire</button>
-              </form>
+              <div class="inline-flex items-center gap-2">
+                <button
+                  type="button"
+                  onclick="openResolveTicketModal(this)"
+                  data-action-url="{% url 'resolve_maintenance_ticket' ticket.id %}"
+                  data-ticket-id="#MNT-{{ ticket.id }}"
+                  data-unit-code="{{ ticket.unit.asset_code }}"
+                  data-unit-name="{{ ticket.unit.catalog_item.name }}"
+                  data-ticket-issue="{{ ticket.issue }}"
+                  data-outcome="REPAIR"
+                  data-confirm-title="Repair & Restock Equipment"
+                  data-confirm-message="Confirm that unit {{ ticket.unit.asset_code }} has been successfully repaired and is ready to be returned to active inventory stock."
+                  data-confirm-detail="Unit: {{ ticket.unit.asset_code }} ({{ ticket.unit.catalog_item.name }})"
+                  data-confirm-button="Restock Unit"
+                  data-confirm-variant="success"
+                  class="cursor-pointer inline-flex items-center rounded-md bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white shadow-sm transition hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 whitespace-nowrap"
+                >
+                  Repair & Restock
+                </button>
+                <button
+                  type="button"
+                  onclick="openResolveTicketModal(this)"
+                  data-action-url="{% url 'resolve_maintenance_ticket' ticket.id %}"
+                  data-ticket-id="#MNT-{{ ticket.id }}"
+                  data-unit-code="{{ ticket.unit.asset_code }}"
+                  data-unit-name="{{ ticket.unit.catalog_item.name }}"
+                  data-ticket-issue="{{ ticket.issue }}"
+                  data-outcome="RETIRE"
+                  data-confirm-title="Retire Equipment Unit"
+                  data-confirm-message="Are you sure you want to permanently retire unit {{ ticket.unit.asset_code }}? This unit will be permanently decommissioned from service."
+                  data-confirm-detail="Unit: {{ ticket.unit.asset_code }} ({{ ticket.unit.catalog_item.name }})"
+                  data-confirm-button="Retire Unit"
+                  data-confirm-variant="danger"
+                  class="cursor-pointer inline-flex items-center rounded-md bg-gray-600 px-3 py-1.5 text-xs font-semibold text-white shadow-sm transition hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 whitespace-nowrap"
+                >
+                  Retire
+                </button>
+              </div>
             {% endif %}
           </td>
         </tr>
@@ -151,6 +183,7 @@
       </tbody>
     </table>
   </div>
+  {% include "components/pagination.html" with queryset=tickets querystring=querystring %}
 </div>
 
 <!-- Modal: Open Maintenance Ticket -->
@@ -164,7 +197,7 @@
       {% csrf_token %}
       <div>
         <label class="block text-xs font-semibold uppercase tracking-wide text-gray-700 mb-1.5">Select Available Unit</label>
-        <select name="unit_id" required class="block w-full rounded-md border border-border-default bg-surface-card px-3 py-2 text-sm text-text-primary shadow-sm transition focus:border-brand-primary focus:outline-none focus:ring-2 focus:ring-brand-primary/20">
+        <select name="unit_id" required class="block w-full rounded-md border border-border-default bg-surface-card pl-3 pr-10 py-2 text-sm text-text-primary shadow-sm transition focus:border-brand-primary focus:outline-none focus:ring-2 focus:ring-brand-primary/20 form-select">
           {% for unit in eligible_units %}
             <option value="{{ unit.id }}">{{ unit.asset_code }} ({{ unit.catalog_item.name }})</option>
           {% endfor %}
@@ -181,4 +214,142 @@
     </form>
   </div>
 </div>
+
+<!-- Modal: Resolve Maintenance Ticket (Repair & Restock / Retire) -->
+<div id="resolveTicketModal" onclick="if(event.target === this) closeResolveTicketModal()" class="fixed inset-0 bg-gray-900/50 backdrop-blur-sm hidden flex items-center justify-center z-50 p-4" role="dialog" aria-modal="true" aria-labelledby="resolveModalTitle">
+  <div class="bg-surface-card rounded-xl shadow-xl max-w-lg w-full p-6 relative border border-border-default">
+    <div class="flex justify-between items-start gap-3 mb-2">
+      <div>
+        <h3 id="resolveModalTitle" class="text-lg font-bold text-text-primary">Resolve Maintenance Work Order</h3>
+        <p id="resolveModalDescription" class="mt-1 text-sm text-text-secondary leading-relaxed">
+          Provide details on the maintenance resolution for this equipment unit.
+        </p>
+      </div>
+      <button type="button" onclick="closeResolveTicketModal()" class="cursor-pointer text-gray-400 hover:text-gray-600 text-xl font-bold leading-none" aria-label="Close modal">&times;</button>
+    </div>
+
+    <!-- Ticket & Unit Context Summary -->
+    <div class="mt-4 rounded-lg border border-border-default bg-gray-50 p-3.5 text-xs space-y-1.5">
+      <div class="flex flex-wrap items-center justify-between gap-2">
+        <span class="font-semibold uppercase tracking-wide text-text-secondary">Work Order</span>
+        <span id="resolveModalTicketId" class="font-mono font-semibold text-text-primary"></span>
+      </div>
+      <div class="flex flex-wrap items-center justify-between gap-2">
+        <span class="font-semibold uppercase tracking-wide text-text-secondary">Equipment Unit</span>
+        <span id="resolveModalUnitDetail" class="font-mono font-semibold text-text-primary"></span>
+      </div>
+      <div class="pt-1 border-t border-border-default/70">
+        <span class="block font-semibold uppercase tracking-wide text-text-secondary">Reported Issue</span>
+        <p id="resolveModalIssue" class="mt-0.5 text-text-primary font-medium"></p>
+      </div>
+    </div>
+
+    <form id="resolveTicketForm" action="" method="POST" class="mt-4 space-y-4">
+      {% csrf_token %}
+      <input type="hidden" id="resolveModalOutcome" name="outcome" value="REPAIR">
+      <div>
+        <label id="resolveModalActionLabel" for="resolveModalActionInput" class="block text-xs font-semibold uppercase tracking-wide text-gray-700 mb-1">
+          Repair & Servicing Action Taken <span class="text-rose-600 font-bold">*</span>
+        </label>
+        <p id="resolveModalActionHelp" class="text-xs text-text-secondary mb-2">
+          Describe the repairs performed, parts replaced, or inspection results before returning the unit to available stock.
+        </p>
+        <textarea
+          id="resolveModalActionInput"
+          name="action"
+          rows="3"
+          required
+          placeholder="Describe repair action..."
+          class="block w-full rounded-md border border-border-default bg-surface-card px-3 py-2 text-sm text-text-primary shadow-sm transition focus:border-brand-primary focus:outline-none focus:ring-2 focus:ring-brand-primary/20"
+        ></textarea>
+      </div>
+
+      <div class="flex justify-end gap-3 mt-6 border-t border-border-default pt-4">
+        <button
+          type="button"
+          onclick="closeResolveTicketModal()"
+          class="cursor-pointer inline-flex items-center justify-center rounded-md border border-border-default bg-surface-card px-4 py-2 text-sm font-medium text-gray-700 shadow-sm transition hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-brand-primary focus:ring-offset-2"
+        >
+          Cancel
+        </button>
+        <button
+          type="submit"
+          id="resolveModalSubmitBtn"
+          class="cursor-pointer inline-flex items-center justify-center rounded-md bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2"
+        >
+          Restock Unit
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  function openResolveTicketModal(btn) {
+    var modal = document.getElementById('resolveTicketModal');
+    var form = document.getElementById('resolveTicketForm');
+    var titleEl = document.getElementById('resolveModalTitle');
+    var descEl = document.getElementById('resolveModalDescription');
+    var ticketIdEl = document.getElementById('resolveModalTicketId');
+    var unitDetailEl = document.getElementById('resolveModalUnitDetail');
+    var issueEl = document.getElementById('resolveModalIssue');
+    var outcomeInput = document.getElementById('resolveModalOutcome');
+    var actionLabel = document.getElementById('resolveModalActionLabel');
+    var actionHelp = document.getElementById('resolveModalActionHelp');
+    var actionInput = document.getElementById('resolveModalActionInput');
+    var submitBtn = document.getElementById('resolveModalSubmitBtn');
+
+    if (!modal || !form || !btn) return;
+
+    var outcome = btn.getAttribute('data-outcome') || 'REPAIR';
+    var actionUrl = btn.getAttribute('data-action-url') || '';
+    var ticketId = btn.getAttribute('data-ticket-id') || '';
+    var unitCode = btn.getAttribute('data-unit-code') || '';
+    var unitName = btn.getAttribute('data-unit-name') || '';
+    var ticketIssue = btn.getAttribute('data-ticket-issue') || '';
+    var title = btn.getAttribute('data-confirm-title') || 'Resolve Maintenance Ticket';
+    var message = btn.getAttribute('data-confirm-message') || '';
+    var confirmButtonText = btn.getAttribute('data-confirm-button') || 'Confirm';
+
+    form.setAttribute('action', actionUrl);
+    outcomeInput.value = outcome;
+    titleEl.textContent = title;
+    descEl.textContent = message;
+    ticketIdEl.textContent = ticketId;
+    unitDetailEl.textContent = unitName ? (unitCode + ' (' + unitName + ')') : unitCode;
+    issueEl.textContent = ticketIssue || '---';
+    actionInput.value = '';
+    submitBtn.textContent = confirmButtonText;
+
+    if (outcome === 'RETIRE') {
+      actionLabel.innerHTML = 'Retirement Reason &amp; Action Taken <span class="text-rose-600 font-bold">*</span>';
+      actionHelp.textContent = 'Document why this unit cannot be repaired or is being permanently decommissioned for inventory audit records.';
+      actionInput.setAttribute('placeholder', 'e.g., Internal board severely damaged beyond economical repair; unit decommissioned...');
+      submitBtn.className = 'cursor-pointer inline-flex items-center justify-center rounded-md bg-brand-primary hover:bg-rose-700 px-4 py-2 text-sm font-semibold text-white shadow-sm transition focus:outline-none focus:ring-2 focus:ring-rose-500 focus:ring-offset-2';
+    } else {
+      actionLabel.innerHTML = 'Repair &amp; Servicing Action Taken <span class="text-rose-600 font-bold">*</span>';
+      actionHelp.textContent = 'Describe the repairs performed, parts replaced, or inspection results before returning the unit to available stock.';
+      actionInput.setAttribute('placeholder', 'e.g., Replaced frayed power cable, recalibrated internal sensor, and verified normal operation...');
+      submitBtn.className = 'cursor-pointer inline-flex items-center justify-center rounded-md bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2';
+    }
+
+    modal.classList.remove('hidden');
+    setTimeout(function () {
+      actionInput.focus();
+    }, 50);
+  }
+
+  function closeResolveTicketModal() {
+    var modal = document.getElementById('resolveTicketModal');
+    if (modal) {
+      modal.classList.add('hidden');
+    }
+  }
+
+  document.addEventListener('keydown', function (event) {
+    if (event.key === 'Escape') {
+      closeResolveTicketModal();
+    }
+  });
+</script>
 {% endblock %}

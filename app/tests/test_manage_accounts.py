@@ -215,3 +215,47 @@ class ManageAccountTests(TestCase):
         self.assertContains(response, reverse("account_list"))
         self.assertContains(response, "Accounts")
         self.assertContains(response, 'aria-current="page"')
+
+    def test_account_list_orders_admin_on_top_and_most_recent_user_first(self):
+        self.client.force_login(self.admin)
+        # Create a brand new user
+        newest_user = create_user("z_newest@example.com")
+        newest_user.profile.first_name = "Zoe"
+        newest_user.profile.last_name = "Newest"
+        newest_user.profile.save()
+
+        response = self.client.get(reverse("account_list"))
+        self.assertEqual(response.status_code, 200)
+
+        users_on_page = list(response.context["users"])
+        # The administrator account must always be on the very top
+        self.assertEqual(users_on_page[0].role, User.UserRoles.ADMIN)
+        self.assertEqual(users_on_page[0].email, self.admin.email)
+
+        # Non-admin users are sorted by most recently created
+        self.assertEqual(users_on_page[1].email, "z_newest@example.com")
+
+    def test_account_list_paginates_at_five_rows_max(self):
+        self.client.force_login(self.admin)
+        # In setUp: admin, user1, user2 (3 users). Add 4 more = 7 users total
+        for i in range(4):
+            create_user(f"extra{i}@example.com")
+
+        # Page 1
+        response = self.client.get(reverse("account_list"))
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.context["users"]), 5)
+        self.assertContains(response, "Showing")
+        self.assertContains(response, "1")
+        self.assertContains(response, "5")
+        self.assertContains(response, "7")
+        self.assertContains(response, 'href="?page=2"')
+
+        # Page 2
+        response_page2 = self.client.get(reverse("account_list"), {"page": 2})
+        self.assertEqual(response_page2.status_code, 200)
+        self.assertEqual(len(response_page2.context["users"]), 2)
+        self.assertContains(response_page2, "Showing")
+        self.assertContains(response_page2, "6")
+        self.assertContains(response_page2, "7")
+        self.assertContains(response_page2, 'href="?page=1"')

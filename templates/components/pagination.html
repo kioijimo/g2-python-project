@@ -1,27 +1,95 @@
-{% if queryset.paginator.num_pages > 1 %}
+{% with page=page_obj|default:queryset %}
+{% if page and page.paginator.num_pages > 1 %}
 <nav
-  class="flex flex-wrap items-center justify-between gap-3 border-t border-border-default px-6 py-4"
+  class="flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-border-default bg-surface-card px-4 sm:px-6 py-3.5"
   aria-label="Pagination"
 >
-  <p class="text-sm text-text-secondary">
-    Page {{ queryset.number }} of {{ queryset.paginator.num_pages }}
+  <!-- Result Count Summary -->
+  <p class="text-xs sm:text-sm text-text-secondary">
+    Showing
+    <span class="font-semibold text-text-primary">{{ page.start_index }}</span>
+    to
+    <span class="font-semibold text-text-primary">{{ page.end_index }}</span>
+    of
+    <span class="font-semibold text-text-primary">{{ page.paginator.count }}</span>
+    results
   </p>
-  <div class="flex items-center gap-2">
-    {% if queryset.has_previous %}
+
+  <!-- Pagination Controls -->
+  <div class="flex items-center gap-1 sm:gap-1.5">
+    <!-- Previous Page Button -->
+    {% if page.has_previous %}
     <a
-      href="?page={{ page_obj.previous_page_number }}{% if querystring %}&{{ querystring }}{% endif %}"
-      class="inline-flex items-center justify-center rounded-md border border-border-default bg-surface-card px-3 py-1.5 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-brand-primary focus:ring-offset-2"
+      href="?page={{ page.previous_page_number }}{% if querystring %}&{{ querystring }}{% endif %}"
+      class="inline-flex items-center justify-center rounded-lg border border-border-default bg-surface-card px-2.5 sm:px-3 py-1.5 text-xs sm:text-sm font-medium text-text-primary shadow-xs transition hover:bg-background-default hover:text-brand-primary focus:outline-none focus:ring-2 focus:ring-brand-primary focus:ring-offset-1"
+      aria-label="Previous page"
     >
-      Previous
+      <svg class="h-4 w-4 mr-1 text-text-secondary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+      </svg>
+      <span>Previous</span>
     </a>
-    {% endif %} {% if queryset.has_next %}
+    {% else %}
+    <span
+      class="inline-flex cursor-not-allowed items-center justify-center rounded-lg border border-border-default/50 bg-background-default/50 px-2.5 sm:px-3 py-1.5 text-xs sm:text-sm font-medium text-text-secondary/50 shadow-none"
+      aria-disabled="true"
+    >
+      <svg class="h-4 w-4 mr-1 text-text-secondary/50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+      </svg>
+      <span>Previous</span>
+    </span>
+    {% endif %}
+
+    <!-- Numbered Page Links with intelligent windowing -->
+    <div class="flex items-center gap-1">
+      {% for num in page.paginator.page_range %}
+        {% if num == page.number %}
+        <span
+          class="inline-flex h-8 min-w-[2rem] items-center justify-center rounded-lg bg-brand-primary px-2.5 text-xs sm:text-sm font-bold text-white shadow-xs"
+          aria-current="page"
+        >
+          {{ num }}
+        </span>
+        {% elif num >= page.number|add:"-2" and num <= page.number|add:"2" or num == 1 or num == page.paginator.num_pages %}
+        <a
+          href="?page={{ num }}{% if querystring %}&{{ querystring }}{% endif %}"
+          class="inline-flex h-8 min-w-[2rem] items-center justify-center rounded-lg border border-border-default bg-surface-card px-2.5 text-xs sm:text-sm font-medium text-text-primary transition hover:bg-background-default hover:text-brand-primary focus:outline-none focus:ring-2 focus:ring-brand-primary focus:ring-offset-1"
+        >
+          {{ num }}
+        </a>
+        {% elif num == page.number|add:"-3" or num == page.number|add:"3" %}
+        <span class="inline-flex h-8 w-6 items-center justify-center text-xs text-text-secondary select-none">
+          &hellip;
+        </span>
+        {% endif %}
+      {% endfor %}
+    </div>
+
+    <!-- Next Page Button -->
+    {% if page.has_next %}
     <a
-      href="?page={{ page_obj.next_page_number }}{% if querystring %}&{{ querystring }}{% endif %}"
-      class="inline-flex items-center justify-center rounded-md border border-border-default bg-surface-card px-3 py-1.5 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-brand-primary focus:ring-offset-2"
+      href="?page={{ page.next_page_number }}{% if querystring %}&{{ querystring }}{% endif %}"
+      class="inline-flex items-center justify-center rounded-lg border border-border-default bg-surface-card px-2.5 sm:px-3 py-1.5 text-xs sm:text-sm font-medium text-text-primary shadow-xs transition hover:bg-background-default hover:text-brand-primary focus:outline-none focus:ring-2 focus:ring-brand-primary focus:ring-offset-1"
+      aria-label="Next page"
     >
-      Next
+      <span>Next</span>
+      <svg class="h-4 w-4 ml-1 text-text-secondary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+      </svg>
     </a>
+    {% else %}
+    <span
+      class="inline-flex cursor-not-allowed items-center justify-center rounded-lg border border-border-default/50 bg-background-default/50 px-2.5 sm:px-3 py-1.5 text-xs sm:text-sm font-medium text-text-secondary/50 shadow-none"
+      aria-disabled="true"
+    >
+      <span>Next</span>
+      <svg class="h-4 w-4 ml-1 text-text-secondary/50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+      </svg>
+    </span>
     {% endif %}
   </div>
 </nav>
 {% endif %}
+{% endwith %}

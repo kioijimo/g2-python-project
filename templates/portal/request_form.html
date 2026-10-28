@@ -54,7 +54,7 @@
       <div class="mb-5 border-b border-border-default pb-4">
         <h2 class="text-lg font-bold text-text-primary">Requested Items</h2>
         <p class="mt-1 text-sm text-text-secondary">
-          Select one to three distinct items. Each item quantity is restricted by real-time available stock.
+          Select one to three distinct items. Maximum {{ max_borrow_quantity }} unit{{ max_borrow_quantity|pluralize }} per item (limited by current availability).
         </p>
       </div>
 
@@ -193,16 +193,17 @@
         }
       }
 
+      const maxBorrowLimit = Number("{{ max_borrow_quantity|default:3 }}");
+
       function applyAvailabilityLimit(available) {
-        if (available === null) {
-          quantity.removeAttribute("max");
-          return;
+        let limit = maxBorrowLimit;
+        if (available !== null) {
+          limit = Math.min(limit, Math.max(0, available));
         }
 
-        const limit = Math.max(0, available);
         quantity.max = String(limit);
 
-        if (limit === 0) {
+        if (available !== null && available === 0) {
           quantity.value = "";
           return;
         }
@@ -239,6 +240,17 @@
 
         if (!Number.isFinite(requested) || requested < 1) {
           return true;
+        }
+
+        if (requested > maxBorrowLimit) {
+          let message = "Maximum " + maxBorrowLimit + " unit(s) per item.";
+          quantity.setCustomValidity(message);
+          quantity.setAttribute("aria-invalid", "true");
+          if (guardError) {
+            guardError.textContent = message;
+            guardError.hidden = false;
+          }
+          return false;
         }
 
         if (requested <= available) {

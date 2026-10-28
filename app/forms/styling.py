@@ -7,9 +7,9 @@ FORM_INPUT_CLASS = (
 )
 
 FORM_SELECT_CLASS = (
-    "w-full rounded-md border border-border-default bg-surface-card px-3 py-2 text-sm text-text-primary "
+    "w-full rounded-md border border-border-default bg-surface-card pl-3 pr-10 py-2 text-sm text-text-primary "
     "shadow-sm transition-colors duration-150 "
-    "focus:border-brand-primary focus:outline-none focus:ring-2 focus:ring-brand-primary/20"
+    "focus:border-brand-primary focus:outline-none focus:ring-2 focus:ring-brand-primary/20 form-select"
 )
 
 FORM_TEXTAREA_CLASS = (

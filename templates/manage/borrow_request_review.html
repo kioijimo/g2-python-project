@@ -171,17 +171,36 @@
       <div class="mt-6 border-t border-border-default pt-6">
         <h3 class="text-base font-semibold text-text-primary">Reject request</h3>
         <p class="mt-1 text-sm text-text-secondary">
-          Reject this request without reserving any units. The request will be marked as rejected.
+          Reject this request without reserving any units. Please state a clear reason so the borrower understands why it was rejected.
         </p>
         <form
           method="post"
           action="{% url 'borrow_request_reject' borrow_request.pk %}"
-          class="mt-4"
+          class="mt-4 space-y-4"
+          data-confirm="true"
+          data-confirm-title="Reject Borrow Request"
+          data-confirm-message="Are you sure you want to reject this borrow request? The borrower will be notified with your stated rejection reason."
+          data-confirm-detail="Request #{{ borrow_request.pk }} - {{ borrow_request.user.email }}"
+          data-confirm-button="Reject Request"
+          data-confirm-variant="danger"
         >
           {% csrf_token %}
+          <div>
+            <label for="rejection_reason" class="block text-xs font-semibold uppercase tracking-wide text-gray-700 mb-1.5">
+              Reason for Rejection <span class="text-rose-600 font-bold">*</span>
+            </label>
+            <textarea
+              id="rejection_reason"
+              name="rejection_reason"
+              rows="3"
+              required
+              placeholder="State why this request is being rejected (e.g., requested units currently undergoing maintenance, conflict with academic priority schedule, incomplete request details)..."
+              class="block w-full rounded-md border border-border-default bg-surface-card px-3 py-2 text-sm text-text-primary shadow-sm transition placeholder-text-secondary/60 focus:border-brand-primary focus:outline-none focus:ring-2 focus:ring-brand-primary/20"
+            ></textarea>
+          </div>
           <button
             type="submit"
-            class="cursor-pointer inline-flex items-center justify-center rounded-md bg-rose-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-rose-700 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:ring-offset-2"
+            class="cursor-pointer inline-flex items-center justify-center rounded-md bg-brand-primary px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-rose-700 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:ring-offset-2"
           >
             Reject request
           </button>
@@ -214,6 +233,12 @@
         method="post"
         action="{% url 'borrow_request_release' borrow_request.pk %}"
         class="mt-4"
+        data-confirm="true"
+        data-confirm-title="Release Equipment Units"
+        data-confirm-message="Confirm that the borrower has received all assigned equipment units. This will immediately issue the loan and mark the request as RELEASED."
+        data-confirm-detail="Request #{{ borrow_request.pk }} to {{ borrow_request.user.email }}"
+        data-confirm-button="Confirm & Release Equipment"
+        data-confirm-variant="primary"
       >
         {% csrf_token %}
         <button
@@ -280,6 +305,16 @@
             {{ borrow_request.reviewed_at|date:"Y-m-d H:i" }}
           </dd>
         </div>
+        {% if borrow_request.rejection_reason %}
+        <div>
+          <dt class="text-xs font-semibold uppercase tracking-wide text-rose-700 font-semibold">
+            Rejection reason
+          </dt>
+          <dd class="mt-1 rounded-md border border-rose-200 bg-rose-50 p-2.5 text-xs text-rose-800 leading-relaxed font-medium whitespace-pre-wrap">
+            {{ borrow_request.rejection_reason }}
+          </dd>
+        </div>
+        {% endif %}
       </dl>
       {% else %}
       <p class="mt-3 text-sm text-text-secondary">

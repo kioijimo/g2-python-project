@@ -176,7 +176,7 @@
         <select
           id="loan_status"
           name="loan_status"
-          class="block w-full rounded-md border border-border-default bg-surface-card px-3 py-2 text-sm text-text-primary shadow-sm transition focus:border-brand-primary focus:outline-none focus:ring-2 focus:ring-brand-primary/20"
+          class="block w-full rounded-md border border-border-default bg-surface-card pl-3 pr-10 py-2 text-sm text-text-primary shadow-sm transition focus:border-brand-primary focus:outline-none focus:ring-2 focus:ring-brand-primary/20 form-select"
         >
           <option value="all" {% if reports.filters.loan_status == 'all' or not reports.filters.loan_status %}selected{% endif %}>All Statuses</option>
           <option value="3" {% if reports.filters.loan_status == '3' %}selected{% endif %}>Issued (Active)</option>
@@ -324,7 +324,7 @@
         </a>
         <a
           href="?export=overdue_csv{% if reports.filters.overdue_from %}&overdue_from={{ reports.filters.overdue_from }}{% endif %}{% if reports.filters.overdue_to %}&overdue_to={{ reports.filters.overdue_to }}{% endif %}"
-          class="cursor-pointer inline-flex items-center justify-center gap-1.5 rounded-md bg-rose-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-rose-700 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:ring-offset-2"
+          class="cursor-pointer inline-flex items-center justify-center gap-1.5 rounded-md bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2"
         >
           <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
@@ -505,7 +505,16 @@
             cornerRadius: 6,
             callbacks: {
               label: function (context) {
-                return ` ${context.label}: ${context.raw}%`;
+                const count = Array.isArray(categoryData.counts)
+                  ? categoryData.counts[context.dataIndex]
+                  : (Number(context.raw) || 0);
+                const total = context.dataset.data.reduce((acc, val) => acc + (Number(val) || 0), 0);
+                const rawPct = Array.isArray(categoryData.percentages)
+                  ? categoryData.percentages[context.dataIndex]
+                  : (total > 0 ? (count / total) * 100 : 0);
+                const pct = Number(rawPct).toFixed(1).replace(/\.0$/, '');
+                const unitLabel = count === 1 ? 'unit' : 'units';
+                return ` ${context.label}: ${count} ${unitLabel} (${pct}%)`;
               }
             }
           }

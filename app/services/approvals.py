@@ -140,9 +140,13 @@ def approve_borrow_request(borrow_request, actor, allocations_by_item):
     return request
 
 
-def reject_borrow_request(borrow_request, actor):
-    """Reject a pending request."""
+def reject_borrow_request(borrow_request, actor, reason=""):
+    """Reject a pending request with a mandatory rejection reason."""
     _require_active_admin(actor)
+
+    clean_reason = (reason or "").strip()
+    if not clean_reason:
+        raise ValidationError("Please provide a reason for rejecting the request.")
 
     with transaction.atomic():
         request = _locked_request(borrow_request)
@@ -151,7 +155,8 @@ def reject_borrow_request(borrow_request, actor):
             raise ValidationError("Only pending requests can be rejected.")
 
         request.status = BorrowRequest.BorrowRequestStatus.REJECTED
-        request.save(update_fields=["status"])
+        request.rejection_reason = clean_reason
+        request.save(update_fields=["status", "rejection_reason"])
 
         LoanRecord.objects.create(
             borrow_request=request,
@@ -159,7 +164,8 @@ def reject_borrow_request(borrow_request, actor):
         )
 
         record_audit(
-            actor, f"Rejected borrow request #{request.pk} from user {actor.email}."
+            actor,
+            f"Rejected borrow request #{request.pk} from user {request.user.email}. Reason: {clean_reason}",
         )
 
     return request

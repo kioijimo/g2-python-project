@@ -59,6 +59,10 @@ def create_borrow_request(user, purpose, due_at, items):
         for catalog_item, quantity in items:
             if quantity < 1:
                 raise ValidationError("Quantity must be at least one.")
+            if quantity > settings.max_borrow_quantity:
+                raise ValidationError(
+                    f"Maximum {settings.max_borrow_quantity} unit(s) per item."
+                )
             if catalog_item.pk in selected_ids:
                 raise ValidationError(
                     "Each catalog item can only be requested once."

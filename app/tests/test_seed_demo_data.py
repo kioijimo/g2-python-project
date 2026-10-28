@@ -1,3 +1,6 @@
+import sqlite3
+from pathlib import Path
+
 from django.core.management import call_command
 from django.test import TestCase
 from django.utils import timezone
@@ -11,6 +14,7 @@ from app.models import (
     MaintenanceRecord,
     Profile,
     ReturnRecord,
+    UnitAllocation,
     User,
 )
 
@@ -94,3 +98,49 @@ class SeedDemoDataCommandTest(TestCase):
                 due_at__lt=now,
             ).exists()
         )
+
+        # 10. Beatrice Mendoza has multiple items and units for return
+        beatrice_req = BorrowRequest.objects.get(
+            user__email="beatrice.mendoza@example.com",
+            status=BorrowRequest.BorrowRequestStatus.ISSUED,
+        )
+        self.assertEqual(beatrice_req.items.count(), 3)
+        allocated_codes = set(
+            UnitAllocation.objects.filter(
+                request_item__borrow_request=beatrice_req,
+                status=UnitAllocation.UnitAllocationStatus.RELEASED,
+            ).values_list("equipment_unit__asset_code", flat=True)
+        )
+        self.assertEqual(
+            allocated_codes,
+            {"LAP-003", "CAM-001", "DMM-002", "DMM-003"},
+        )
+
+    def test_seed_demo_data_sql_file_valid_and_has_beatrice_multi_items(self):
+        sql_path = Path("seed_demo_data.sql")
+        self.assertTrue(sql_path.exists())
+        sql_script = sql_path.read_text(encoding="utf-8")
+
+        conn = sqlite3.connect(":memory:")
+        try:
+            conn.executescript(sql_script)
+            cursor = conn.cursor()
+            # BorrowRequest #16 belongs to Beatrice (user_id=9)
+            cursor.execute(
+                "SELECT COUNT(*) FROM app_requestitem WHERE borrow_request_id = 16"
+            )
+            self.assertEqual(cursor.fetchone()[0], 3)
+
+            cursor.execute(
+                """
+                SELECT eu.asset_code
+                FROM app_unitallocation ua
+                JOIN app_requestitem ri ON ua.request_item_id = ri.id
+                JOIN app_equipmentunit eu ON ua.equipment_unit_id = eu.id
+                WHERE ri.borrow_request_id = 16 AND ua.status = 2
+                """
+            )
+            codes = {row[0] for row in cursor.fetchall()}
+            self.assertEqual(codes, {"LAP-003", "CAM-001", "DMM-002", "DMM-003"})
+        finally:
+            conn.close()

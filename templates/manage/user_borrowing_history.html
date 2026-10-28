@@ -16,10 +16,7 @@
   </a>
   <div class="flex flex-wrap items-center justify-between gap-4">
     <div>
-      <div class="inline-flex items-center gap-1.5 rounded-full bg-brand-primary-subtle px-2.5 py-0.5 text-xs font-semibold text-brand-primary border border-brand-primary/20 mb-2">
-        <span class="h-1.5 w-1.5 rounded-full bg-brand-accent"></span>
-        <span>Account Audit</span>
-      </div>
+
       <h1 class="text-2xl font-bold tracking-tight text-text-primary sm:text-3xl">
         Borrowing History
       </h1>
@@ -165,5 +162,7 @@
       </tbody>
     </table>
   </div>
+
+  {% include "components/pagination.html" with queryset=borrow_requests querystring=querystring %}
 </div>
 {% endblock %}

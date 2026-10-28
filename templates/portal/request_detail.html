@@ -25,7 +25,16 @@
     </a>
 
     {% if borrow_request.is_cancellable %}
-    <form method="post" action="{% url 'portal:request_cancel' borrow_request.pk %}" onsubmit="return confirm('Cancel this request?');">
+    <form
+      method="post"
+      action="{% url 'portal:request_cancel' borrow_request.pk %}"
+      data-confirm="true"
+      data-confirm-title="Cancel Borrow Request"
+      data-confirm-message="Are you sure you want to cancel this equipment request? This action cannot be undone."
+      data-confirm-detail="Request #{{ borrow_request.pk }}"
+      data-confirm-button="Yes, Cancel Request"
+      data-confirm-variant="danger"
+    >
       {% csrf_token %}
       {% include "components/button.html" with text="Cancel request" type="submit" variant="danger" %}
     </form>
@@ -140,6 +149,12 @@
             All borrowed equipment has been returned and verified in fine condition.
             {% elif borrow_request.get_status_display == "Rejected" %}
             An administrator rejected this request.
+            {% if borrow_request.rejection_reason %}
+            <div class="mt-2.5 rounded-lg border border-rose-200 bg-rose-50/80 p-3 text-xs text-rose-800">
+              <span class="font-semibold uppercase tracking-wide text-rose-900 block mb-1">Reason for Rejection:</span>
+              <p class="leading-relaxed whitespace-pre-wrap">{{ borrow_request.rejection_reason }}</p>
+            </div>
+            {% endif %}
             {% elif borrow_request.get_status_display == "Cancelled" %}
             This request was cancelled by you.
             {% endif %}

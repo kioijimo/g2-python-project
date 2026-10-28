@@ -74,9 +74,10 @@ def create_units(
     return units
 
 
-def create_settings(max_borrow_days=7):
+def create_settings(max_borrow_days=7, max_borrow_quantity=3):
     return SystemSetting.objects.create(
         max_borrow_days=max_borrow_days,
+        max_borrow_quantity=max_borrow_quantity,
     )
 
 

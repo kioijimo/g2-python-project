@@ -137,6 +137,7 @@ def request_create(request):
         {
             "form": form,
             "formset": formset,
+            "max_borrow_quantity": settings.max_borrow_quantity,
             "max_borrow_days": settings.max_borrow_days,
         },
     )
@@ -150,11 +151,19 @@ def request_list(request):
         .order_by("-created_at")
     )
 
+    page_obj = Paginator(borrow_requests, 5).get_page(request.GET.get("page"))
+    params = request.GET.copy()
+    params.pop("page", None)
+    querystring = params.urlencode()
+
     return render(
         request,
         "portal/request_list.html",
         {
-            "borrow_requests": borrow_requests,
+            "borrow_requests": page_obj,
+            "page_obj": page_obj,
+            "queryset": page_obj,
+            "querystring": querystring,
         },
     )
 

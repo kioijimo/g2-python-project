@@ -6,36 +6,39 @@
 <!-- Page Header -->
 <div class="mb-8 flex flex-wrap items-center justify-between gap-4">
   <div>
-
     <h1 class="text-2xl font-bold tracking-tight text-text-primary sm:text-3xl">Returns Management</h1>
-    <p class="mt-1 text-sm text-text-secondary">Log unit-level equipment returns, inspect conditions, and restock available inventory.</p>
+    <p class="mt-1 text-sm text-text-secondary">Log single-unit, multi-item partial, or full equipment returns, inspect conditions, and route damaged units to maintenance.</p>
   </div>
 </div>
 
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-  <!-- Return Form -->
+  <!-- Return Form (Single or Comma-Separated Quick Return) -->
   <div class="bg-surface-card p-6 rounded-xl shadow-sm border border-border-default">
-    <h2 class="text-lg font-semibold text-text-primary mb-4">Process Unit Return</h2>
+    <h2 class="text-lg font-semibold text-text-primary mb-1">Process Unit Return</h2>
+    <p class="text-xs text-text-secondary mb-4">Return a single unit, comma-separated units, or use the table on the right for multi-item &amp; full returns.</p>
     <form action="{% url 'process_unit_return' %}" method="POST" class="space-y-4">
       {% csrf_token %}
       <div>
-        <label class="block text-xs font-semibold uppercase tracking-wide text-gray-700 mb-1.5">Active Borrow Request</label>
-        <select name="borrow_request_id" required class="block w-full rounded-md border border-border-default bg-surface-card px-3 py-2 text-sm text-text-primary shadow-sm transition focus:border-brand-primary focus:outline-none focus:ring-2 focus:ring-brand-primary/20">
+        <label for="borrow-request-select" class="block text-xs font-semibold uppercase tracking-wide text-gray-700 mb-1.5">Active Borrow Request</label>
+        <select id="borrow-request-select" name="borrow_request_id" required class="block w-full rounded-md border border-border-default bg-surface-card pl-3 pr-10 py-2 text-sm text-text-primary shadow-sm transition focus:border-brand-primary focus:outline-none focus:ring-2 focus:ring-brand-primary/20 form-select">
           <option value="">-- Select Issued Request --</option>
           {% for req in active_requests %}
-            <option value="{{ req.id }}">#REQ-{{ req.id }} | {{ req.user.email }}</option>
+            <option value="{{ req.id }}" {% if selected_request_id == req.id|stringformat:"s" %}selected{% endif %}>
+              #REQ-{{ req.id }} | {{ req.user.email }} ({{ req.remaining_units_count }}/{{ req.total_units_count }} remaining{% if req.is_overdue %} &bull; {{ req.overdue_days_count }}d overdue{% endif %})
+            </option>
           {% endfor %}
         </select>
       </div>
 
       <div>
-        <label class="block text-xs font-semibold uppercase tracking-wide text-gray-700 mb-1.5">Asset Code</label>
-        <input type="text" name="asset_code" placeholder="e.g. AST-0012" required class="block w-full rounded-md border border-border-default bg-surface-card px-3 py-2 text-sm text-text-primary shadow-sm transition focus:border-brand-primary focus:outline-none focus:ring-2 focus:ring-brand-primary/20">
+        <label for="asset-code-input" class="block text-xs font-semibold uppercase tracking-wide text-gray-700 mb-1.5">Asset Code(s)</label>
+        <input id="asset-code-input" type="text" name="asset_code" placeholder="e.g. LAP-003 or LAP-003, CAM-001" required class="block w-full rounded-md border border-border-default bg-surface-card px-3 py-2 text-sm text-text-primary shadow-sm transition focus:border-brand-primary focus:outline-none focus:ring-2 focus:ring-brand-primary/20">
+        <p class="mt-1 text-[11px] text-text-secondary">Click unit rows in the table to populate, or enter multiple codes separated by commas.</p>
       </div>
 
       <div>
-        <label class="block text-xs font-semibold uppercase tracking-wide text-gray-700 mb-1.5">Returned Condition</label>
-        <select name="condition" required class="block w-full rounded-md border border-border-default bg-surface-card px-3 py-2 text-sm text-text-primary shadow-sm transition focus:border-brand-primary focus:outline-none focus:ring-2 focus:ring-brand-primary/20">
+        <label for="condition-select" class="block text-xs font-semibold uppercase tracking-wide text-gray-700 mb-1.5">Returned Condition</label>
+        <select id="condition-select" name="condition" required class="block w-full rounded-md border border-border-default bg-surface-card pl-3 pr-10 py-2 text-sm text-text-primary shadow-sm transition focus:border-brand-primary focus:outline-none focus:ring-2 focus:ring-brand-primary/20 form-select">
           <option value="{{ EquipmentCondition.FINE }}">Fine / Serviceable (Restock to Available)</option>
           <option value="{{ EquipmentCondition.DAMAGED }}">Damaged (Route to Maintenance)</option>
         </select>
@@ -47,43 +50,363 @@
     </form>
   </div>
 
-  <!-- Recent Returns Audit Table -->
+  <!-- Selected Borrow Request Details Table (Per-Unit, Multi-Item & Return All) -->
   <div class="lg:col-span-2 overflow-hidden rounded-xl border border-border-default bg-surface-card shadow-sm">
-    <div class="px-6 py-4 border-b border-border-default font-semibold text-text-primary">
-      Recent Unit Return Logs
-    </div>
-    <div class="overflow-x-auto">
-      <table class="w-full text-left text-sm">
-        <thead class="border-b border-border-default bg-gray-50 text-xs font-semibold uppercase tracking-wider text-text-secondary">
-          <tr>
-            <th class="px-6 py-3.5">Timestamp</th>
-            <th class="px-6 py-3.5">Request ID</th>
-            <th class="px-6 py-3.5">Asset Code</th>
-            <th class="px-6 py-3.5">Condition</th>
-          </tr>
-        </thead>
-        <tbody class="divide-y divide-gray-100">
-          {% for record in recent_returns %}
-          <tr class="transition-colors hover:bg-gray-50/50">
-            <td class="px-6 py-4 text-text-secondary">{{ record.created_at|date:"M d, Y H:i" }}</td>
-            <td class="px-6 py-4 font-mono font-medium text-text-primary">#REQ-{{ record.borrow_request.id }}</td>
-            <td class="px-6 py-4 font-mono font-semibold text-text-primary">{{ record.equipment_unit.asset_code }}</td>
-            <td class="px-6 py-4">
-              {% if record.condition == EquipmentCondition.FINE %}
-                <span class="inline-flex items-center rounded-full bg-emerald-50 px-2.5 py-0.5 text-xs font-semibold text-emerald-700 ring-1 ring-inset ring-emerald-600/20">Fine</span>
+    <form id="batch-return-form" action="{% url 'process_unit_return' %}" method="POST">
+      {% csrf_token %}
+      <input type="hidden" id="batch-borrow-request-id" name="borrow_request_id" value="{{ selected_request_id }}">
+
+      <div class="px-6 py-4 border-b border-border-default flex flex-wrap items-center justify-between gap-2">
+        <span class="font-semibold text-text-primary">Borrow Request Details</span>
+        {% for req in active_requests %}
+        <div data-request-header="{{ req.id }}" class="hidden flex-wrap items-center gap-2 text-xs text-text-secondary">
+          <span class="font-mono font-semibold text-text-primary">#REQ-{{ req.id }}</span>
+          <span>&bull;</span>
+          <span>Purpose: <strong class="font-medium text-text-primary">{{ req.purpose }}</strong></span>
+          <span>&bull;</span>
+          <span class="inline-flex items-center rounded-full border border-border-default bg-background-default px-2 py-0.5 text-[11px] font-semibold text-text-primary whitespace-nowrap">
+            {{ req.returned_units_count }}/{{ req.total_units_count }} Returned
+          </span>
+          {% if req.is_overdue %}
+          <span class="inline-flex items-center rounded-full bg-rose-50 px-2.5 py-0.5 text-[11px] font-semibold text-rose-700 ring-1 ring-inset ring-rose-600/20 whitespace-nowrap">
+            Overdue ({{ req.overdue_days_count }} day{{ req.overdue_days_count|pluralize }})
+          </span>
+          {% endif %}
+          {% include "components/borrow_request_status.html" with req=req %}
+        </div>
+        {% endfor %}
+      </div>
+
+      <!-- Batch Return Action Toolbar per Request -->
+      {% for req in active_requests %}
+      {% if req.remaining_units_count > 0 %}
+      <div data-request-toolbar="{{ req.id }}" class="hidden flex-wrap items-center justify-between gap-3 border-b border-border-default bg-gray-50/70 px-6 py-3">
+        <span class="text-xs font-medium text-text-secondary">
+          Click unit rows below to select items for return
+        </span>
+        <div class="flex flex-wrap items-center gap-2">
+          <button
+            type="submit"
+            name="return_mode"
+            value="selected"
+            data-return-selected-btn="{{ req.id }}"
+            class="hidden cursor-pointer items-center justify-center rounded-md bg-brand-primary px-3 py-1.5 text-xs font-semibold text-white shadow-xs transition hover:bg-brand-primary-hover focus:outline-none focus:ring-2 focus:ring-brand-primary focus:ring-offset-1"
+          >
+            Return Selected Units (<span data-selected-count="{{ req.id }}">0</span>)
+          </button>
+          <button
+            type="submit"
+            name="return_mode"
+            value="all"
+            class="cursor-pointer inline-flex items-center justify-center rounded-md bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white shadow-xs transition hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-1"
+          >
+            Return All Remaining ({{ req.remaining_units_count }})
+          </button>
+        </div>
+      </div>
+      {% endif %}
+      {% endfor %}
+
+      <div class="overflow-x-auto">
+        <table id="selected-request-table" class="w-full text-left text-sm">
+          <thead class="border-b border-border-default bg-gray-50 text-xs font-semibold uppercase tracking-wider text-text-secondary">
+            <tr>
+              <th class="px-4 py-3.5">Request ID</th>
+              <th class="px-4 py-3.5">Unit</th>
+              <th class="px-4 py-3.5">Asset Code</th>
+              <th class="px-4 py-3.5">Borrower</th>
+              <th class="px-4 py-3.5">Due Date</th>
+              <th class="px-4 py-3.5">Status / Return Action</th>
+            </tr>
+          </thead>
+          <tbody id="selected-request-empty" class="divide-y divide-gray-100">
+            <tr>
+              <td colspan="6" class="px-6 py-12 text-center text-sm text-text-secondary">
+                Select an active borrow request to view its allocated units, asset codes, overdue days, and return controls.
+              </td>
+            </tr>
+          </tbody>
+          {% for req in active_requests %}
+          <tbody data-request-rows="{{ req.id }}" class="hidden divide-y divide-gray-100">
+            {% for unit in req.allocated_units %}
+            <tr
+              {% if not unit.is_returned %}
+              data-selectable-row="{{ req.id }}"
+              data-asset-code="{{ unit.asset_code }}"
+              aria-selected="false"
+              tabindex="0"
+              onclick="toggleRowSelection(this, event)"
+              onkeydown="handleRowKeydown(this, event)"
+              class="cursor-pointer select-none transition-colors hover:bg-gray-50/50 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-brand-primary"
               {% else %}
-                <span class="inline-flex items-center rounded-full bg-rose-50 px-2.5 py-0.5 text-xs font-semibold text-rose-700 ring-1 ring-inset ring-rose-600/20">Damaged</span>
+              class="transition-colors hover:bg-gray-50/50"
               {% endif %}
-            </td>
-          </tr>
-          {% empty %}
-          <tr>
-            <td colspan="4" class="px-6 py-12 text-center text-sm text-text-secondary">No unit returns logged yet.</td>
-          </tr>
+            >
+              <td class="px-4 py-4 font-mono font-medium text-text-primary whitespace-nowrap">
+                {% if not unit.is_returned %}
+                <input
+                  type="checkbox"
+                  name="asset_codes"
+                  value="{{ unit.asset_code }}"
+                  data-unit-checkbox="{{ req.id }}"
+                  class="hidden"
+                >
+                {% endif %}
+                #REQ-{{ req.id }}
+              </td>
+              <td class="px-4 py-4">
+                <div class="font-medium text-text-primary">{{ unit.catalog_item }}</div>
+                <div class="text-xs text-text-secondary">{{ unit.category }}</div>
+              </td>
+              <td class="px-4 py-4 whitespace-nowrap">
+                {% if not unit.is_returned %}
+                <span
+                  class="inline-flex items-center rounded-full border border-brand-primary-subtle bg-brand-primary-subtle px-2.5 py-0.5 font-mono text-xs font-semibold text-brand-primary"
+                >
+                  {{ unit.asset_code }}
+                </span>
+                {% else %}
+                <span class="font-mono font-semibold text-text-secondary">{{ unit.asset_code }}</span>
+                {% endif %}
+              </td>
+              <td class="px-4 py-4">
+                <div class="font-medium text-text-primary">{{ req.user.display_name }}</div>
+                <div class="text-xs text-text-secondary">{{ req.user.email }}</div>
+              </td>
+              <td class="px-4 py-4 text-text-secondary whitespace-nowrap">
+                <div>{{ req.due_at|date:"M d, Y" }}</div>
+                {% if req.is_overdue %}
+                <span class="mt-0.5 inline-flex items-center rounded-full bg-rose-50 px-2 py-0.5 text-[11px] font-semibold text-rose-700 ring-1 ring-inset ring-rose-600/20 whitespace-nowrap">
+                  Overdue ({{ req.overdue_days_count }} day{{ req.overdue_days_count|pluralize }})
+                </span>
+                {% endif %}
+              </td>
+              <td class="px-4 py-4">
+                {% if unit.is_returned %}
+                  {% if unit.return_condition == EquipmentCondition.FINE %}
+                    <span class="inline-flex items-center rounded-full bg-emerald-50 px-2.5 py-0.5 text-xs font-semibold text-emerald-700 ring-1 ring-inset ring-emerald-600/20 whitespace-nowrap">Returned (Fine)</span>
+                  {% else %}
+                    <span class="inline-flex items-center rounded-full bg-rose-50 px-2.5 py-0.5 text-xs font-semibold text-rose-700 ring-1 ring-inset ring-rose-600/20 whitespace-nowrap">Returned (Damaged)</span>
+                  {% endif %}
+                {% else %}
+                  <div class="flex flex-wrap items-center gap-2">
+                    <span class="inline-flex items-center rounded-full bg-amber-50 px-2 py-0.5 text-[11px] font-semibold text-amber-800 ring-1 ring-inset ring-amber-600/20 whitespace-nowrap">Issued</span>
+                    <select
+                      name="condition_{{ unit.asset_code }}"
+                      aria-label="Condition for {{ unit.asset_code }}"
+                      class="rounded-md border border-border-default bg-surface-card pl-2 pr-7 py-1 text-xs text-text-primary shadow-2xs focus:border-brand-primary focus:outline-none focus:ring-1 focus:ring-brand-primary"
+                    >
+                      <option value="{{ EquipmentCondition.FINE }}">Fine (Restock)</option>
+                      <option value="{{ EquipmentCondition.DAMAGED }}">Damaged (Maint.)</option>
+                    </select>
+                    <button
+                      type="submit"
+                      name="return_mode"
+                      value="single:{{ unit.asset_code }}"
+                      class="cursor-pointer inline-flex items-center justify-center rounded-md border border-emerald-600/30 bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700 transition hover:bg-emerald-600 hover:text-white"
+                    >
+                      Return
+                    </button>
+                  </div>
+                {% endif %}
+              </td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="6" class="px-6 py-12 text-center text-sm text-text-secondary">
+                No allocated units found for #REQ-{{ req.id }}.
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
           {% endfor %}
-        </tbody>
-      </table>
-    </div>
+        </table>
+      </div>
+    </form>
   </div>
 </div>
+
+<!-- Recent Returns Audit Table -->
+<div class="mt-6 overflow-hidden rounded-xl border border-border-default bg-surface-card shadow-sm">
+  <div class="px-6 py-4 border-b border-border-default font-semibold text-text-primary">
+    Recent Unit Return Logs
+  </div>
+  <div class="overflow-x-auto">
+    <table class="w-full text-left text-sm">
+      <thead class="border-b border-border-default bg-gray-50 text-xs font-semibold uppercase tracking-wider text-text-secondary">
+        <tr>
+          <th class="px-6 py-3.5">Timestamp</th>
+          <th class="px-6 py-3.5">Request ID</th>
+          <th class="px-6 py-3.5">Asset Code</th>
+          <th class="px-6 py-3.5">Condition</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-gray-100">
+        {% for record in recent_returns %}
+        <tr class="transition-colors hover:bg-gray-50/50">
+          <td class="px-6 py-4 text-text-secondary whitespace-nowrap">{{ record.created_at|date:"M d, Y H:i" }}</td>
+          <td class="px-6 py-4 font-mono font-medium text-text-primary whitespace-nowrap">#REQ-{{ record.borrow_request.id }}</td>
+          <td class="px-6 py-4 font-mono font-semibold text-text-primary whitespace-nowrap">{{ record.equipment_unit.asset_code }}</td>
+          <td class="px-6 py-4">
+            {% if record.condition == EquipmentCondition.FINE %}
+              {% include "components/badge.html" with label="Fine" variant="success" %}
+            {% else %}
+              {% include "components/badge.html" with label="Damaged" variant="danger" %}
+            {% endif %}
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="4" class="px-6 py-12 text-center text-sm text-text-secondary">No unit returns logged yet.</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% include "components/pagination.html" with queryset=recent_returns querystring=querystring %}
+</div>
+
+<script>
+  function updateSelectedUnitsButton(requestId) {
+    if (!requestId) return;
+    var checkboxes = document.querySelectorAll('[data-unit-checkbox="' + requestId + '"]');
+    var checkedCount = 0;
+    var selectedCodes = [];
+    checkboxes.forEach(function (cb) {
+      var isSelected = Boolean(cb.checked && !cb.disabled);
+      var row = cb.closest('[data-selectable-row]');
+      if (isSelected) {
+        checkedCount++;
+        selectedCodes.push(cb.value);
+      }
+      if (row) {
+        if (isSelected) {
+          row.classList.add('bg-brand-primary-subtle');
+          row.classList.remove('hover:bg-gray-50/50');
+          row.setAttribute('aria-selected', 'true');
+        } else {
+          row.classList.remove('bg-brand-primary-subtle');
+          row.classList.add('hover:bg-gray-50/50');
+          row.setAttribute('aria-selected', 'false');
+        }
+      }
+    });
+
+    var assetInput = document.getElementById('asset-code-input');
+    if (assetInput) {
+      assetInput.value = selectedCodes.join(', ');
+    }
+
+    var btn = document.querySelector('[data-return-selected-btn="' + requestId + '"]');
+    var countSpan = document.querySelector('[data-selected-count="' + requestId + '"]');
+    if (countSpan) {
+      countSpan.textContent = String(checkedCount);
+    }
+    if (btn) {
+      if (checkedCount >= 2) {
+        btn.classList.remove('hidden');
+        btn.classList.add('inline-flex');
+      } else {
+        btn.classList.add('hidden');
+        btn.classList.remove('inline-flex');
+      }
+    }
+  }
+
+  function toggleRowSelection(row, event) {
+    if (!row) return;
+    if (event && event.target && event.target.closest('select, button, a, input, label')) {
+      return;
+    }
+    var cb = row.querySelector('[data-unit-checkbox]');
+    if (!cb || cb.disabled) return;
+    cb.checked = !cb.checked;
+    var reqId = row.getAttribute('data-selectable-row');
+    updateSelectedUnitsButton(reqId);
+  }
+
+  function handleRowKeydown(row, event) {
+    if (!row || !event || event.target !== row) return;
+    if (event.key === ' ' || event.key === 'Enter') {
+      event.preventDefault();
+      toggleRowSelection(row, null);
+    }
+  }
+
+  function updateSelectedBorrowRequestTable(requestId) {
+    var emptyBody = document.getElementById('selected-request-empty');
+    var rowBodies = document.querySelectorAll('[data-request-rows]');
+    var headers = document.querySelectorAll('[data-request-header]');
+    var toolbars = document.querySelectorAll('[data-request-toolbar]');
+    var batchReqInput = document.getElementById('batch-borrow-request-id');
+
+    if (batchReqInput) {
+      batchReqInput.value = requestId || '';
+    }
+
+    rowBodies.forEach(function (tbody) {
+      var isMatch = Boolean(requestId && tbody.getAttribute('data-request-rows') === String(requestId));
+      if (isMatch) {
+        tbody.classList.remove('hidden');
+      } else {
+        tbody.classList.add('hidden');
+      }
+      var controls = tbody.querySelectorAll('input, select, button');
+      controls.forEach(function (ctrl) {
+        ctrl.disabled = !isMatch;
+      });
+    });
+
+    headers.forEach(function (header) {
+      if (requestId && header.getAttribute('data-request-header') === String(requestId)) {
+        header.classList.remove('hidden');
+        header.classList.add('flex');
+      } else {
+        header.classList.add('hidden');
+        header.classList.remove('flex');
+      }
+    });
+
+    toolbars.forEach(function (toolbar) {
+      var isMatch = Boolean(requestId && toolbar.getAttribute('data-request-toolbar') === String(requestId));
+      if (isMatch) {
+        toolbar.classList.remove('hidden');
+        toolbar.classList.add('flex');
+      } else {
+        toolbar.classList.add('hidden');
+        toolbar.classList.remove('flex');
+      }
+      var controls = toolbar.querySelectorAll('input, button');
+      controls.forEach(function (ctrl) {
+        ctrl.disabled = !isMatch;
+      });
+    });
+
+    if (requestId) {
+      updateSelectedUnitsButton(requestId);
+    } else {
+      var assetInput = document.getElementById('asset-code-input');
+      if (assetInput) {
+        assetInput.value = '';
+      }
+    }
+
+    if (emptyBody) {
+      if (requestId) {
+        emptyBody.classList.add('hidden');
+      } else {
+        emptyBody.classList.remove('hidden');
+      }
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', function () {
+    var select = document.getElementById('borrow-request-select');
+    if (!select) return;
+    updateSelectedBorrowRequestTable(select.value);
+    select.addEventListener('change', function () {
+      updateSelectedBorrowRequestTable(this.value);
+    });
+  });
+</script>
 {% endblock %}

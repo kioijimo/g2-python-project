@@ -112,6 +112,9 @@ class RequestHistoryTests(TestCase):
 
         self.assertContains(response, "Partially Returned")
         self.assertContains(response, "Return the remaining units")
+        self.assertContains(response, "border-teal-200 bg-teal-50 text-teal-700")
+        self.assertContains(response, "whitespace-nowrap")
+        self.assertNotContains(response, "border-amber-200 bg-amber-50 text-amber-700")
 
     def test_detail_cannot_view_another_users_request(self):
         other_request = self.make_request(self.other_user)
