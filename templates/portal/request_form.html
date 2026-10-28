@@ -101,13 +101,12 @@
               <p class="mt-1 text-xs text-gray-500" data-quantity-availability></p>
               <p class="mt-1 text-xs text-rose-600" data-quantity-guard-error role="alert" hidden></p>
             </div>
-
-            <div class="flex items-end sm:col-span-2">
+            <div class="flex justify-center items-end h-full sm:col-span-2">
               {% if not forloop.first %}
               <button
                 type="button"
                 data-remove-request-item
-                class="inline-flex w-full items-center justify-center rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 shadow-sm transition hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 sm:w-auto"
+                class="mb-1 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 shadow-sm transition hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 sm:w-auto"
               >
                 Remove
               </button>
@@ -320,7 +319,8 @@
 
       removeButton.addEventListener("click", function () {
         ["catalog_item", "quantity"].forEach(function (name) {
-          const field = row.querySelector('[name$="-"' + name + '"]');
+          
+          const field = row.querySelector('[name$="-' + name + '"]');
           if (field) {
             field.value = "";
           }
